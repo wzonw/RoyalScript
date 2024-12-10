@@ -84,6 +84,42 @@ class TokenType:
     ESCAPE_BACKSLASH = "ESCAPE_BACKSLASH"
     ESCAPE_QUOTE = "ESCAPE_QUOTE"
 
+    #DELIMS haha
+    DELIMS = {
+    'return': {'0', ' '},
+    'data_type': {' ', '~'},
+    'dynasty': {' '},
+    'mirror': {'|', '&', ']', ',', ' ', '}', ')', '~', '\n'},
+    'conditional': {'(', ' '},
+    'io': {'(', ' '},
+    'castle': {' '},
+    'int_float': {',', ' ',['general_operator'], ')', '~', '!', r'&', '|', '>', '<', '='},
+    'string': {' ', ')', ',', '&', '}', '~', '!', '='},
+    'assign_delim': {['alpha'], ['number'], '{', ' ', '-', '(', '"'},
+    'operator_delim': {['alpha'], ['number'], ' ', '-', '(', '{'},
+    'logical_delim': {'"', ['alpha'], ['number'], ' ', '-', '(', '{'},
+    'string_parts': {'"', ['alpha'], ['number'], ' ', '-', '(', '|', '&'},
+    'open_brace': {'{', '}', '(', ['number'], ' ', '"', ['alpha'], '\n', '>', '-'},
+    'close_brace': {'{', '}', '.', '~', ' ', ',', ')', '\n', '>', '&', ['general_operator'], '!', '|'},
+    'open_parenthesis': {'{', ['number'], ['alpha'], ' ', '-', '\n', '>', '(', ')', '"'},
+    'id': {'{', '\n', ' ', '~', ',', '(', ')', '[', ']', '}', ['general_operator'], '!', r'&', '|', '.'},
+    'close_parenthesis': {'{', ' ', ['general_operator'], '!', '&', '|', '\n', '~', '>', '.', ',', ')', '(', '[', ']', '}'},
+    'open_bracket': {']', ['number'], '-', ['alpha'], '(', ' ', '\n'},
+    'double_open_bracket': {' ', '\n', ['alpha'], '>'},
+    'close_bracket': {'\n', '(', ' ', '~', ',', ')', '[', ']', '}', ['general_operator'], '!', r'&', '|', '.', '\n'},
+    'double_close_bracket': {']',' ', '\n', ['alpha'], '>'},
+    'unary': {'|', '~', ')', ['general_operator'], '!', ' ', '\n'},
+    'concat': {' ', '"', ['alpha'], ['number'], '(', '{', '\n'},
+    'line': {'\n', ' ', ['alpha'], ']'},
+    'comma': {['alpha'], ' ', ['number'], '"', '-', '\n', '>', '{'},
+    'dot_op': {['alpha'], '[', '(', '\n'},
+    'nuww': {' ', '~', ')', '}', ',', '=', '\n', '!', '|', '&'},
+    'whitespace': {' ', '\n'},
+    'single_line_comment': {'\n'},
+    'all': {None}
+}
+
+
 
 class RoyalScriptLexer:
     def __init__(self, code):
@@ -677,8 +713,8 @@ class RoyalScriptLexerGUI(tk.Tk):
                 self.output_listbox.insert(tk.END, f"{token.value}\n")  # Just the word (lexeme), centered
 
                 if token.token_type in TokenType.__dict__.values():
-                    definition = token.token_type.replace("_", " ").capitalize()
-                    self.token_listbox.insert(tk.END, f"{definition.capitalize()}")
+                    definition = token.token_type.replace("_", " ")
+                    self.token_listbox.insert(tk.END, f"{definition}")
 
         except SyntaxError as e:
             # Display error messages in the Errors Box
