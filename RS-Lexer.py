@@ -27,6 +27,8 @@ class TokenType:
     TWIST = "ELSEIF"  # Else if statement
     CURSE = "ELSE"  # Else statement
 
+    ESCAPE = "ESCAPE"
+
     # Flow control
     BELIEVE = "CONDITIONAL"
     FOREVER = "CONDITIONAL"
@@ -77,6 +79,10 @@ class TokenType:
     MULTI_COMMENT = "MULTI-LINE COMMENT"
     DOT = "DOT"
 
+    ESCAPE_NEWLINE = "ESCAPE_NEWLINE"
+    ESCAPE_TAB = "ESCAPE_TAB"
+    ESCAPE_BACKSLASH = "ESCAPE_BACKSLASH"
+    ESCAPE_QUOTE = "ESCAPE_QUOTE"
 
 
 class RoyalScriptLexer:
@@ -131,6 +137,59 @@ class RoyalScriptLexer:
             self.position += len(match)
             return True
         return False
+    
+    def peek_escape_sequence(self):
+        """Check if the next part of the code matches an escape sequence and return the corresponding token."""
+        
+        # Match the escape sequences
+        if self.match(r'\\n'):  # Match \n escape sequence
+            token = Token(r'\n', TokenType.ESCAPE_NEWLINE, self.position)
+            self.tokens.append(token)
+            self.position += 2  # Move the position forward by the length of the escape sequence
+            return True
+
+        elif self.match(r'\\t'):  # Match \t escape sequence
+            token = Token(r'\t', TokenType.ESCAPE_TAB, self.position)
+            self.tokens.append(token)
+            self.position += 2  # Move position forward
+            return True
+
+        elif self.match(r'\\\\'):  # Match \\ escape sequence
+            token = Token(r'\\', TokenType.ESCAPE_BACKSLASH, self.position)
+            self.tokens.append(token)
+            self.position += 2  # Move position forward
+            return True
+
+        elif self.match(r'\\"'):  # Match \" escape sequence
+            token = Token(r'\"', TokenType.ESCAPE_QUOTE, self.position)
+            self.tokens.append(token)
+            self.position += 2  # Move position forward
+            return True
+
+        return False
+
+
+
+
+    
+    def peek_symbol(self, symbol, token_type):
+        # If the symbol is more than one character long, check if the next characters match
+        if len(symbol) > 1:
+            # Match the multi-character symbol
+            if self.match(symbol):
+                token = Token(symbol, token_type, self.position)
+                self.tokens.append(token)
+                self.position += len(symbol)  # Move the position forward by the length of the symbol
+                return True
+        else:
+            # Handle single-character symbols
+            if self.match(re.escape(symbol)):  # Match the single character symbol
+                token = Token(symbol, token_type, self.position)
+                self.tokens.append(token)
+                self.position += 1  # Move the position forward by 1 (since it's a single character)
+                return True
+        return False
+
 
     def get_tokens(self):
         """Tokenize the entire input code"""
@@ -225,129 +284,133 @@ class RoyalScriptLexer:
             #operators
 
             if char == '=':
-                cursor_advanced = self.peek_reserved('=', TokenType.ASSIGNMENT_OPERATOR)
+                cursor_advanced = self.peek_symbol('==', TokenType.ASSIGNMENT_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_reserved('==', TokenType.RELATIONAL_OPERATOR)
+                cursor_advanced = self.peek_symbol('=', TokenType.RELATIONAL_OPERATOR)
                 if cursor_advanced:
                     continue
             
             if char == '+':
-                cursor_advanced = self.peek_reserved('+', TokenType.ARITHMETIC_OPERATOR)
+                cursor_advanced = self.peek_symbol('++', TokenType.ARITHMETIC_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_reserved('++', TokenType.UNARY_OPERATOR)
+                cursor_advanced = self.peek_symbol('+=', TokenType.UNARY_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_reserved('+=', TokenType.ASSIGNMENT_OPERATOR)
+                cursor_advanced = self.peek_symbol('+', TokenType.ASSIGNMENT_OPERATOR)
                 if cursor_advanced:
                     continue
 
             if char == '-':
-                cursor_advanced = self.peek_reserved('-', TokenType.ARITHMETIC_OPERATOR)
+                cursor_advanced = self.peek_symbol('--', TokenType.ARITHMETIC_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_reserved('--', TokenType.UNARY_OPERATOR)
+                cursor_advanced = self.peek_symbol('-=', TokenType.UNARY_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_reserved('-=', TokenType.ASSIGNMENT_OPERATOR)
+                cursor_advanced = self.peek_symbol('-', TokenType.ASSIGNMENT_OPERATOR)
                 if cursor_advanced:
                     continue
             
             if char == '*':
-                cursor_advanced = self.peek_reserved('*', TokenType.ARITHMETIC_OPERATOR)
+                cursor_advanced = self.peek_symbol('*=', TokenType.ARITHMETIC_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_reserved('*=', TokenType.ASSIGNMENT_OPERATOR)
+                cursor_advanced = self.peek_symbol('*', TokenType.ASSIGNMENT_OPERATOR)
                 if cursor_advanced:
                     continue
 
             if char == '/':
-                cursor_advanced = self.peek_reserved('/', TokenType.ARITHMETIC_OPERATOR)
+                cursor_advanced = self.peek_symbol('/=', TokenType.ARITHMETIC_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_reserved('/=', TokenType.ASSIGNMENT_OPERATOR)
+                cursor_advanced = self.peek_symbol('/', TokenType.ASSIGNMENT_OPERATOR)
                 if cursor_advanced:
                     continue
 
             if char == '%':
-                cursor_advanced = self.peek_reserved('%', TokenType.ARITHMETIC_OPERATOR)
+                cursor_advanced = self.peek_symbol('%=', TokenType.ARITHMETIC_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_reserved('%=', TokenType.ASSIGNMENT_OPERATOR)
+                cursor_advanced = self.peek_symbol('%', TokenType.ASSIGNMENT_OPERATOR)
                 if cursor_advanced:
                     continue
 
             if char == '|':
-                cursor_advanced = self.peek_reserved('||', TokenType.LOGICAL_OPERATOR)
+                cursor_advanced = self.peek_symbol('||', TokenType.LOGICAL_OPERATOR)
                 if cursor_advanced:
                     continue
 
             if char == '&':
-                cursor_advanced = self.peek_reserved('&&', TokenType.LOGICAL_OPERATOR)
+                cursor_advanced = self.peek_symbol('&&', TokenType.LOGICAL_OPERATOR)
                 if cursor_advanced:
                     continue
 
             if char == ">":
-                cursor_advanced = self.peek_reserved('>', TokenType.RELATIONAL_OPERATOR)
+                cursor_advanced = self.peek_symbol('>', TokenType.RELATIONAL_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_reserved('>=', TokenType.RELATIONAL_OPERATOR)
+                cursor_advanced = self.peek_symbol('>=', TokenType.RELATIONAL_OPERATOR)
                 if cursor_advanced:
                     continue
 
             if char == '<':
-                cursor_advanced = self.peek_reserved('<', TokenType.RELATIONAL_OPERATOR)
+                cursor_advanced = self.peek_symbol('<', TokenType.RELATIONAL_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_reserved('<=', TokenType.RELATIONAL_OPERATOR)
+                cursor_advanced = self.peek_symbol('<=', TokenType.RELATIONAL_OPERATOR)
                 if cursor_advanced:
                     continue
             
             if char == '(':
-                cursor_advanced = self.peek_reserved('(', TokenType.OPEN_PAREN)
+                cursor_advanced = self.peek_symbol('(', TokenType.OPEN_PAREN)
                 if cursor_advanced:
                     continue
             
             if char == ')':
-                cursor_advanced = self.peek_reserved(')', TokenType.CLOSE_PAREN)
+                cursor_advanced = self.peek_symbol(')', TokenType.CLOSE_PAREN)
                 if cursor_advanced:
                     continue
 
             if char == '{':
-                cursor_advanced = self.peek_reserved('{', TokenType.OPEN_CURLY)
+                cursor_advanced = self.peek_symbol('{', TokenType.OPEN_CURLY)
                 if cursor_advanced:
                     continue
             
             if char == '}':
-                cursor_advanced = self.peek_reserved('}', TokenType.CLOSE_CURLY)
+                cursor_advanced = self.peek_symbol('}', TokenType.CLOSE_CURLY)
                 if cursor_advanced:
                     continue
             
             if char == '[':
-                cursor_advanced = self.peek_reserved('[', TokenType.OPEN_BRACKET)
+                cursor_advanced = self.peek_symbol('[', TokenType.OPEN_BRACKET)
                 if cursor_advanced:
                     continue
             
             if char == ']':
-                cursor_advanced = self.peek_reserved(']', TokenType.CLOSE_BRACKET)
+                cursor_advanced = self.peek_symbol(']', TokenType.CLOSE_BRACKET)
                 if cursor_advanced:
                     continue
             
             if char == ".":
-                cursor_advanced = self.peek_reserved('.', TokenType.DOT)
+                cursor_advanced = self.peek_symbol('.', TokenType.DOT)
                 if cursor_advanced:
                     continue
             
             if char == ",":
-                cursor_advanced = self.peek_reserved(',', TokenType.COMMA)
+                cursor_advanced = self.peek_symbol(',', TokenType.COMMA)
                 if cursor_advanced:
                     continue
 
             if char == '~':
-                cursor_advanced = self.peek_reserved('~', TokenType.TERMINATOR)
+                cursor_advanced = self.peek_symbol('~', TokenType.TERMINATOR)
                 if cursor_advanced:
                     continue
+            if char == '\\':  # Check if the character is the start of an escape sequence
+                        if self.peek_escape_sequence():  # This function handles all escape sequences
+                            continue
+
 
             if char.isdigit() or (char == '.' and self.position + 1 < len(self.code) and self.code[self.position + 1].isdigit()):
                 if '.' in self.code[self.position:]:
@@ -610,7 +673,7 @@ class RoyalScriptLexerGUI(tk.Tk):
                 self.output_listbox.insert(tk.END, f"{token.value}\n")  # Just the word (lexeme), centered
 
                 if token.token_type in TokenType.__dict__.values():
-                    definition = token.token_type.replace("_", " ").lower()
+                    definition = token.token_type.replace("_", " ").capitalize()
                     self.token_listbox.insert(tk.END, f"{definition.capitalize()}")
 
         except SyntaxError as e:
