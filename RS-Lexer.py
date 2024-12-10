@@ -168,10 +168,6 @@ class RoyalScriptLexer:
 
         return False
 
-
-
-
-    
     def peek_symbol(self, symbol, token_type):
         # If the symbol is more than one character long, check if the next characters match
         if len(symbol) > 1:
@@ -183,12 +179,20 @@ class RoyalScriptLexer:
                 return True
         else:
             # Handle single-character symbols
-            if self.match(re.escape(symbol)):  # Match the single character symbol
+            if self.match(symbol):  # Match the single character symbol
                 token = Token(symbol, token_type, self.position)
                 self.tokens.append(token)
                 self.position += 1  # Move the position forward by 1 (since it's a single character)
                 return True
         return False
+
+    def match(self, symbol):
+        """Match the input code against the provided symbol using string comparison."""
+        # Check if the current position can match the symbol
+        if self.input_code[self.position:self.position + len(symbol)] == symbol:
+            return True
+        return False
+
 
 
     def get_tokens(self):
