@@ -146,6 +146,9 @@ class RoyalScriptLexer:
             for keyword, token_type in self.RESERVED_KEYWORDS.items():
                 if self.peek_reserved(keyword, token_type):
                     continue
+            
+            
+
 
             if char.isdigit() or (char == '.' and self.position + 1 < len(self.code) and self.code[self.position + 1].isdigit()):
                 if '.' in self.code[self.position:]:
@@ -209,7 +212,7 @@ class RoyalScriptLexer:
         return self.tokens
 
     def match_literal(self, token_type):
-        """Match literals like INT, FLOAT"""
+        """Match literals like INT, FLOAT, CHAR, STRING"""
         if token_type == TokenType.FLOAT_LITERAL:
             # Match floats like 3.14, .5, or 10.
             match = self.match(r'\b\d*\.\d+\b|\b\d+\.\b')
@@ -227,21 +230,27 @@ class RoyalScriptLexer:
                 self.position += len(match)
                 return True
 
-
         elif token_type == TokenType.CHAR_LITERAL:
+            # Match char literals like 'a', '1', '$' (single characters inside single quotes)
             match = self.match(r"'([^'\\])'")
             if match:
-                
                 token = Token(match, token_type, self.position)
                 self.tokens.append(token)
                 self.position += len(match)
+                return True
+            else:
+                # If the match fails, raise an error and display in the error box
+                raise SyntaxError(f"Invalid char literal at position {self.position}")
 
         elif token_type == TokenType.STRING_LITERAL:
+            # Match string literals enclosed in double quotes
             match = self.match(r'"([^"\\\n]*(\\.[^"\\\n]*)*)"')
             if match:
                 token = Token(match, token_type, self.position)
                 self.tokens.append(token)
                 self.position += len(match)
+                return True
+
 
     def match_unary_operator(self):
         """Match post-unary operators (++ and --)"""
@@ -385,28 +394,31 @@ class RoyalScriptLexerGUI(tk.Tk):
     def analyze_code(self):
         code = self.input_text.get("1.0", tk.END)
         lexer = RoyalScriptLexer(code)
-        tokens = lexer.get_tokens()
-
+        
         # Clear previous output
         self.output_listbox.delete(0, tk.END)
         self.token_listbox.delete(0, tk.END)
+        self.errors_listbox.delete(0, tk.END)
 
         try:
+            tokens = lexer.get_tokens()
+            
             # Show only the words in the output text
             for token in tokens:
                 self.output_listbox.insert(tk.END, f"{token.value}\n")  # Just the word (lexeme), centered
 
                 if token.token_type in TokenType.__dict__.values():
                     definition = token.token_type.replace("_", " ").lower()
-                    self.token_listbox.insert(tk.END, f"{definition.capitalize().lower()}")
+                    self.token_listbox.insert(tk.END, f"{definition.capitalize()}")
 
         except SyntaxError as e:
             # Display error messages in the Errors Box
             self.errors_listbox.insert(tk.END, f"{str(e)}\n")
-
         except Exception as e:
             # Handle any unexpected errors
             self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}\n")
+
+
 if __name__ == "__main__":
     app = RoyalScriptLexerGUI()
     app.mainloop()
