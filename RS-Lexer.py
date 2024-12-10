@@ -27,14 +27,22 @@ class TokenType:
     TWIST = "ELSEIF"  # Else if statement
     CURSE = "ELSE"  # Else statement
 
+    # Flow control
+    BELIEVE = "CONDITIONAL"
+    FOREVER = "CONDITIONAL"
+    BREAK = "FLOW CONTROL"
+    CONTINUE = "FLOW CONTROL"
+    RETURN = "RETURN"
+
     # Data types
-    TREASURES = "Data Type"  # int
-    OCEAN = "Data Type"  # float
-    SCROLL = "Data Type"  # string
-    ROSE = "Data Type"  # char
-    MIRROR = "Data Type"  # boolean
-    CHAMBER = "Data Type"  # void
-    DYNASTY = "Data Type"  # constant
+    TREASURES = "DATA TYPE"  # int
+    OCEAN = "DATA TYPE"  # float
+    SCROLL = "DATA TYPE"  # string
+    ROSE = "DATA TYPE"  # char
+    MIRROR = "DATA TYPE"  # boolean
+    CHAMBER = "DATA TYPE"  # void
+    DYNASTY = "DATA TYPE"  # constant
+    PHANTOM = "NULL"
 
     # Literals
     INT_LITERAL = "INT_LITERAL"
@@ -56,17 +64,19 @@ class TokenType:
     DOT = "DOT"
     OPEN_PAREN = "OPEN_PAREN"
     CLOSE_PAREN = "CLOSE_PAREN"
-    OPEN_BRACE = "OPEN_BRACE"
-    CLOSE_BRACE = "CLOSE_BRACE"
     OPEN_BRACKET = "OPEN_BRACKET"
     CLOSE_BRACKET = "CLOSE_BRACKET"
     TERMINATOR = "TERMINATOR"
+    OPEN_CURLY = "OPEN_CURLY"
+    CLOSE_CURLY = "CLOSE_CURLY"
 
     # Other token types
     IDENTIFIER = "IDENTIFIER"
     WHITESPACE = "WHITESPACE"
-    SINGLE_COMMENT = "Single-LINE Comment"
-    MULTI_COMMENT = "Multi-LINE Comment"
+    SINGLE_COMMENT = "SINGLE-LINE COMMENT"
+    MULTI_COMMENT = "MULTI-LINE COMMENT"
+    DOT = "DOT"
+
 
 
 class RoyalScriptLexer:
@@ -124,6 +134,7 @@ class RoyalScriptLexer:
 
     def get_tokens(self):
         """Tokenize the entire input code"""
+        cursor_advanced = False
         while self.position < len(self.code):
             char = self.current_char()
 
@@ -143,12 +154,200 @@ class RoyalScriptLexer:
                 continue
 
             # Check for reserved keywords
-            for keyword, token_type in self.RESERVED_KEYWORDS.items():
-                if self.peek_reserved(keyword, token_type):
+            if char == 'b':
+                cursor_advanced = self.peek_reserved('believe', TokenType.BELIEVE)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('break', TokenType.BREAK)
+                if cursor_advanced:
+                    continue
+            if char == 'c':
+                cursor_advanced = self.peek_reserved('cast', TokenType.CAST)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('castle', TokenType.CASTLE)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('chamber', TokenType.CHAMBER)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('continue', TokenType.CONTINUE)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('crown', TokenType.CROWN)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('curse', TokenType.CURSE)
+                if cursor_advanced:
+                    continue
+            if char == 'd':
+                cursor_advanced = self.peek_reserved('dynasty', TokenType.DYNASTY)
+                if cursor_advanced:
+                    continue
+            if char == 'f':
+                cursor_advanced = self.peek_reserved('forever', TokenType.FOREVER)
+                if cursor_advanced:
+                    continue
+            if char == 'g':
+                cursor_advanced = self.peek_reserved('granted', TokenType.GRANTED)
+                if cursor_advanced:
+                    continue
+            if char == 'm':
+                cursor_advanced = self.peek_reserved('mirror', TokenType.MIRROR)
+                if cursor_advanced:
+                    continue
+            if char == 'O':
+                cursor_advanced = self.peek_reserved('ocean', TokenType.OCEAN)
+                if cursor_advanced:
+                    continue
+            if char == 'p':
+                cursor_advanced = self.peek_reserved('phantom', TokenType.PHANTOM)
+                if cursor_advanced:
+                    continue
+            if char == 'r':
+                cursor_advanced = self.peek_reserved('reign', TokenType.REIGN)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('return', TokenType.RETURN)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('rose', TokenType.ROSE)
+                if cursor_advanced:
+                    continue
+            if char == 's':
+                cursor_advanced = self.peek_reserved('scroll', TokenType.SCROLL)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('spell', TokenType.SPELL)
+                if cursor_advanced:
+                    continue
+
+            #operators
+
+            if char == '=':
+                cursor_advanced = self.peek_reserved('=', TokenType.ASSIGNMENT_OPERATOR)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('==', TokenType.RELATIONAL_OPERATOR)
+                if cursor_advanced:
                     continue
             
-            
+            if char == '+':
+                cursor_advanced = self.peek_reserved('+', TokenType.ARITHMETIC_OPERATOR)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('++', TokenType.UNARY_OPERATOR)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('+=', TokenType.ASSIGNMENT_OPERATOR)
+                if cursor_advanced:
+                    continue
 
+            if char == '-':
+                cursor_advanced = self.peek_reserved('-', TokenType.ARITHMETIC_OPERATOR)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('--', TokenType.UNARY_OPERATOR)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('-=', TokenType.ASSIGNMENT_OPERATOR)
+                if cursor_advanced:
+                    continue
+            
+            if char == '*':
+                cursor_advanced = self.peek_reserved('*', TokenType.ARITHMETIC_OPERATOR)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('*=', TokenType.ASSIGNMENT_OPERATOR)
+                if cursor_advanced:
+                    continue
+
+            if char == '/':
+                cursor_advanced = self.peek_reserved('/', TokenType.ARITHMETIC_OPERATOR)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('/=', TokenType.ASSIGNMENT_OPERATOR)
+                if cursor_advanced:
+                    continue
+
+            if char == '%':
+                cursor_advanced = self.peek_reserved('%', TokenType.ARITHMETIC_OPERATOR)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('%=', TokenType.ASSIGNMENT_OPERATOR)
+                if cursor_advanced:
+                    continue
+
+            if char == '|':
+                cursor_advanced = self.peek_reserved('||', TokenType.LOGICAL_OPERATOR)
+                if cursor_advanced:
+                    continue
+
+            if char == '&':
+                cursor_advanced = self.peek_reserved('&&', TokenType.LOGICAL_OPERATOR)
+                if cursor_advanced:
+                    continue
+
+            if char == ">":
+                cursor_advanced = self.peek_reserved('>', TokenType.RELATIONAL_OPERATOR)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('>=', TokenType.RELATIONAL_OPERATOR)
+                if cursor_advanced:
+                    continue
+
+            if char == '<':
+                cursor_advanced = self.peek_reserved('<', TokenType.RELATIONAL_OPERATOR)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('<=', TokenType.RELATIONAL_OPERATOR)
+                if cursor_advanced:
+                    continue
+            
+            if char == '(':
+                cursor_advanced = self.peek_reserved('(', TokenType.OPEN_PAREN)
+                if cursor_advanced:
+                    continue
+            
+            if char == ')':
+                cursor_advanced = self.peek_reserved(')', TokenType.CLOSE_PAREN)
+                if cursor_advanced:
+                    continue
+
+            if char == '{':
+                cursor_advanced = self.peek_reserved('{', TokenType.OPEN_CURLY)
+                if cursor_advanced:
+                    continue
+            
+            if char == '}':
+                cursor_advanced = self.peek_reserved('}', TokenType.CLOSE_CURLY)
+                if cursor_advanced:
+                    continue
+            
+            if char == '[':
+                cursor_advanced = self.peek_reserved('[', TokenType.OPEN_BRACKET)
+                if cursor_advanced:
+                    continue
+            
+            if char == ']':
+                cursor_advanced = self.peek_reserved(']', TokenType.CLOSE_BRACKET)
+                if cursor_advanced:
+                    continue
+            
+            if char == ".":
+                cursor_advanced = self.peek_reserved('.', TokenType.DOT)
+                if cursor_advanced:
+                    continue
+            
+            if char == ",":
+                cursor_advanced = self.peek_reserved(',', TokenType.COMMA)
+                if cursor_advanced:
+                    continue
+
+            if char == '~':
+                cursor_advanced = self.peek_reserved('~', TokenType.TERMINATOR)
+                if cursor_advanced:
+                    continue
 
             if char.isdigit() or (char == '.' and self.position + 1 < len(self.code) and self.code[self.position + 1].isdigit()):
                 if '.' in self.code[self.position:]:
@@ -157,54 +356,57 @@ class RoyalScriptLexer:
                     self.match_literal(TokenType.INT_LITERAL)
                 continue
 
-            if char == '"':
-                self.match_literal(TokenType.STRING_LITERAL)
-                continue
-
-            if char == "'":
-                self.match_literal(TokenType.CHAR_LITERAL)
-                continue
-
-            # Match identifiers
-            if char.isalpha() or char == '_':
-                self.match_identifier()
-                continue
             
-            if char in ['+', '-', '*', '/', '%']:
-                if self.match_unary_operator():
-                    continue
-                else:
-                    self.match_Arith_operator()
-                    continue
+
+            # if char == '"':
+            #     self.match_literal(TokenType.STRING_LITERAL)
+            #     continue
+
+                
+            # if char == "'":
+            #     self.match_literal(TokenType.CHAR_LITERAL)
+            #     continue
+
+            # # Match identifiers
+            # if char.isalpha() or char == '_':
+            #     self.match_identifier()
+            #     continue
             
-            # Handle operators and other symbols
-            if char in ['=','+=', '-=', '*=', '/=', '%=']:
-                self.match_operator()
-                continue
-
-            # For relational operators lmao
-            if char in ['==','>','<=','>=','<','!=']:
-                self.match_operator()
-                continue
-
-            # Handle parentheses and braces
-            if char in ['(', ')', '{', '}', '[', ']', ',', '.']:
-                self.match_symbol()
-                continue
-
-            if char in ['&' , '|', '!']:
-                self.match_logical_operator()
-                continue
-
-            if char == '?':
-                self.match_comment()
-                self.advance() 
-                continue
+            # if char in ['+', '-', '*', '/', '%']:
+            #     if self.match_unary_operator():
+            #         continue
+            #     else:
+            #         self.match_Arith_operator()
+            #         continue
             
-            if char == '?*':
-                self.match_comment()
-                self.advance() 
-                continue
+            # # Handle operators and other symbols
+            # if char in ['=','+=', '-=', '*=', '/=', '%=']:
+            #     self.match_operator()
+            #     continue
+
+            # # For relational operators lmao
+            # if char in ['==','>','<=','>=','<','!=']:
+            #     self.match_operator()
+            #     continue
+
+            # # Handle parentheses and braces
+            # if char in ['(', ')', '{', '}', '[', ']', ',', '.']:
+            #     self.match_symbol()
+            #     continue
+
+            # if char in ['&' , '|', '!']:
+            #     self.match_logical_operator()
+            #     continue
+
+            # if char == '?':
+            #     self.match_comment()
+            #     self.advance() 
+            #     continue
+            
+            # if char == '?*':
+            #     self.match_comment()
+            #     self.advance() 
+            #     continue
 
             # If none of the patterns match, raise an error
             raise SyntaxError(f"Unexpected character: {char} at position {self.position}")
