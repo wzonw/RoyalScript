@@ -673,8 +673,8 @@ class RoyalScriptLexerGUI(tk.Tk):
                 self.output_listbox.insert(tk.END, f"{token.value}\n")  # Just the word (lexeme), centered
 
                 if token.token_type in TokenType.__dict__.values():
-                    definition = token.token_type.replace("_", " ").capitalize()
-                    self.token_listbox.insert(tk.END, f"{definition.capitalize()}")
+                    definition = token.token_type.replace("_", " ")
+                    self.token_listbox.insert(tk.END, f"{definition}")
 
         except SyntaxError as e:
             # Display error messages in the Errors Box
