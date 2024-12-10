@@ -86,24 +86,24 @@ class RoyalScriptLexer:
         self.tokens = []
 
         # Define all reserved words in RoyalScript dynamically from input
-        self.RESERVED_KEYWORDS = {
-            'crown': TokenType.CROWN,
-            'reign': TokenType.REIGN,
-            'spell': TokenType.SPELL,
-            'castle': TokenType.CASTLE,
-            'wish': TokenType.WISH,
-            'granted': TokenType.GRANTED,
-            'cast': TokenType.CAST,
-            'twist': TokenType.TWIST,
-            'curse': TokenType.CURSE,
-            'treasures': TokenType.TREASURES,
-            'ocean': TokenType.OCEAN,
-            'scroll': TokenType.SCROLL,
-            'rose': TokenType.ROSE,
-            'mirror': TokenType.MIRROR,
-            'chamber': TokenType.CHAMBER,
-            'dynasty': TokenType.DYNASTY
-        }
+        # self.RESERVED_KEYWORDS = {
+        #     'crown': TokenType.CROWN,
+        #     'reign': TokenType.REIGN,
+        #     'spell': TokenType.SPELL,
+        #     'castle': TokenType.CASTLE,
+        #     'wish': TokenType.WISH,
+        #     'granted': TokenType.GRANTED,
+        #     'cast': TokenType.CAST,
+        #     'twist': TokenType.TWIST,
+        #     'curse': TokenType.CURSE,
+        #     'treasures': TokenType.TREASURES,
+        #     'ocean': TokenType.OCEAN,
+        #     'scroll': TokenType.SCROLL,
+        #     'rose': TokenType.ROSE,
+        #     'mirror': TokenType.MIRROR,
+        #     'chamber': TokenType.CHAMBER,
+        #     'dynasty': TokenType.DYNASTY
+        # }
 
     def advance(self):
         """Advance to the next character in the input"""
