@@ -83,8 +83,7 @@ class TokenType:
     ESCAPE_TAB = "ESCAPE_TAB"
     ESCAPE_BACKSLASH = "ESCAPE_BACKSLASH"
     ESCAPE_QUOTE = "ESCAPE_QUOTE"
-
-    #DELIMS haha
+    
     DELIMS = {
     'return': {'0', ' '},
     'data_type': {' ', '~'},
@@ -93,26 +92,26 @@ class TokenType:
     'conditional': {'(', ' '},
     'io': {'(', ' '},
     'castle': {' '},
-    'int_float': {',', ' ',('general_operator'), ')', '~', '!', r'&', '|', '>', '<', '='},
+    'int_float': {',', ' ', tuple(['general_operator']), ')', '~', '!', r'&', '|', '>', '<', '='},
     'string': {' ', ')', ',', '&', '}', '~', '!', '='},
-    'assign_delim': {('alpha'), ('number'), '{', ' ', '-', '(', '"'},
-    'operator_delim': {('alpha'), ('number'), ' ', '-', '(', '{'},
-    'logical_delim': {'"', ('alpha'), ('number'), ' ', '-', '(', '{'},
-    'string_parts': {'"', ('alpha'), ('number'), ' ', '-', '(', '|', '&'},
-    'open_brace': {'{', '}', '(', ('number'), ' ', '"', ('alpha'), '\n', '>', '-'},
-    'close_brace': {'{', '}', '.', '~', ' ', ',', ')', '\n', '>', '&', ('general_operator'), '!', '|'},
-    'open_parenthesis': {'{', ('number'), ('alpha'), ' ', '-', '\n', '>', '(', ')', '"'},
-    'id': {'{', '\n', ' ', '~', ',', '(', ')', '(', ']', '}', ('general_operator'), '!', r'&', '|', '.'},
-    'close_parenthesis': {'{', ' ', ('general_operator'), '!', '&', '|', '\n', '~', '>', '.', ',', ')', '(', '(', ']', '}'},
-    'open_bracket': {']', ('number'), '-', ('alpha'), '(', ' ', '\n'},
-    'double_open_bracket': {' ', '\n', ('alpha'), '>'},
-    'close_bracket': {'\n', '(', ' ', '~', ',', ')', '(', ']', '}', ('general_operator'), '!', r'&', '|', '.', '\n'},
-    'double_close_bracket': {']',' ', '\n', ('alpha'), '>'},
-    'unary': {'|', '~', ')', ('general_operator'), '!', ' ', '\n'},
-    'concat': {' ', '"', ('alpha'), ('number'), '(', '{', '\n'},
-    'line': {'\n', ' ', ('alpha'), ']'},
-    'comma': {('alpha'), ' ', ('number'), '"', '-', '\n', '>', '{'},
-    'dot_op': {('alpha'), '[', '(', '\n'},
+    'assign_delim': {tuple(['alpha']), tuple(['number']), '{', ' ', '-', '(', '"'},
+    'operator_delim': {tuple(['alpha']), tuple(['number']), ' ', '-', '(', '{'},
+    'logical_delim': {'"', tuple(['alpha']), tuple(['number']), ' ', '-', '(', '{'},
+    'string_parts': {'"', tuple(['alpha']), tuple(['number']), ' ', '-', '(', '|', '&'},
+    'open_brace': {'{', '}', '(', tuple(['number']), ' ', '"', tuple(['alpha']), '\n', '>', '-'},
+    'close_brace': {'{', '}', '.', '~', ' ', ',', ')', '\n', '>', '&', tuple(['general_operator']), '!', '|'},
+    'open_parenthesis': {'{', tuple(['number']), tuple(['alpha']), ' ', '-', '\n', '>', '(', ')', '"'},
+    'id': {'{', '\n', ' ', '~', ',', '(', ')', '[', ']', '}', tuple(['general_operator']), '!', r'&', '|', '.'},
+    'close_parenthesis': {'{', ' ', tuple(['general_operator']), '!', '&', '|', '\n', '~', '>', '.', ',', ')', '(', '[', ']', '}'},
+    'open_bracket': {']', tuple(['number']), '-', tuple(['alpha']), '(', ' ', '\n'},
+    'double_open_bracket': {' ', '\n', tuple(['alpha']), '>'},
+    'close_bracket': {'\n', '(', ' ', '~', ',', ')', '[', ']', '}', tuple(['general_operator']), '!', r'&', '|', '.', '\n'},
+    'double_close_bracket': {']', ' ', '\n', tuple(['alpha']), '>'},
+    'unary': {'|', '~', ')', tuple(['general_operator']), '!', ' ', '\n'},
+    'concat': {' ', '"', tuple(['alpha']), tuple(['number']), '(', '{', '\n'},
+    'line': {'\n', ' ', tuple(['alpha']), ']'},
+    'comma': {tuple(['alpha']), ' ', tuple(['number']), '"', '-', '\n', '>', '{'},
+    'dot_op': {tuple(['alpha']), '[', '(', '\n'},
     'nuww': {' ', '~', ')', '}', ',', '=', '\n', '!', '|', '&'},
     'whitespace': {' ', '\n'},
     'single_line_comment': {'\n'},
@@ -203,33 +202,31 @@ class RoyalScriptLexer:
             return True
 
         return False
-
+    
     def peek_symbol(self, symbol, token_type):
         # If the symbol is more than one character long, check if the next characters match
         if len(symbol) > 1:
             # Match the multi-character symbol
-            if self.match(symbol):
+            if self.match_other(symbol):
                 token = Token(symbol, token_type, self.position)
                 self.tokens.append(token)
                 self.position += len(symbol)  # Move the position forward by the length of the symbol
                 return True
         else:
             # Handle single-character symbols
-            if self.match(symbol):  # Match the single character symbol
+            if self.match_other(re.escape(symbol)):  # Match the single character symbol
                 token = Token(symbol, token_type, self.position)
                 self.tokens.append(token)
                 self.position += 1  # Move the position forward by 1 (since it's a single character)
                 return True
         return False
 
-    def match(self, symbol):
+    def match_other(self, symbol):
         """Match the input code against the provided symbol using string comparison."""
         # Check if the current position can match the symbol
-        if self.input_code[self.position:self.position + len(symbol)] == symbol:
+        if self.code[self.position:self.position + len(symbol)] == symbol:
             return True
         return False
-
-
 
     def get_tokens(self):
         """Tokenize the entire input code"""
@@ -254,240 +251,28 @@ class RoyalScriptLexer:
 
             # Check for reserved keywords
             if char == 'b':
-                self.position += 1  
-                next_char = self.current_char()
-
-                if next_char == 'e':
-                    self.position += 1
-                    next_char = self.current_char()
-
-                    if next_char == 'l':
-                        self.position += 1
-                        next_char = self.current_char()
-
-                        if next_char == 'i':
-                            self.position += 1
-                            next_char = self.current_char()
-
-                            if next_char == 'e':
-                                self.position += 1
-                                next_char = self.current_char()
-
-                                if next_char == 'v':
-                                    self.position += 1
-                                    next_char = self.current_char()
-
-                                    if next_char == 'e':
-                                        self.position += 1
-                                        # Look for a delimiter to finalize the token
-                                        delimiter = self.current_char()
-
-                                        if delimiter in [' ', '~']:
-                                            self.position += 1
-                                            self.tokens.append(Token("believe", TokenType.BELIEVE, self.position - 7))  # Adjust position
-                                           
-                                        else:
-                                            raise SyntaxError(f"Expected delimiter '~' ' ' after 'believe' at position {self.position}")
-                    continue            
-                if next_char == 'r':
-                    self.position += 1
-                    next_char = self.current_char()
-
-                    if next_char == 'e':
-                        self.position += 1
-                        next_char = self.current_char()
-
-                        if next_char == 'a':
-                            self.position += 1
-                            next_char = self.current_char()
-                            
-                            if next_char == 'k':
-                                self.position += 1
-                                delimiter = self.current_char()
-
-                                if delimiter in [' ', '~']:
-                                    self.position += 1
-                                    self.tokens.append(Token("break", TokenType.BREAK, self.position - 5))  # Adjust position
-                              
-                                else:
-                                    raise SyntaxError(f"Expected delimiter '~' ' ' after 'break' at position {self.position}")
+                cursor_advanced = self.peek_reserved('believe', TokenType.BELIEVE)
+                if cursor_advanced:
                     continue
-                #cast 
-
+                cursor_advanced = self.peek_reserved('break', TokenType.BREAK)
+                if cursor_advanced:
+                    continue
             if char == 'c':
-                self.posiion += 1 
-                next_char = self.current_char()
-
-                if next_char == 'a':
-                    self.posiion += 1 
-                    next_char = self.current_char()
-
-                    if next_char == 's':
-                        self.posiion += 1
-                        next_char = self.current_char()
-
-                        if next_char == 't':
-                            self.position  += 1
-                            next_char = self.current_char() 
-
-                            if delimiter in [' ', '~']:
-                                self.position += 1
-                                self.tokens.append(Token("cast", TokenType.CAST, self.position - 7))  # Adjust position
-                                
-                            else:
-                                raise SyntaxError(f"Expected delimiter '~' ' ' after 'believe' at position {self.position}")
-
+                cursor_advanced = self.peek_reserved('cast', TokenType.CAST)
+                if cursor_advanced:
                     continue
-                
-                            if next_char == 'l':
-                                self.position += 1
-                                next_char = self.current_char()
-
-                                    if next_char == 'e':
-                                        self.position += 1
-                                        next_char = self.current_char()
-
-                                        if delimiter in [' ', '~']:
-                                            self.position += 1
-                                            self.tokens.append(Token("castle", TokenType.CASTLE, self.position - 5))  # Adjust position
-                                    
-                                        else:
-                                            raise SyntaxError(f"Expected delimiter '~' ' ' after 'break' at position {self.position}")
-                            continue
-                continue
-                           
-
-
-            if next_char == 'h':
-                    self.position += 1
-                    next_char = self.current_char()  
-
-                 if next_char == 'a':
-                    self.position += 1
-                    next_char = self.current_char()
-
-                         if next_char == 'm':
-                        self.position += 1
-                        next_char = self.current_char()
-
-                            if next_char == 'b':
-                            self.position += 1
-                            next_char = self.current_char()
-
-                                if next_char == 'e':
-                                self.position += 1
-                                next_char = self.current_char()
-
-                                    if next_char == 'r':
-                                    self.position += 1
-                                    next_char = self.current_char()
-
-
-                                if delimiter in [' ', '~']:
-                                    self.position += 1
-                                    self.tokens.append(Token("chamber ", TokenType.BREAK, self.position - 5))  # Adjust position
-                              
-                                else:
-                                    raise SyntaxError(f"Expected delimiter '~' ' ' after 'break' at position {self.position}")
-                        continue
-
-    
-                if next_char == 'o':
-                 self.posiion += 1 
-                 next_char = self.current_char()
-
-                 if next_char == 'n':
-                    self.posiion += 1
-                    next_char = self.current_char()
-
-                    if next_char == 't':
-                        self.posiion += 1
-                        next_char = self.current_char()
-
-                        if next_char == 'i':
-                            self.position += 1
-                            next_char = self.current_char()
-
-                            if next_char == 'n'
-                            self.posittion  += 1
-                            next_char = self.current_char()
-
-                                if next_char == 'u'
-                                self.position += 1
-                                next_char = self.current_char()
-
-                                    if next_char == 'e'
-                                    self.position += 1
-                                    next_char = self.current_char()
-
-                                    if delimiter in [' ', '~']:
-                                            self.position += 1
-                                            self.tokens.append(Token("continue", TokenType.CONTINUE , self.position - 7))  # Adjust position
-                            
-                     else:
-                        raise SyntaxError(f"Expected delimiter '~' ' ' after 'believe' at position {self.position}")
-                    
+                cursor_advanced = self.peek_reserved('castle', TokenType.CASTLE)
+                if cursor_advanced:
                     continue
-
-                if next_char == 'r':
-                    self.position += 1 
-                    next_char = self.current_char()
-
-                    if next_char == 'o':
-                    self.position += 1
-                    next_char = self.current_char()
-
-                        if next_char == 'w':
-                        self.position += 1
-                        next_char = self.current_char()
-
-                            if next_char == 'n':
-                            self.position += 14
-                            next_char = self.current_char()
-
-                            if delimiter in [' ', '~']:
-                                            self.position += 1
-                                            self.tokens.append(Token("crown", TokenType.CROWN, self.position - 4))  # Adjust position
-                            
-                     else:
-                        raise SyntaxError(f"Expected delimiter '~' ' ' after 'believe' at position {self.position}")
-                    
+                cursor_advanced = self.peek_reserved('chamber', TokenType.CHAMBER)
+                if cursor_advanced:
                     continue
-
-               if next_char = 'u':
-                self.position += 1
-                next_char = self.current_char()
-
-
-                    if next_char =  'r':
-                        self.position += 1
-                        next_char = self.current_char()
-
-                        if next_char = 's':
-                        self.position += 1
-                        next_char = self.current_char()
-
-                            if next_char == 's':
-                            self.posiion += 1
-                            next_char = self.current_char()
-
-                                if next char == 'e'
-                                self.position += 1
-                                next_char = self.current_char() 
-
-                           
-                                if delimiter in [' ', '~']:
-                                    self.position += 1
-                                    self.tokens.append(Token("curse", TokenType.CURSE, self.position - 5))  # Adjust position
-                              
-                                else:
-                                    raise SyntaxError(f"Expected delimiter '~' ' ' after 'break' at position {self.position}")
-                    continue  
-
-                if next_char = 'u':
-                self.posiion += 1
-                next_char = self.curret
-
+                cursor_advanced = self.peek_reserved('continue', TokenType.CONTINUE)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_reserved('crown', TokenType.CROWN)
+                if cursor_advanced:
+                    continue
                 cursor_advanced = self.peek_reserved('curse', TokenType.CURSE)
                 if cursor_advanced:
                     continue
@@ -536,56 +321,59 @@ class RoyalScriptLexer:
             #operators
 
             if char == '=':
-                cursor_advanced = self.peek_symbol('==', TokenType.ASSIGNMENT_OPERATOR)
+                cursor_advanced = self.peek_symbol('==', TokenType.RELATIONAL_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_symbol('=', TokenType.RELATIONAL_OPERATOR)
+                cursor_advanced = self.peek_symbol('=', TokenType.ASSIGNMENT_OPERATOR)
                 if cursor_advanced:
                     continue
             
             if char == '+':
-                cursor_advanced = self.peek_symbol('++', TokenType.ARITHMETIC_OPERATOR)
+                cursor_advanced = self.peek_symbol('++', TokenType.UNARY_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_symbol('+=', TokenType.UNARY_OPERATOR)
+                cursor_advanced = self.peek_symbol('+=', TokenType.ASSIGNMENT_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_symbol('+', TokenType.ASSIGNMENT_OPERATOR)
+                cursor_advanced = self.peek_symbol('+', TokenType.ARITHMETIC_OPERATOR)
                 if cursor_advanced:
                     continue
 
             if char == '-':
-                cursor_advanced = self.peek_symbol('--', TokenType.ARITHMETIC_OPERATOR)
+                cursor_advanced = self.peek_symbol('--', TokenType.UNARY_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_symbol('-=', TokenType.UNARY_OPERATOR)
+                cursor_advanced = self.peek_symbol('-=', TokenType.ASSIGNMENT_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_symbol('-', TokenType.ASSIGNMENT_OPERATOR)
+                cursor_advanced = self.peek_symbol('-', TokenType.ARITHMETIC_OPERATOR)
                 if cursor_advanced:
                     continue
             
             if char == '*':
-                cursor_advanced = self.peek_symbol('*=', TokenType.ARITHMETIC_OPERATOR)
+                cursor_advanced = self.peek_symbol('*=', TokenType.ASSIGNMENT_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_symbol('*', TokenType.ASSIGNMENT_OPERATOR)
+                cursor_advanced = self.peek_symbol('*?', TokenType.MULTI_COMMENT)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_symbol('*', TokenType.ARITHMETIC_OPERATOR)
                 if cursor_advanced:
                     continue
 
             if char == '/':
-                cursor_advanced = self.peek_symbol('/=', TokenType.ARITHMETIC_OPERATOR)
+                cursor_advanced = self.peek_symbol('/=', TokenType.ASSIGNMENT_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_symbol('/', TokenType.ASSIGNMENT_OPERATOR)
+                cursor_advanced = self.peek_symbol('/', TokenType.ARITHMETIC_OPERATOR)
                 if cursor_advanced:
                     continue
 
             if char == '%':
-                cursor_advanced = self.peek_symbol('%=', TokenType.ARITHMETIC_OPERATOR)
+                cursor_advanced = self.peek_symbol('%=', TokenType.ASSIGNMENT_OPERATOR)
                 if cursor_advanced:
                     continue
-                cursor_advanced = self.peek_symbol('%', TokenType.ASSIGNMENT_OPERATOR)
+                cursor_advanced = self.peek_symbol('%', TokenType.ARITHMETIC_OPERATOR)
                 if cursor_advanced:
                     continue
 
@@ -645,6 +433,14 @@ class RoyalScriptLexer:
                 if cursor_advanced:
                     continue
             
+            if char == '?':
+                cursor_advanced = self.peek_symbol('?*', TokenType.MULTI_COMMENT)
+                if cursor_advanced:
+                    continue
+                cursor_advanced = self.peek_symbol('?', TokenType.SINGLE_COMMENT)
+                if cursor_advanced:
+                    continue
+
             if char == ".":
                 cursor_advanced = self.peek_symbol('.', TokenType.DOT)
                 if cursor_advanced:
@@ -673,55 +469,55 @@ class RoyalScriptLexer:
 
             
 
-            # if char == '"':
-            #     self.match_literal(TokenType.STRING_LITERAL)
-            #     continue
+            if char == '"':
+                self.match_literal(TokenType.STRING_LITERAL)
+                continue
 
                 
-            # if char == "'":
-            #     self.match_literal(TokenType.CHAR_LITERAL)
-            #     continue
+            if char == "'":
+                self.match_literal(TokenType.CHAR_LITERAL)
+                continue
 
-            # # Match identifiers
-            # if char.isalpha() or char == '_':
-            #     self.match_identifier()
-            #     continue
+            # Match identifiers
+            if char.isalpha() or char == '_':
+                self.match_identifier()
+                continue
             
-            # if char in ['+', '-', '*', '/', '%']:
-            #     if self.match_unary_operator():
-            #         continue
-            #     else:
-            #         self.match_Arith_operator()
-            #         continue
+            if char in ['+', '-', '*', '/', '%']:
+                if self.match_unary_operator():
+                    continue
+                else:
+                    self.match_Arith_operator()
+                    continue
             
-            # # Handle operators and other symbols
-            # if char in ['=','+=', '-=', '*=', '/=', '%=']:
-            #     self.match_operator()
-            #     continue
+            # Handle operators and other symbols
+            if char in ['=','+=', '-=', '*=', '/=', '%=']:
+                self.match_operator()
+                continue
 
-            # # For relational operators lmao
-            # if char in ['==','>','<=','>=','<','!=']:
-            #     self.match_operator()
-            #     continue
+            # For relational operators lmao
+            if char in ['==','>','<=','>=','<','!=']:
+                self.match_operator()
+                continue
 
-            # # Handle parentheses and braces
-            # if char in ['(', ')', '{', '}', '[', ']', ',', '.']:
-            #     self.match_symbol()
-            #     continue
+            # Handle parentheses and braces
+            if char in ['(', ')', '{', '}', '[', ']', ',', '.']:
+                self.match_symbol()
+                continue
 
-            # if char in ['&' , '|', '!']:
-            #     self.match_logical_operator()
-            #     continue
+            if char in ['&' , '|', '!']:
+                self.match_logical_operator()
+                continue
 
-            # if char == '?':
-            #     self.match_comment()
-            #     self.advance() 
-            #     continue
+            if char == '?':
+                self.match_comment()
+                self.advance() 
+                continue
             
-            # if char == '?*':
-            #     self.match_comment()
-            #     self.advance() 
-            #     continue
+            if char == '?*':
+                self.match_comment()
+                self.advance() 
+                continue
 
             # If none of the patterns match, raise an error
             raise SyntaxError(f"Unexpected character: {char} at position {self.position}")
@@ -925,8 +721,8 @@ class RoyalScriptLexerGUI(tk.Tk):
                 self.output_listbox.insert(tk.END, f"{token.value}\n")  # Just the word (lexeme), centered
 
                 if token.token_type in TokenType.__dict__.values():
-                    definition = token.token_type.replace("_", " ")
-                    self.token_listbox.insert(tk.END, f"{definition}")
+                    definition = token.token_type.replace("_", " ").capitalize()
+                    self.token_listbox.insert(tk.END, f"{definition.capitalize()}")
 
         except SyntaxError as e:
             # Display error messages in the Errors Box
