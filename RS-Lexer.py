@@ -95,24 +95,24 @@ class TokenType:
     'castle': {' '},
     'int_float': {',', ' ',('general_operator'), ')', '~', '!', r'&', '|', '>', '<', '='},
     'string': {' ', ')', ',', '&', '}', '~', '!', '='},
-    'assign_delim': {['alpha'], ['number'], '{', ' ', '-', '(', '"'},
-    'operator_delim': {['alpha'], ['number'], ' ', '-', '(', '{'},
-    'logical_delim': {'"', ['alpha'], ['number'], ' ', '-', '(', '{'},
-    'string_parts': {'"', ['alpha'], ['number'], ' ', '-', '(', '|', '&'},
-    'open_brace': {'{', '}', '(', ['number'], ' ', '"', ['alpha'], '\n', '>', '-'},
-    'close_brace': {'{', '}', '.', '~', ' ', ',', ')', '\n', '>', '&', ('general_operator'], '!', '|'},
-    'open_parenthesis': {'{', ('number'], ('alpha'], ' ', '-', '\n', '>', '(', ')', '"'},
-    'id': {'{', '\n', ' ', '~', ',', '(', ')', '(', ']', '}', ('general_operator'], '!', r'&', '|', '.'},
-    'close_parenthesis': {'{', ' ', ('general_operator'], '!', '&', '|', '\n', '~', '>', '.', ',', ')', '(', '[', ']', '}'},
-    'open_bracket': {']', ['number'], '-', ['alpha'], '(', ' ', '\n'},
-    'double_open_bracket': {' ', '\n', ['alpha'], '>'},
-    'close_bracket': {'\n', '(', ' ', '~', ',', ')', '[', ']', '}', ['general_operator'], '!', r'&', '|', '.', '\n'},
-    'double_close_bracket': {']',' ', '\n', ['alpha'], '>'},
-    'unary': {'|', '~', ')', ['general_operator'], '!', ' ', '\n'},
-    'concat': {' ', '"', ['alpha'], ['number'], '(', '{', '\n'},
-    'line': {'\n', ' ', ['alpha'], ']'},
-    'comma': {['alpha'], ' ', ['number'], '"', '-', '\n', '>', '{'},
-    'dot_op': {['alpha'], '[', '(', '\n'},
+    'assign_delim': {('alpha'), ('number'), '{', ' ', '-', '(', '"'},
+    'operator_delim': {('alpha'), ('number'), ' ', '-', '(', '{'},
+    'logical_delim': {'"', ('alpha'), ('number'), ' ', '-', '(', '{'},
+    'string_parts': {'"', ('alpha'), ('number'), ' ', '-', '(', '|', '&'},
+    'open_brace': {'{', '}', '(', ('number'), ' ', '"', ('alpha'), '\n', '>', '-'},
+    'close_brace': {'{', '}', '.', '~', ' ', ',', ')', '\n', '>', '&', ('general_operator'), '!', '|'},
+    'open_parenthesis': {'{', ('number'), ('alpha'), ' ', '-', '\n', '>', '(', ')', '"'},
+    'id': {'{', '\n', ' ', '~', ',', '(', ')', '(', ']', '}', ('general_operator'), '!', r'&', '|', '.'},
+    'close_parenthesis': {'{', ' ', ('general_operator'), '!', '&', '|', '\n', '~', '>', '.', ',', ')', '(', '(', ']', '}'},
+    'open_bracket': {']', ('number'), '-', ('alpha'), '(', ' ', '\n'},
+    'double_open_bracket': {' ', '\n', ('alpha'), '>'},
+    'close_bracket': {'\n', '(', ' ', '~', ',', ')', '(', ']', '}', ('general_operator'), '!', r'&', '|', '.', '\n'},
+    'double_close_bracket': {']',' ', '\n', ('alpha'), '>'},
+    'unary': {'|', '~', ')', ('general_operator'), '!', ' ', '\n'},
+    'concat': {' ', '"', ('alpha'), ('number'), '(', '{', '\n'},
+    'line': {'\n', ' ', ('alpha'), ']'},
+    'comma': {('alpha'), ' ', ('number'), '"', '-', '\n', '>', '{'},
+    'dot_op': {('alpha'), '[', '(', '\n'},
     'nuww': {' ', '~', ')', '}', ',', '=', '\n', '!', '|', '&'},
     'whitespace': {' ', '\n'},
     'single_line_comment': {'\n'},
@@ -250,28 +250,240 @@ class RoyalScriptLexer:
 
             # Check for reserved keywords
             if char == 'b':
-                cursor_advanced = self.peek_reserved('believe', TokenType.BELIEVE)
-                if cursor_advanced:
+                self.position += 1  
+                next_char = self.current_char()
+
+                if next_char == 'e':
+                    self.position += 1
+                    next_char = self.current_char()
+
+                    if next_char == 'l':
+                        self.position += 1
+                        next_char = self.current_char()
+
+                        if next_char == 'i':
+                            self.position += 1
+                            next_char = self.current_char()
+
+                            if next_char == 'e':
+                                self.position += 1
+                                next_char = self.current_char()
+
+                                if next_char == 'v':
+                                    self.position += 1
+                                    next_char = self.current_char()
+
+                                    if next_char == 'e':
+                                        self.position += 1
+                                        # Look for a delimiter to finalize the token
+                                        delimiter = self.current_char()
+
+                                        if delimiter in [' ', '~']:
+                                            self.position += 1
+                                            self.tokens.append(Token("believe", TokenType.BELIEVE, self.position - 7))  # Adjust position
+                                           
+                                        else:
+                                            raise SyntaxError(f"Expected delimiter '~' ' ' after 'believe' at position {self.position}")
+                    continue            
+                if next_char == 'r':
+                    self.position += 1
+                    next_char = self.current_char()
+
+                    if next_char == 'e':
+                        self.position += 1
+                        next_char = self.current_char()
+
+                        if next_char == 'a':
+                            self.position += 1
+                            next_char = self.current_char()
+                            
+                            if next_char == 'k':
+                                self.position += 1
+                                delimiter = self.current_char()
+
+                                if delimiter in [' ', '~']:
+                                    self.position += 1
+                                    self.tokens.append(Token("break", TokenType.BREAK, self.position - 5))  # Adjust position
+                              
+                                else:
+                                    raise SyntaxError(f"Expected delimiter '~' ' ' after 'break' at position {self.position}")
                     continue
-                cursor_advanced = self.peek_reserved('break', TokenType.BREAK)
-                if cursor_advanced:
-                    continue
+                #cast 
+
             if char == 'c':
-                cursor_advanced = self.peek_reserved('cast', TokenType.CAST)
-                if cursor_advanced:
+                self.posiion += 1 
+                next_char = self.current_char()
+
+                if next_char == 'a':
+                    self.posiion += 1 
+                    next_char = self.current_char()
+
+                    if next_char == 's':
+                        self.posiion += 1
+                        next_char = self.current_char()
+
+                        if next_char == 't':
+                            self.position  += 1
+                            next_char = self.current_char() 
+
+                            if delimiter in [' ', '~']:
+                                self.position += 1
+                                self.tokens.append(Token("cast", TokenType.CAST, self.position - 7))  # Adjust position
+                                
+                            else:
+                                raise SyntaxError(f"Expected delimiter '~' ' ' after 'believe' at position {self.position}")
+
                     continue
-                cursor_advanced = self.peek_reserved('castle', TokenType.CASTLE)
-                if cursor_advanced:
+                
+                            if next_char == 'l':
+                                self.position += 1
+                                next_char = self.current_char()
+
+                                    if next_char == 'e':
+                                        self.position += 1
+                                        next_char = self.current_char()
+
+                                        if delimiter in [' ', '~']:
+                                            self.position += 1
+                                            self.tokens.append(Token("castle", TokenType.CASTLE, self.position - 5))  # Adjust position
+                                    
+                                        else:
+                                            raise SyntaxError(f"Expected delimiter '~' ' ' after 'break' at position {self.position}")
+                            continue
+                continue
+                           
+
+
+            if next_char == 'h':
+                    self.position += 1
+                    next_char = self.current_char()  
+
+                 if next_char == 'a':
+                    self.position += 1
+                    next_char = self.current_char()
+
+                         if next_char == 'm':
+                        self.position += 1
+                        next_char = self.current_char()
+
+                            if next_char == 'b':
+                            self.position += 1
+                            next_char = self.current_char()
+
+                                if next_char == 'e':
+                                self.position += 1
+                                next_char = self.current_char()
+
+                                    if next_char == 'r':
+                                    self.position += 1
+                                    next_char = self.current_char()
+
+
+                                if delimiter in [' ', '~']:
+                                    self.position += 1
+                                    self.tokens.append(Token("chamber ", TokenType.BREAK, self.position - 5))  # Adjust position
+                              
+                                else:
+                                    raise SyntaxError(f"Expected delimiter '~' ' ' after 'break' at position {self.position}")
+                        continue
+
+    
+                if next_char == 'o':
+                 self.posiion += 1 
+                 next_char = self.current_char()
+
+                 if next_char == 'n':
+                    self.posiion += 1
+                    next_char = self.current_char()
+
+                    if next_char == 't':
+                        self.posiion += 1
+                        next_char = self.current_char()
+
+                        if next_char == 'i':
+                            self.position += 1
+                            next_char = self.current_char()
+
+                            if next_char == 'n'
+                            self.posittion  += 1
+                            next_char = self.current_char()
+
+                                if next_char == 'u'
+                                self.position += 1
+                                next_char = self.current_char()
+
+                                    if next_char == 'e'
+                                    self.position += 1
+                                    next_char = self.current_char()
+
+                                    if delimiter in [' ', '~']:
+                                            self.position += 1
+                                            self.tokens.append(Token("continue", TokenType.CONTINUE , self.position - 7))  # Adjust position
+                            
+                     else:
+                        raise SyntaxError(f"Expected delimiter '~' ' ' after 'believe' at position {self.position}")
+                    
                     continue
-                cursor_advanced = self.peek_reserved('chamber', TokenType.CHAMBER)
-                if cursor_advanced:
+
+                if next_char == 'r':
+                    self.position += 1 
+                    next_char = self.current_char()
+
+                    if next_char == 'o':
+                    self.position += 1
+                    next_char = self.current_char()
+
+                        if next_char == 'w':
+                        self.position += 1
+                        next_char = self.current_char()
+
+                            if next_char == 'n':
+                            self.position += 14
+                            next_char = self.current_char()
+
+                            if delimiter in [' ', '~']:
+                                            self.position += 1
+                                            self.tokens.append(Token("crown", TokenType.CROWN, self.position - 4))  # Adjust position
+                            
+                     else:
+                        raise SyntaxError(f"Expected delimiter '~' ' ' after 'believe' at position {self.position}")
+                    
                     continue
-                cursor_advanced = self.peek_reserved('continue', TokenType.CONTINUE)
-                if cursor_advanced:
-                    continue
-                cursor_advanced = self.peek_reserved('crown', TokenType.CROWN)
-                if cursor_advanced:
-                    continue
+
+               if next_char = 'u':
+                self.position += 1
+                next_char = self.current_char()
+
+
+                    if next_char =  'r':
+                        self.position += 1
+                        next_char = self.current_char()
+
+                        if next_char = 's':
+                        self.position += 1
+                        next_char = self.current_char()
+
+                            if next_char == 's':
+                            self.posiion += 1
+                            next_char = self.current_char()
+
+                                if next char == 'e'
+                                self.position += 1
+                                next_char = self.current_char() 
+
+                           
+                                if delimiter in [' ', '~']:
+                                    self.position += 1
+                                    self.tokens.append(Token("curse", TokenType.CURSE, self.position - 5))  # Adjust position
+                              
+                                else:
+                                    raise SyntaxError(f"Expected delimiter '~' ' ' after 'break' at position {self.position}")
+                    continue  
+
+                if next_char = 'u':
+                self.posiion += 1
+                next_char = self.curret
+
                 cursor_advanced = self.peek_reserved('curse', TokenType.CURSE)
                 if cursor_advanced:
                     continue
