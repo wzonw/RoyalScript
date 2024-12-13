@@ -5,6 +5,21 @@ import re
 
 #Lagay tayo sound kahit magical intro lang
 
+#Regular Definitions
+#Number
+zero = '0'
+num = '123456789'
+number = zero + num
+period = '.'
+
+#Alphabet Letters
+alpa_capital = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+alpha_lower = 'abcdefghijklmnopqrstuvwxyz'
+alpha = alpha_capital + alpha_lower
+
+#AlphaNum
+alphanum = alpha + number
+special_char = '!@#$%^&*()-_=+[]{{}}\|\';":/.,?><'
 
 
 
