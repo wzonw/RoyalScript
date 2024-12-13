@@ -19,7 +19,50 @@ alpha = alpha_capital + alpha_lower
 
 #AlphaNum
 alphanum = alpha + number
-special_char = '!@#$%^&*()-_=+[]{{}}\|\';":/.,?><'
+special_char = "!@#$%^&*()-_=+[]{}\\|:;'”,<>./?"
+ascii_type = alphanum + special_char
+
+#Operators
+arithmetic_op = '+-*/%'
+
+equal = '='
+plus_equal = '+='
+minus_equal = '-='
+mult_equal = '*='
+div_equal = '/='
+mod_equal = '%='
+
+and_op = '&&'
+not_op = '!'
+or_op = '||'
+
+not_equal =  '!='
+dual_equal = '=='
+greater_than = '>'
+less_than = '<'
+less_euqal = '<='
+greater_equal '>='
+
+increment = '++'
+decrement = '--'
+
+single_line = '?'
+multiline_open = '?*'
+multiline_close = '*?' # I saw sa iba they seperated them but let's see kung mag eerror HWHAWHA
+
+#Escape Sequence
+
+newline = '\\n'
+tab = '\\t'
+backslash = '\\\\'
+double_quote = '"'
+
+#Others
+true = 'true'
+false = 'false'
+space = 'space'
+
+
 
 
 
