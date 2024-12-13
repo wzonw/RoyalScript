@@ -413,7 +413,36 @@ class RoyalScriptLexer:
                                 raise SyntaxError(f"Expected delimiter '~' ' ' after 'believe' at position {self.position}")
                             
                     continue
-            
+                
+                if next_char == 'u':
+                    self.position += 1
+                    next_char = self.current_char()
+
+                    if next_char ==  'r':
+                        self.position += 1
+                        next_char = self.current_char()
+
+                        if next_char == 's':
+                            self.position += 1
+                            next_char = self.current_char()
+
+                            if next_char == 's':
+                                self.position += 1
+                                next_char = self.current_char()
+
+                                if next_char == 'e':
+                                    self.position += 1
+                                    next_char = self.current_char() 
+
+
+                                if delimiter in [' ', '{']:
+                                    self.position += 1
+                                    self.tokens.append(Token("curse", TokenType.CURSE, self.position - 5))  # Adjust position
+                              
+                                else:
+                                    raise SyntaxError(f"Expected delimiter '~' '{{ ' after 'curse' at position {self.position}")
+                    
+                    continue  
 
             if char == 'd':
                 cursor_advanced = self.peek_reserved('dynasty', TokenType.DYNASTY)
