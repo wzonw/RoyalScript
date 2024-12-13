@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import scrolledtext
 import re
+import token_RS
 
 
 #Lagay tayo sound kahit magical intro lang
@@ -59,6 +60,7 @@ multiline_close = '*?' # I saw sa iba they seperated them but let's see kung mag
 newline = '\\n'
 tab = '\\t'
 backslash = '\\\\'
+escape_seq = newline + tab + backslash
 double_quote = '"'
 
 #Others
@@ -72,6 +74,49 @@ chamber = 'void' #Same with dynasty
 # return = return hawhahwhawh delete i guess\\
 spell = 'declaration' #Same with dynasty
 concatenat = '+'
+
+#Literals
+#scroll_lit = ''
+
+escape_delim = alphanum + escape_seq + '"'
+control_flow = space + escape_seq
+
+#Symbols Delim
+arithmetic_op_delim = alphanum + '(' + ')' #Double check with the ()
+plus_delim = alphanum + '(' + '"'
+logical_op_delim = alphanum + '('
+not_op_delim = alphanum + "'" + '"' + '('
+witch_delim = '{'
+assign_op_delim = '(' + alphanum
+equal_delim = alphanum + '"' + "'" + '[' + '('
+unary_op_delim = alphanum + '~' +  ')'
+relational_op_delim = '(' + "'" + '"' + alphanum
+open_par_delim = unary_op + alphanum
+close_par_delim = arithmetic_op + logical_op + relational_op + '(' + '{' + '~'
+open_curl_delim = '(' + unary_op + alphanum + newline
+close_curl_delim = alpha_lower
+open_square_delim = '"' + '"' + ']' + alphanum
+close_square_delim = '~' +'[' + '='
+comma_delim = alphanum + '-' + '"' + "'"
+
+id_delim = '(' + ')' + '~' + arithmetic_op + assignment_op + relational_op + unary_op
+
+#Literals Delim
+book_delim = '~' +  ')' + '+'
+number_delim = ')' + '}' + ']' + '~' + unary_op + relational_op + logical_op + assigment_op + arithmetic_op
+
+#Other Delimiter
+genie_delim = '('
+gate_delim = '~'
+
+#Comments Delim
+single_delim = newline
+# multi_delim = 
+
+#Error definition
+
+
+
 
 
 
