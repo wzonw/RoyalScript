@@ -31,10 +31,12 @@ minus_equal = '-='
 mult_equal = '*='
 div_equal = '/='
 mod_equal = '%='
+assignment_op = equal + plus_equal + minus_equal + mult_equal + div_equal + mod_equal
 
 and_op = '&&'
 not_op = '!'
 or_op = '||'
+logical_op = and_op + not_op + or_op
 
 not_equal =  '!='
 dual_equal = '=='
@@ -42,9 +44,11 @@ greater_than = '>'
 less_than = '<'
 less_euqal = '<='
 greater_equal '>='
+relational_op = not_equal + dual_equal + greater_than +less_than + less_eual + greater_equal
 
 increment = '++'
 decrement = '--'
+unary_op = increment + decrement
 
 single_line = '?'
 multiline_open = '?*'
@@ -58,9 +62,17 @@ backslash = '\\\\'
 double_quote = '"'
 
 #Others
+terminator = '~'
 true = 'true'
 false = 'false'
 space = 'space'
+dynasty = 'const' #Unsure, no constant data-type for python
+phantom = NULL #double check
+chamber = 'void' #Same with dynasty
+# return = return hawhahwhawh delete i guess\\
+spell = 'declaration' #Same with dynasty
+concatenat = '+'
+
 
 
 
