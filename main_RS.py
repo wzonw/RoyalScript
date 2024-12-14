@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import scrolledtext
 import re
-import token_RS
+import RS_regdef
 
 
 #Lagay tayo sound kahit magical intro lang
@@ -14,7 +14,7 @@ number = zero + num
 period = '.'
 
 #Alphabet Letters
-alpa_capital = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+alpha_capital = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 alpha_lower = 'abcdefghijklmnopqrstuvwxyz'
 alpha = alpha_capital + alpha_lower
 
@@ -43,9 +43,9 @@ not_equal =  '!='
 dual_equal = '=='
 greater_than = '>'
 less_than = '<'
-less_euqal = '<='
-greater_equal '>='
-relational_op = not_equal + dual_equal + greater_than +less_than + less_eual + greater_equal
+less_equal = '<='
+greater_equal = '>='
+relational_op = not_equal + dual_equal + greater_than +less_than + less_equal + greater_equal
 
 increment = '++'
 decrement = '--'
@@ -69,7 +69,7 @@ true = 'true'
 false = 'false'
 space = 'space'
 dynasty = 'const' #Unsure, no constant data-type for python
-phantom = NULL #double check
+phantom = 'NULL' #double check
 chamber = 'void' #Same with dynasty
 # return = return hawhahwhawh delete i guess\\
 spell = 'declaration' #Same with dynasty
@@ -103,7 +103,7 @@ id_delim = '(' + ')' + '~' + arithmetic_op + assignment_op + relational_op + una
 
 #Literals Delim
 book_delim = '~' +  ')' + '+'
-number_delim = ')' + '}' + ']' + '~' + unary_op + relational_op + logical_op + assigment_op + arithmetic_op
+number_delim = ')' + '}' + ']' + '~' + unary_op + relational_op + logical_op + assignment_op + arithmetic_op
 
 #Other Delimiter
 genie_delim = '('
@@ -116,7 +116,8 @@ single_delim = newline
 #Error definition
 
 
-
+class RoyalScriptLexer:
+    def _init_(self, text, )
 
 
 

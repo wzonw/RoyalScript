@@ -45,6 +45,8 @@ RegDef = {
     # Relational operators
     'relational_op': {'!=', '==', '>', '<', '>=', '<='},
 
+    'general_operator' : {'!=', '==', '>', '<', '>=', '<=' ,'+=', '-=', '*=', '/=', '%=','+', '-', '*', '/', '%','++', '--' },
+
     # Escape sequences
     'escape_seq': {'\\n', '\\t', '\\', '\\"'},
     
