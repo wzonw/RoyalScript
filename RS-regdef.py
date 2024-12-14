@@ -62,7 +62,7 @@ RegDef = {
 }
 
 
-DELIMS = {
+Delims = {
     'end': {'~', ' ', '\n'},
     
     # Data types (e.g., for parsing types like int, float, etc.)
