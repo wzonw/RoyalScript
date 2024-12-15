@@ -3,7 +3,6 @@ from tkinter import scrolledtext
 import re
 import RS_regdef
 
-
 #Lagay tayo sound kahit magical intro lang
 
 #Regular Definitions
@@ -113,13 +112,177 @@ gate_delim = '~'
 single_delim = newline
 # multi_delim = 
 
+#RESERVE WORDS
+BELIEVE = 'believe'
+
 #Error definition
+class Error:
+    def __init__ (self, pos_start, pos_end, error_name, details):
+        self.pos_start = pos_start
+        self.pos_end = pos_end
+        self.error_name = error_name
+        self.details = details
+
+    def as_string(self):
+        result = f'{self.error_name}: {self.details}\n'
+        result += f'File {self.pos_start.fn}, line {self.pos_start.ln +1}'
+        return result
+    
+    class IllegalChar_Error():
+        def __init__ (self, pos_start, pos_end, details):
+            super().__init__(pos_start, pos_end, 'Illegal Character', details)
+    
+class Position:
+    def __init__(self, idx, ln, col, fn, ftxt):
+        self.idx = idx
+        self.ln =ln
+        self.col = col
+        self.fn = fn
+        self.ftxt = ftxt
+
+    def advance (self, current_char):
+        self.idx += 1
+        self.col += 1
+
+        if current_char == "\n":
+            self.ln+=1
+            self.col = 0
+
+        return self
+class Token:
+    def __init__ (self, token, value=None):
+        self.token = token
+        self.value = value
+    def _repar_(self):
+        if self.value: return f'{self.value}: {self.token}'
+        return f'{self.token}'
 
 
 class RoyalScriptLexer:
-    def _init_(self, text, )
+    def __init__(self, text, fn):
+        self. text = text
+        self.fn = fn
+        self.pos = Position (-1,0,-1,fn,text)
+        self.current_char = self.text[self.pos.idx] if len(self.text) > 0 else None  # Initialize current_char
+
+    def peek (self):
+        next_idx = self.post.idx + 1
+        return self.text[next_idx] if next_idx < len(self.text) else None
+    def advance(self):
+        self.pos.advance(self.current_char)
+        self.current_char = self.text[self.pos.idx] if self.pos.idx <= len(self.text)-1 else None
+    def make_tokens(self):
+        tokens = []
+        errors = []
+        string = ""
+        
+
+        while self.current_char is not None:
+            """ if self.current_char in special_chars:
+                errors.extend([f"Invalid symbol: {self.current_char}"])
+                self.advance() """
+            if self.current_char in '\t':
+                tokens.append(Token(NEWTAB, "\\t"))
+                self.advance()
+            elif self.current_char  == '\n':
+                tokens.append(Token(NEWLINE, "\\n"))
+                self.advance()
+            elif self.current_char  == '>':
+                tokens.append(Token(greater_than, ">"))
+                self.advance()
+            elif self.current_char  == '<':
+                tokens.append(Token(less_than, "<"))
+                self.advance()
+            elif self.current_char.isspace():
+                # Handle spaces explicitly
+                while self.current_char is not None and self.current_char.isspace():
+                    if self.current_char == " ":
+                        tokens.append(Token(SPACE, "\" \""))
+                    self.advance()
+            elif self.current_char in alpha:
+                result, error = self.make_word()
+                
+                if error:
+                    errors.extend(error)  
+                tokens.append(result)
+            else:
+                errors.append(f"Illegal character '{self.current_char}' at position {self.pos.idx}")
+                self.advance()
+
+        return tokens, errors
+
+    def make_word(self):
+        ident = ""
+        ident_count = 0
+        errors = []
+
+        while self.current_char is not None and (self.current_char.isalnum() or self.current_char == "_"):
+            ident += self.current_char
+            self.advance()
+
+            if self.current_char == "b": 
+                ident += self.current_char
+                self.advance()
+                ident_count += 1
+                if self.current_char == "e":
+                    ident += self.current_char
+                    elf.advance()
+                    ident_count += 1
+                    if self.current_char == "l":
+                        ident += self.current_char
+                        self.advance()
+                        ident_count += 1
+                        if self.current_char == "i":
+                            ident += self.current_char
+                            self.advance()
+                            ident_count += 1
+                            if self.current_char == "e":
+                                ident += self.current_char
+                                self.advance()
+                                ident_count += 1
+                                if self.current_char == "v":
+                                    ident += self.current_char
+                                    self.advance()
+                                    ident_count += 1
+                                    if self.current_char == "e":
+                                        ident += self.current_char
+                                        self.advance()
+                                        ident_count += 1
+
+                                        if self.current_char == None:
+                                            errors.extend([f'Invalid delimiter for belive! Cause: {self.current_char}. Expected: ('])
+                                            return [], errors
+                                        if self.current_char in '(':
+                                            return Token(BELIEVE, "believe"), errors
+                                        elif self.current_char in alpha_num: #double check this
+                                            continue
+                                        else:
+                                            errors.extend([f'Invalid delimiter for add! Cause: {self.current_char}. Expected: ('])
+                                            return [], errors
+            if ident:
+                result, error = self.make_ident(ident)
+                if error:
+                    errors.append(error)
+                    return [], errors
+                elif result:
+                    return Token(IDENTIFIER, result), errors
+
+    def make_ident(self, ident):
+        """
+        Validates whether the given word is a valid identifier or reserved word.
+        """
+        errors = []
+
+        # Ensure the first letter is uppercase
+        if not ident[0].isupper():
+            return None, f"Invalid identifier start: '{ident[0]}'. Cause: '{ident}'. Identifier must start with an uppercase letter."
+
+        # Ensure no invalid characters are present
+
+        return ident, None
 
 
+            
 
 
 
@@ -184,32 +347,50 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.analyze_button.grid(row=3, column=0, columnspan=3, pady=0)
 
     def analyze_code(self):
-        code = self.input_text.get("1.0", tk.END)
-        lexer = RoyalScriptLexer(code)
+        code = self.input_text.get("1.0", tk.END).strip()
+        lexer = RoyalScriptLexer("<input>",code)
+
         
         # Clear previous output
         self.output_listbox.delete(0, tk.END)
         self.token_listbox.delete(0, tk.END)
         self.errors_listbox.delete(0, tk.END)
 
-        try:
-            tokens = lexer.get_tokens()
+
+        tokens, errors = lexer.make_tokens()
             
-            # Show only the words in the output text
-            for token in tokens:
-                self.output_listbox.insert(tk.END, f"{token.value}\n")  # Just the word (lexeme), centered
+        row_number = 1    # Show only the words in the output text
+        for token in tokens:
+            
+           if isinstance(token, Token):  # Ensure it's a valid token object
+                lexeme = token.value if token.value is not None else token.token
+                    # Check for spaces as errors
+                if token.token == "SPACE":
+                    self.error_output.insert(tk.END, f"Error: Unexpected whitespace at line {row_number}\n")
+                    # Check for newlines as tokens
+                elif token.token == "NEWLINE":
+                    lexeme = "\\n"  # Display as "\n" in the table for clarity
+                self.token_listbox.insert(tk.END, f"{token.token}")
+                self.output_listbox.insert(tk.END, f"{code}")
 
-                if token.token_type in TokenType.__dict__.values():
-                    definition = token.token_type.replace("_", " ")
-                    self.token_listbox.insert(tk.END, f"{definition}")
+                row_number += 1
 
-        except SyntaxError as e:
-            # Display error messages in the Errors Box
-            self.errors_listbox.insert(tk.END, f"{str(e)}\n")
-        except Exception as e:
-            # Handle any unexpected errors
-            self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}\n")
+        if errors:
+            self.errors_listbox.insert(tk.END, "\n".join(errors) + "\n")
+        else:
+            self.errors_listbox.insert(tk.END, "No errors found.\n")
 
+        
+    def clear_input(self):
+        """Clear the code input box"""
+        self.code_input.delete("1.0", tk.END)
+
+    def undo_input(self):
+        """Undo the last action in the code input box"""
+        current_text = self.code_input.get("1.0", tk.END)
+        if len(current_text) > 1:  # Check if there's any text to undo
+            self.code_input.delete("1.0", tk.END)
+            self.code_input.insert("1.0", current_text[:-2])
 
 if __name__ == "__main__":
     app = RoyalScriptLexerGUI()
