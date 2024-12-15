@@ -26,7 +26,10 @@ class TokenType:
     CAST = "IF"  # If statement
     TWIST = "ELSEIF"  # Else if statement
     CURSE = "ELSE"  # Else statement
-
+    TOROSE = "CONVERSION FUNC"
+    TOSCROLL = "CONVERSION FUNC"
+    TOOCEAN = "CONVERSION FUNC"
+    TOTREASURES = "CONVERSION FUNC"  
     ESCAPE = "ESCAPE"
 
     # Flow control
@@ -360,38 +363,38 @@ class RoyalScriptLexer:
                                     else:
                                         raise SyntaxError(f"Expected delimiter ' ' after 'castle' at position {self.position}")
                         
-                continue
+                    continue
                                 
                 if next_char == 'h':
-                        self.position += 1
-                        next_char = self.current_char()  
+                    self.position += 1
+                    next_char = self.current_char()  
 
-                        if next_char == 'a':
+                    if next_char == 'a':
+                        self.position += 1
+                        next_char = self.current_char()
+
+                        if next_char == 'm':
                             self.position += 1
                             next_char = self.current_char()
 
-                            if next_char == 'm':
+                            if next_char == 'b':
                                 self.position += 1
                                 next_char = self.current_char()
 
-                                if next_char == 'b':
+                                if next_char == 'e':
                                     self.position += 1
                                     next_char = self.current_char()
 
-                                    if next_char == 'e':
+                                    if next_char == 'r':
                                         self.position += 1
-                                        next_char = self.current_char()
+                                        delimiter = self.current_char()
 
-                                        if next_char == 'r':
+                                        if delimiter in [' ']:
                                             self.position += 1
-                                            delimter = self.current_char()
-
-                                            if delimiter in [' ']:
-                                                self.position += 1
-                                                self.tokens.append(Token("chamber ", TokenType.CHAMBER, self.position - 5))  # Adjust position
+                                            self.tokens.append(Token("chamber ", TokenType.CHAMBER, self.position - 5))  # Adjust position
                                             
-                                            else:
-                                                raise SyntaxError(f"Expected delimiter ' ' after 'chamber' at position {self.position}")
+                                        else:
+                                            raise SyntaxError(f"Expected delimiter ' ' after 'chamber' at position {self.position}")
                     continue
 
                 if next_char == 'o':
@@ -406,17 +409,20 @@ class RoyalScriptLexer:
                             if next_char == 'i':
                                 self.position += 1
                                 next_char = self.current_char()
-                                if next_char == 'u':
+                                if next_char == 'n':
                                     self.position += 1
                                     next_char = self.current_char()
-                                    if next_char == 'e':
+                                    if next_char == 'u':
                                         self.position += 1
-                                        delimiter = self.current_char()
-                                        if delimter == [' ', '~']:
+                                        next_char = self.current_char()
+                                        if next_char == 'e':
                                             self.position += 1
-                                            self.tokens.append(Token("continue", TokenType.CONTINUE, self.position - 8))
-                                        else:
-                                            raise SyntaxError(f"Expected delimiter '~' ' ' after 'continue' at position {self.position}")
+                                            delimiter = self.current_char()
+                                            if delimiter in [' ', '~']:
+                                                self.position += 1
+                                                self.tokens.append(Token("continue", TokenType.CONTINUE, self.position - 8))
+                                            else:
+                                                raise SyntaxError(f"Expected delimiter '~' ' ' after 'continue' at position {self.position}")
                     continue
 
                 if next_char == 'r':
@@ -432,13 +438,15 @@ class RoyalScriptLexer:
                                 self.position += 1
                                 delimiter = self.current_char()
 
-                                if delimeter in [' ', '~']:
+                                if delimiter in [' ', '~']:
                                     self.position += 1 
                                     self.tokens.append(Token("crown", TokenType.CROWN, self.position - 5))
                                 else:
                                    raise SyntaxError(f"Expected delimiter '~' ' ' after 'crown' at position {self.position}")
                     continue
-                if next_char =+ 'u':
+                if next_char == 'u':
+                    self.position += 1
+                    next_char = self.current_char()
                     if next_char == 'r':
                         self.position += 1
                         next_char = self.current_char()
@@ -448,55 +456,456 @@ class RoyalScriptLexer:
                             if next_char == 'e':
                                 self.position += 1
                                 delimiter = self.current_char()
-                                if delimiter == ['{', ' ']:
+
+                                if delimiter in ['{', ' ']:
                                     self.position += 1
-                                    self.token.append(Token("curse", TokenType.CURSE, self.position  -5))
+                                    self.tokens.append(Token("curse", TokenType.CURSE, self.position - 5))
                                 else:
-                                    raise SyntaxError(f"Expected delimiter '~' ' ' after 'believe' at position {self.position}")
+                                    raise SyntaxError(f"Expected delimiter '{{' ' ' after 'curse' at position {self.position}")
                     continue
 
             if char == 'd':
-                cursor_advanced = self.peek_reserved('dynasty', TokenType.DYNASTY)
-                if cursor_advanced:
+                self.position += 1
+                next_char = self.current_char()
+                if char == 'y':
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 'n':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 'a':
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == 's':
+                                self.position += 1
+                                next_char = self.current_char()
+                                if next_char == 't':
+                                    self.position += 1
+                                    next_char = self.current_char()
+                                    if next_char == 'y':
+                                        self.position += 1
+                                        delimiter = self.current_char()
+                                        if delimiter in [' ']:
+                                            self.position += 1
+                                            self.tokens.append(Token("dynasty", TokenType.DYSNASTY, self.position - 7))
+                                        else:
+                                            raise SyntaxError(f"Expected delimiter  ' ' after 'dysntasty' at position {self.position}")
                     continue
+            
             if char == 'f':
-                cursor_advanced = self.peek_reserved('forever', TokenType.FOREVER)
-                if cursor_advanced:
-                    continue
-            if char == 'g':
-                cursor_advanced = self.peek_reserved('granted', TokenType.GRANTED)
-                if cursor_advanced:
-                    continue
-            if char == 'm':
-                cursor_advanced = self.peek_reserved('mirror', TokenType.MIRROR)
-                if cursor_advanced:
-                    continue
-            if char == 'O':
-                cursor_advanced = self.peek_reserved('ocean', TokenType.OCEAN)
-                if cursor_advanced:
-                    continue
-            if char == 'p':
-                cursor_advanced = self.peek_reserved('phantom', TokenType.PHANTOM)
-                if cursor_advanced:
-                    continue
-            if char == 'r':
-                cursor_advanced = self.peek_reserved('reign', TokenType.REIGN)
-                if cursor_advanced:
-                    continue
-                cursor_advanced = self.peek_reserved('return', TokenType.RETURN)
-                if cursor_advanced:
-                    continue
-                cursor_advanced = self.peek_reserved('rose', TokenType.ROSE)
-                if cursor_advanced:
-                    continue
-            if char == 's':
-                cursor_advanced = self.peek_reserved('scroll', TokenType.SCROLL)
-                if cursor_advanced:
-                    continue
-                cursor_advanced = self.peek_reserved('spell', TokenType.SPELL)
-                if cursor_advanced:
+                self.position += 1  
+                next_char = self.current_char()
+                if char == 'o':
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 'r':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 'e':
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == 'v':
+                                self.position += 1
+                                next_char = self.current_char()
+                                if next_char == 'e':
+                                    self.position += 1
+                                    next_char = self.current_char()
+                                    if next_char == 'r':
+                                        self.position += 1
+                                        delimiter = self.current_char()
+                                        if delimiter in ['~', ' ']:
+                                            self.position += 1
+                                            self. tokens.append(Token("forever", TokenType.FOREVER, self.position - 7))
+                                        else:
+                                            raise SyntaxError(f"Expected delimiter '~' ' ' after 'forever' at position {self.position}")
                     continue
 
+            if char == 'g':
+                self.position += 1
+                next_char = self.current_char()
+                if char == 'r':
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 'a':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 'n':
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == 't':
+                                self.position += 1
+                                next_char = self.current_char()
+                                if next_char == 'e':
+                                    self.position += 1
+                                    next_char = self.current_char()
+                                    if next_char == 'd':
+                                        self.position += 1                                    
+                                        delimiter = self.current_char()
+                                        if delimiter in ['(', ' ']:
+                                            self.position += 1
+                                            self.tokens.append(Token("granted", TokenType.GRANTED, self.position - 7))
+                                        else:
+                                            raise SyntaxError(f"Expected delimiter '(' ' ' after 'granted' at position {self.position}")
+                    continue
+
+                        
+            if char == 'm':
+                self.position += 1
+                next_char = self.current_char()
+                if next_char == 'i':
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 'r':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 'r':
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == 'o':
+                                self.position += 1
+                                next_char = self.current_char()                        
+                                if next_char == 'r':
+                                    self.position += 1
+                                    delimiter = self.current_char()
+                                    if delimiter in [' ', '=']:
+                                        self.position += 1
+                                        self.tokens.append(Token("mirror", TokenType.MIRROR, self.position - 6))
+                                    else:
+                                        raise SyntaxError(f"Expected delimiter '=' ' ' after 'mirror' at position {self.position}")
+                    continue
+                
+            if char == 'O':
+                self.position += 1
+                next_char = self.current_char()
+                if next_char == 'c':
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 'e':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 'a':
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == 'n':
+                                self.position += 1
+                                delimiter = self.current_char()
+                                if delimiter in [" "]:
+                                    self.position += 1
+                                    self.tokens.append(Token("ocean", TokenType.OCEAN, self.position - 5))
+                                else:
+                                    raise SyntaxError(f"Expected delimiter ' ' after 'ocean' at position {self.position}")
+                    continue
+
+            if char == 'p':
+                self.position += 1
+                next_char = self.current_char()
+                if next_char == 'h':
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 'a':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 'n':
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == 't':
+                                self.position += 1
+                                next_char = self.current_char()
+                                if next_char == 'o':
+                                    self.position += 1
+                                    next_char = self.current_char()
+                                    if next_char == 'm':
+                                        self.position += 1
+                                        delimiter = self.current_char()
+                                        if delimiter in ['~', ' ']:
+                                            self.position += 1
+                                            self.tokens.append(Token("phantom", TokenType.PHANTOM, self.position - 7))
+                                        else:
+                                            raise SyntaxError(f"Expected delimiter '~' ' ' after 'phantom' at position {self.position}")
+
+                    continue
+
+            if char == 'r':
+                self.position += 1
+                next_char = self.current_char()
+                if next_char == 'e':
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 'i':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 'g':
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == 'n':
+                                self.position += 1
+                                delimiter = self.current_char()
+                                if delimiter in ['~', ' ']: 
+                                    self.position += 1
+                                    self.tokens.append(Token("reign", TokenType.REIGN, self.position -5))
+                                
+                                elif delimiter == "t":
+                                    next_char = self.current_char()
+
+                                else:
+                                    raise SyntaxError(f"Expected delimiter '~' ' ' after 'reign' at position {self.position}")
+                        continue
+
+                    if next_char == 't':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 'u':
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == 'r':
+                                self.position += 1
+                                next_char = self.current_char()
+                                if next_char == 'n':
+                                    self.position += 1
+                                    delimiter = self.current_char()
+                                    if delimiter in [' ']:
+                                        self.position += 1
+                                        self.tokens.append(Token("return", TokenType.RETURN, self.position - 6))
+
+                                    elif delimiter == "o":
+                                        next_char = self.current_char()
+                                    else:
+                                        raise SyntaxError(f"Expected delimiter ' ' after 'return' at position {self.position}")
+                continue
+                
+                if delimiter == "o":
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 's':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 'e':
+                            self.position += 1
+                            delimiter = self.current_char()
+                            if delim in [" "]:
+                                self.position += 1
+                                self.tokens.append(Token("rose", TokenType.ROSE, self.position - 4))
+                            else:
+                                raise SyntaxError(f"Expected delimiter ' ' after 'rose' at position {self.position}")
+                continue
+
+
+            if char == 's':
+                self.position += 1
+                next_char = self.current_char()
+                if char == 'c':
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 'r':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 'o':
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == 'l':
+                                self.position += 1
+                                next_char = self.current_char()
+                                if next_char == 'l':
+                                    self.position += 1
+                                    delimiter = self.current_char()
+                                    if delimiter in [" "]:
+                                        self.position += 1
+                                        self.tokens.append(Token("scroll", TokenType.SCROLL, self.position - 6))
+                                    else:
+                                        raise SyntaxError(f"Expected delimiter ' ' after 'scroll' at position {self.position}")
+
+                continue
+
+            if char ==  't':
+                self.position += 1
+                next_char = self.current_char()
+                if next_char == 'a':
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 'l':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 'e':
+                            self.position += 1
+                            delimiter = self.current_char()
+                            if delimiter in [" ", '~']:
+                                self.position += 1
+                                self.tokens.append(Token("tale", TokenType.TALE, self.position - 4))
+                            elif delimiter in ["o"]:
+                                next_char = self.current_char()
+                            else:
+                                raise SyntaxError(f"Expected delimiter '~' ' ' after 'tale' at position {self.position}")
+                    continue
+                if next_char == 'o':
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 'r':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 'o':
+                            self.position += 1
+                            next_char = self.current_char()    
+                            if next_char == 's':
+                                self.position += 1
+                                next_char = self.current_char()
+                                if next_char == 'e':
+                                    self.position += 1
+                                    delimiter = self.current_char()
+                                    if delimiter in [' ', '(']:
+                                        self.position += 1
+                                        self.tokens.append(Token("torose", TokenType.TOROSE, self.position - 6))
+                                    else:
+                                        raise SyntaxError(f"Expected delimiter '(' ' ' after 'torose' at position {self.position}")
+                        continue
+                    if next_char == 'o':
+                        self.position+=1
+                        next_char = self.current_char()
+                        if next_char == 'c':
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == 'e':
+                                self.position += 1
+                                next_char = self.current_char()
+                                if next_char == 'a':
+                                    self.position += 1
+                                    next_char = self.current_char()
+                                    if next_char == 'n':
+                                        self.position += 1
+                                        delimiter = self.current_char()
+                                        if delimiter in [' ', '(']:
+                                            self.position += 1
+                                            self.tokens.append(Token("toocean", TokenType.TOOCEAN, self.position - 7))
+                                        else:
+                                            raise SyntaxError(f"Expected delimiter '(' ' ' after 'TOOCEAN' at position {self.position}")
+                        continue
+                    if next_char == 's':
+                        self.position+=1
+                        next_char = self.current_char()
+                        if next_char == 'c':
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == 'r':
+                                self.position += 1
+                                next_char = self.current_char()
+                                if next_char == 'o':
+                                    self.position += 1
+                                    next_char = self.current_char()
+                                    if next_char == 'l':
+                                        self.position += 1
+                                        next_char = self.current_char()
+                                        if next_char == 'l':
+                                            self.position += 1
+                                            delimiter = self.current_char()
+                                            if delimiter in [' ', '(']:
+                                                self.position += 1
+                                                self.tokens.append(Token("toscroll", TokenType.TOSCROLL, self.position - 8))
+                                            else:
+                                                raise SyntaxError(f"Expected delimiter '(' ' ' after 'toscroll' at position {self.position}")
+                        continue
+
+                    
+                    if next_char == 't':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == "r":
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == 'e':
+                                self.position += 1
+                                next_char = self.current_char()
+                                if next_char == 'a':
+                                    self.position += 1
+                                    next_char = self.current_char()
+                                    if next_char == 's':
+                                        self.position += 1
+                                        next_char = self.current_char()
+                                        if next_char == 'u':
+                                            self.position += 1
+                                            next_char = self.current_char()
+                                            if next_char == 'r':
+                                                self.position += 1
+                                                next_char = self.current_char()
+                                                if next_char == 'e':
+                                                    self.position += 1
+                                                    delimiter = self.current_char()
+                                                    if next_char == 's':
+                                                        self.position += 1
+                                                        delimiter = self.current_char()
+                                                        if delimiter in [' ', '~']:
+                                                            self.position += 1
+                                                            self.tokens.append(Token("totreasures", TokenType.TOTREASURES, self.position - 11))
+                                                        else:
+                                                            raise SyntaxError(f"Expected delimiter '(' ' ' after 'totreasures' at position {self.position}")
+                    continue
+                if next_char == 'r':
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 'e':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 'a':
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == 's':
+                                self.position += 1
+                                next_char = self.current_char()
+                                if next_char == 'u':
+                                    self.position += 1
+                                    next_char = self.current_char()
+                                    if next_char == 'r':
+                                        self.position += 1
+                                        next_char = self.current_char()
+                                        if next_char == 'e':
+                                            self.position += 1
+                                            next_char = self.current_char()    
+                                            if next_char == 's':
+                                                self.position += 1
+                                                delimiter = self.current_char()
+                                                if delimiter in [' ']:
+                                                    self.position += 1
+                                                    self.tokens.append(Token("treasures", TokenType.TREASURES, self.position - 9))
+                                                else:
+                                                    raise SyntaxError(f"Expected delimiter ' ' after 'treasures' at position {self.position}")
+                    continue
+                if next_char == 'w':
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 'i':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == 's':
+                            self.position += 1
+                            next_char = self.current_char()
+                            if next_char == "t":
+                                self.position += 1
+                                delimiter = self.current_char()
+                                if delimiter in [' ', '(']:
+                                    self.position += 1
+                                    self.tokens.append(Token("twist", TokenType.TWIST, self.position - 5))
+                                else:
+                                    raise SyntaxError(f"Expected delimiter ' ' or '(' after 'twist' at position {self.position}")
+                continue
+
+            if next_char == 'w':
+                self.position += 1
+                next_char = self.current_char()
+                if next_char == 'i':
+                    self.position += 1
+                    next_char = self.current_char()
+                    if next_char == 's':
+                        self.position += 1
+                        next_char = self.current_char()
+                        if next_char == "h":
+                            self.position += 1
+                            delimiter = self.current_char()
+                            if delimiter in ["(", ' ']:
+                                self.position += 1
+                                self.tokens.append(Token("wish", TokenType.WISH, self.position - 4))
+                            else:
+                                raise SyntaxError(f"Expected delimiter ' ' or '(' after 'wish' at position {self.position}")
+
+                continue
+            
             #operators
 
             if char == '=':
