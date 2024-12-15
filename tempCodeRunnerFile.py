@@ -886,7 +886,7 @@ class RoyalScriptLexer:
                                     raise SyntaxError(f"Expected delimiter ' ' or '(' after 'twist' at position {self.position}")
                 continue
 
-            if next_char == 'w':
+            if char == 'w':
                 self.position += 1
                 next_char = self.current_char()
                 if next_char == 'i':
@@ -905,15 +905,18 @@ class RoyalScriptLexer:
                                 raise SyntaxError(f"Expected delimiter ' ' or '(' after 'wish' at position {self.position}")
 
                 continue
+
             #operators
 
             if char == '=':
-                cursor_advanced = self.peek_symbol('==', TokenType.ASSIGNMENT_OPERATOR)
-                if cursor_advanced:
-                    continue
-                cursor_advanced = self.peek_symbol('=', TokenType.RELATIONAL_OPERATOR)
-                if cursor_advanced:
-                    continue
+                self.position += 1
+                delimiter = self.current_char()
+                if delimiter in ["="]:
+                    self.position += 1
+                    self.tokens.append(Token("==", TokenType.RELATIONAL_OPERATOR, self.position - 1))
+                else:
+                    self.tokens.append(Token("=", TokenType.ASSIGNMENT_OPERATOR, self.position - 2))
+                    
             
             if char == '+':
                 cursor_advanced = self.peek_symbol('++', TokenType.ARITHMETIC_OPERATOR)
