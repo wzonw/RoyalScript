@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import scrolledtext
 import re
+import RS_regdef as regdef
 
 
 # Token class to represent individual tokens
@@ -57,7 +58,7 @@ class TokenType:
     BOOL_LITERAL = "BOOL_LITERAL"
     NULL_LITERAL = "NULL_LITERAL"
 
-    # Operators
+    # Operatorsi 
     ASSIGNMENT_OPERATOR = "ASSIGNMENT_OPERATOR"
     ARITHMETIC_OPERATOR = "ARITHMETIC OPERATOR"
     RELATIONAL_OPERATOR = "RELATIONAL OPERATOR"
@@ -910,13 +911,18 @@ class RoyalScriptLexer:
 
             if char == '=':
                 self.position += 1
-                delimiter = self.current_char()
-                if delimiter in ["="]:
+                next_char = self.current_char()
+                if next_char == "=":
                     self.position += 1
-                    self.tokens.append(Token("==", TokenType.RELATIONAL_OPERATOR, self.position - 1))
+                    delimiter = self.current_char()
+                    if delimiter in [' ', '']:
+                        self.position += 1
+                        self.tokens.append(Token("==", TokenType.RELATIONAL_OPERATOR, self.position - 2))
+                    else:
+                        raise SyntaxError(f"Expected delimiter ' ' or '(' after relational operator at position {self.position}")
                 else:
-                    self.tokens.append(Token("=", TokenType.ASSIGNMENT_OPERATOR, self.position - 2))
-                    
+                    self.tokens.append(Token('=', TokenType.ASSIGNMENT_OPERATOR, self.position - 1))
+                continue
             
             if char == '+':
                 cursor_advanced = self.peek_symbol('++', TokenType.ARITHMETIC_OPERATOR)
