@@ -24,7 +24,7 @@ class TokenType:
     SPELL = "RESERVE WORDS"  # For function declarations
     CASTLE = "RESERVE WORDS"  # Main function
     WISH = "INPUT"  # Input
-    GRANTED = "INPUT"  # Output
+    GRANTED = "OUTPUT"  # Output
     CAST = "IF"  # If statement
     TWIST = "ELSEIF"  # Else if statement
     CURSE = "ELSE"  # Else statement
@@ -33,6 +33,7 @@ class TokenType:
     TOOCEAN = "CONVERSION FUNC"
     TOTREASURES = "CONVERSION FUNC"  
     ESCAPE = "ESCAPE"
+    TALE = "FOR LOOP"
 
     # Flow control
     BELIEVE = "CONDITIONAL"
@@ -291,127 +292,176 @@ class RoyalScriptLexer:
                         f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
                     )
 
+            if char == 'd':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state47()
 
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )
+                
+            if char == 'f':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state55()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )
+            if char == 'g':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state63()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )
+                
+            if char == 'm':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state71()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )
+
+            if char == 'o':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state78()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )
+                
+            if char == 'p':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state84()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '~']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )   
+
+            if char == 'r':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state92()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '~']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )  
+
+            if char == 's':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state108()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )     
+
+            if char == 't':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state120()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(', '~']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )  
+
+
+            if char == 'w':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state168()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )    
         return self.tokens
-
-    def match_literal(self, token_type):
-        """Match literals like INT, FLOAT, CHAR, STRING"""
-        if token_type == TokenType.FLOAT_LITERAL:
-            # Match floats like 3.14, .5, or 10.
-            match = self.match(r'\b\d*\.\d+\b|\b\d+\.\b')
-            if match:
-                token = Token(match, token_type, self.position)
-                self.tokens.append(token)
-                self.position += len(match)
-                return True
-        elif token_type == TokenType.INT_LITERAL:
-            # Match integers without a dot
-            match = self.match(r'\b\d+\b(?!\.)')
-            if match:
-                token = Token(match, token_type, self.position)
-                self.tokens.append(token)
-                self.position += len(match)
-                return True
-
-        elif token_type == TokenType.CHAR_LITERAL:
-            # Match char literals like 'a', '1', '$' (single characters inside single quotes)
-            match = self.match(r"'([^'\\])'")
-            if match:
-                token = Token(match, token_type, self.position)
-                self.tokens.append(token)
-                self.position += len(match)
-                return True
-            else:
-                # If the match fails, raise an error and display in the error box
-                raise SyntaxError(f"Invalid char literal at position {self.position}")
-
-        elif token_type == TokenType.STRING_LITERAL:
-            # Match string literals enclosed in double quotes
-            match = self.match(r'"([^"\\\n]*(\\.[^"\\\n]*)*)"')
-            if match:
-                token = Token(match, token_type, self.position)
-                self.tokens.append(token)
-                self.position += len(match)
-                return True
-
-
-    def match_unary_operator(self):
-        """Match post-unary operators (++ and --)"""
-        match = self.match(r'\+\+|\-\-')
-        if match:
-            # Ensure it's treated as post-unary by checking previous token
-            if self.tokens and self.tokens[-1].token_type in {TokenType.IDENTIFIER, TokenType.INT_LITERAL, TokenType.FLOAT_LITERAL}:
-                token = Token(match, TokenType.UNARY_OPERATOR, self.position)
-                self.tokens.append(token)
-                self.position += len(match)
-                return True
-        return False
-    
-    def match_logical_operator(self):
-        # Adjusted regex pattern for logical operators (&&, ||, !)
-        match = self.match(r'\&&|\|\||\!(?=([A-Z]|[A-Z][a-zA-Z0-9_]))')
-        if match:
-            token = Token(match, TokenType.LOGICAL_OPERATOR, self.position)
-            self.tokens.append(token)
-            self.position += len(match)
-
-
-    def match_identifier(self):
-        """Match identifiers"""
-        match = self.match(r'\b[A-Z_][a-zA-Z0-9_]*\b') #Hndi na ccatch if lowercase, insert warning unidentified word
-        if match:
-            token = Token(match, TokenType.IDENTIFIER, self.position)
-            self.tokens.append(token)
-            self.position += len(match)
-
-    def match_operator(self):
-        """Match operators (<, >, <=,>=,==,!=)"""
-        match = self.match(r'\<=|\>=|\==|\!=|<|>')
-        if match:
-            token = Token(match, TokenType.RELATIONAL_OPERATOR, self.position)
-            self.tokens.append(token)
-            self.position += len(match)
-            
-        """Match operators (=,+=, -=, *=, /=, %=)"""
-        match = self.match(r'\+=|-=|\*=|/=|%=|=')
-        if match:
-            token = Token(match, TokenType.ASSIGNMENT_OPERATOR, self.position)
-            self.tokens.append(token)
-            self.position += len(match)
-
-    def match_Arith_operator(self):
-        """Match operators (+, -, *, /, %)"""
-        match = self.match(r'[\+|\-|\*|/|%|]')
-        if match:
-            token = Token(match, TokenType.ARITHMETIC_OPERATOR, self.position)
-            self.tokens.append(token)
-            self.position += len(match)
-
-    def match_comment(self):
-        # Single-line comment matching 
-        match = self.match(r'\?(?!\*)[^\n*]*\*?[^\n]*(?=\n)')
-        if match:
-            token = Token(match, TokenType.SINGLE_COMMENT, self.position)
-            self.tokens.append(token)
-            self.position += len(match)
-            return True
-
-        # Multi-line comment matching (starts with '?*', ends with '*?')
-        match = self.match(r'\?\*[\s\S]*?\*\?')
-        if match:
-            token = Token(match, TokenType.MULTI_COMMENT, self.position)
-            self.tokens.append(token)
-            self.position += len(match)
-            return True
-        return False
-
-    def match_symbol(self):
-        """Match Terminator"""
-        match = self.match(r'[~]')
-        if match:
-            token = Token(match, TokenType.TERMINATOR, self.position)
-            self.tokens.append(token)
-            self.position += len(match)
 
 
     def state1(self):
@@ -820,23 +870,1188 @@ class RoyalScriptLexer:
 
         match self.current_char():
             case "e":
-                return self.state40(input_str)
+                return self.state45(input_str)
             case _:
                 return False, input_str, None
 
-    def state40(self, input_str):
+    def state45(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ', '(']:
+            return self.state46(input_str)
+        else:
+            return False, input_str, None
+
+    #Final State Curse
+    def state46(self, input_str):
+        return True, input_str, TokenType.CURSE
+    
+
+    def state47(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "y":
+                return self.state48(input_str)
+            case _:
+                return False, input_str, None
+
+    def state48(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "n":
+                return self.state49(input_str)
+            case _:
+                return False, input_str, None
+                
+    def state49(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "a":
+                return self.state50(input_str)
+            case _:
+                return False, input_str, None
+
+
+    def state50(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
+                return self.state51(input_str)
+            case _:
+                return False, input_str, None
+
+    def state51(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "t":
+                return self.state52(input_str)
+            case _:
+                return False, input_str, None
+                
+    def state52(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "y":
+                return self.state53(input_str)
+            case _:
+                return False, input_str, None
+
+    def state53(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ']:
+            return self.state54(input_str)
+        else:
+            return False, input_str, None
+
+    #Final State Dynasty
+    def state54(self, input_str):
+        return True, input_str, TokenType.DYNASTY
+    
+
+    def state55(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "o":
+                return self.state56(input_str)
+            case _:
+                return False, input_str, None
+
+    def state56(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state57(input_str)
+            case _:
+                return False, input_str, None
+                
+    def state57(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state58(input_str)
+            case _:
+                return False, input_str, None
+
+
+    def state58(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "v":
+                return self.state59(input_str)
+            case _:
+                return False, input_str, None
+
+    def state59(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state60(input_str)
+            case _:
+                return False, input_str, None
+                
+    def state60(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state61(input_str)
+            case _:
+                return False, input_str, None
+
+    def state61(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ', '(']:
+            return self.state62(input_str)
+        else:
+            return False, input_str, None
+
+    #Final State Forever
+    def state62(self, input_str):
+        return True, input_str, TokenType.FOREVER
+    
+
+    def state63(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state64(input_str)
+            case _:
+                return False, input_str, None
+
+    def state64(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "a":
+                return self.state65(input_str)
+            case _:
+                return False, input_str, None
+                
+    def state65(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "n":
+                return self.state66(input_str)
+            case _:
+                return False, input_str, None
+
+
+    def state66(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "t":
+                return self.state67(input_str)
+            case _:
+                return False, input_str, None
+
+    def state67(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state68(input_str)
+            case _:
+                return False, input_str, None
+                
+    def state68(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "d":
+                return self.state69(input_str)
+            case _:
+                return False, input_str, None
+
+    def state69(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ', '(']:
+            return self.state70(input_str)
+        else:
+            return False, input_str, None
+
+    #Final State Granted
+    def state70(self, input_str):
+        return True, input_str, TokenType.GRANTED
+
+
+    def state71(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "i":
+                return self.state72(input_str)
+            case _:
+                return False, input_str, None
+
+    def state72(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state73(input_str)
+            case _:
+                return False, input_str, None
+                
+    def state73(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state74(input_str)
+            case _:
+                return False, input_str, None
+
+
+    def state74(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "o":
+                return self.state75(input_str)
+            case _:
+                return False, input_str, None
+
+    def state75(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state76(input_str)
+            case _:
+                return False, input_str, None
+
+    def state76(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ']:
+            return self.state77(input_str)
+        else:
+            return False, input_str, None
+
+    #Final State Mirror
+    def state77(self, input_str):
+        return True, input_str, TokenType.MIRROR
+    
+    def state84(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "h":
+                return self.state85(input_str)
+            case _:
+                return False, input_str, None
+
+    def state85(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "a":
+                return self.state86(input_str)
+            case _:
+                return False, input_str, None
+                
+    def state86(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "n":
+                return self.state87(input_str)
+            case _:
+                return False, input_str, None
+
+
+    def state87(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "t":
+                return self.state88(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state88(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "o":
+                return self.state89(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state89(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "m":
+                return self.state90(input_str)
+            case _:
+                return False, input_str, None
+
+    def state90(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ']:
+            return self.state91(input_str)
+        else:
+            return False, input_str, None
+        
+        #Final State Ocean
+    def state91(self, input_str):
+        return True, input_str, TokenType.PHANTOM
+    
+
+    def state78(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "c":
+                return self.state79(input_str)
+            case _:
+                return False, input_str, None
+
+    def state79(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state80(input_str)
+            case _:
+                return False, input_str, None
+                
+    def state80(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "a":
+                return self.state81(input_str)
+            case _:
+                return False, input_str, None
+
+
+    def state81(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "n":
+                return self.state82(input_str)
+            case _:
+                return False, input_str, None
+
+    def state82(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ']:
+            return self.state83(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State Ocean
+    def state83(self, input_str):
+        return True, input_str, TokenType.OCEAN
+    
+    def state92(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state93(input_str)
+            case "o":
+                return self.state104(input_str)
+            case _:
+                return False, input_str, None
+
+    def state93(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "i":
+                return self.state94(input_str)
+            case "t":
+                return self.state98(input_str)
+            case _:
+                return False, input_str, None
+                
+    def state94(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "g":
+                return self.state95(input_str)
+            case _:
+                return False, input_str, None
+
+
+    def state95(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "n":
+                return self.state96(input_str)
+            case _:
+                return False, input_str, None
+
+    def state96(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in [' ', '~']:
-            return self.state41(input_str)
+            return self.state97(input_str)
         else:
             return False, input_str, None
+        
+    #Final State reign
+    def state97(self, input_str):
+        return True, input_str, TokenType.REIGN
+    
+    def state98(self, input_str):
+        input_str += self.current_char()
+        self.advance()
 
-    #Final State Continue
-    def state41(self, input_str):
-        return True, input_str, TokenType.CROWN
+        match self.current_char():
+            case "u":
+                return self.state99(input_str)
+            case _:
+                return False, input_str, None
 
+
+    def state99(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state100(input_str)
+            case _:
+                return False, input_str, None
+            
+
+    def state100(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "n":
+                return self.state101(input_str)
+            case _:
+                return False, input_str, None
+
+    def state101(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ']:
+            return self.state102(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State return
+    def state102(self, input_str):
+        return True, input_str, TokenType.RETURN    
+    
+    def state104(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
+                return self.state105(input_str)
+            case _:
+                return False, input_str, None
+
+
+    def state105(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state106(input_str)
+            case _:
+                return False, input_str, None
+            
+
+    def state106(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ']:
+            return self.state107(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State rose
+    def state107(self, input_str):
+        return True, input_str, TokenType.ROSE    
+
+    def state108(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "c":
+                return self.state109(input_str)
+            case "p":
+                return self.state115(input_str)
+            case _:
+                return False, input_str, None   
+
+    def state109(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state110(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state110(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "o":
+                return self.state111(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state111(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "l":
+                return self.state112(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state112(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "l":
+                return self.state113(input_str)
+            case _:
+                return False, input_str, None
+            
+
+    def state113(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ']:
+            return self.state114(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State rose
+    def state114(self, input_str):
+        return True, input_str, TokenType.ROSE    
+    
+    
+    def state115(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state116(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state116(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "l":
+                return self.state117(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state117(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "l":
+                return self.state118(input_str)
+            case _:
+                return False, input_str, None
+
+    def state118(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ']:
+            return self.state119(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State spell
+    def state119(self, input_str):
+        return True, input_str, TokenType.SPELL  
+    
+    def state120(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "a":
+                return self.state121(input_str)
+            case "o":
+                return self.state125(input_str)
+            case "r":
+                return self.state154(input_str)
+            case "w":
+                return self.state163(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state121(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "l":
+                return self.state122(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state122(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state123(input_str)
+            case _:
+                return False, input_str, None
+
+    def state123(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ', "("]:
+            return self.state124(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State tale
+    def state124(self, input_str):
+        return True, input_str, TokenType.TALE
+    
+    def state125(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "o":
+                return self.state126(input_str)
+            case "r":
+                return self.state132(input_str)
+            case "s":
+                return self.state137(input_str)
+            case "t":
+                return self.state144(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state126(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "c":
+                return self.state127(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state127(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state128(input_str)
+            case _:
+                return False, input_str, None
+
+    def state128(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "a":
+                return self.state129(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state129(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "n":
+                return self.state130(input_str)
+            case _:
+                return False, input_str, None
+
+    def state130(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in ["("]:
+            return self.state131(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State toocean
+    def state131(self, input_str):
+        return True, input_str, TokenType.TOOCEAN
+    
+
+    def state132(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "o":
+                return self.state133(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state133(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
+                return self.state134(input_str)
+            case _:
+                return False, input_str, None
+
+    def state134(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state135(input_str)
+            case _:
+                return False, input_str, None
+
+    def state135(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in ["("]:
+            return self.state136(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State torose
+    def state136(self, input_str):
+        return True, input_str, TokenType.TOROSE
+    
+
+    def state137(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "c":
+                return self.state138(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state138(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state139(input_str)
+            case _:
+                return False, input_str, None
+
+    def state139(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "o":
+                return self.state140(input_str)
+            case _:
+                return False, input_str, None
+
+    def state140(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "l":
+                return self.state141(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state141(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "l":
+                return self.state142(input_str)
+            case _:
+                return False, input_str, None
+
+    def state142(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in ["("]:
+            return self.state143(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State torose
+    def state143(self, input_str):
+        return True, input_str, TokenType.TOSCROLL
+    
+    def state144(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state145(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state145(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state146(input_str)
+            case _:
+                return False, input_str, None
+
+    def state146(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "a":
+                return self.state147(input_str)
+            case _:
+                return False, input_str, None
+
+    def state147(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
+                return self.state148(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state148(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "u":
+                return self.state149(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state149(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state150(input_str)
+            case _:
+                return False, input_str, None
+
+    def state150(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state151(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state151(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
+                return self.state152(input_str)
+            case _:
+                return False, input_str, None
+
+    def state152(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in ["("]:
+            return self.state153(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State torose
+    def state153(self, input_str):
+        return True, input_str, TokenType.TOSCROLL
+    
+    def state154(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state155(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state155(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "a":
+                return self.state156(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state156(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
+                return self.state157(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state157(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "u":
+                return self.state158(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state158(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state159(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state159(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state160(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state160(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
+                return self.state161(input_str)
+            case _:
+                return False, input_str, None
+
+    def state161(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" "]:
+            return self.state162(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State treasures
+    def state162(self, input_str):
+        return True, input_str, TokenType.TREASURES
+    
+    def state163(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "i":
+                return self.state164(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state164(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
+                return self.state165(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state165(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "t":
+                return self.state166(input_str)
+            case _:
+                return False, input_str, None
+
+    def state166(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" ", "("]:
+            return self.state167(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State twist
+    def state167(self, input_str):
+        return True, input_str, TokenType.TWIST
+    
+    def state168(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "i":
+                return self.state169(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state169(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
+                return self.state170(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state170(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "h":
+                return self.state171(input_str)
+            case _:
+                return False, input_str, None
+            
+
+    def state171(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" ", "("]:
+            return self.state172(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State wish
+    def state172(self, input_str):
+        return True, input_str, TokenType.WISH
     
 # Create the GUI with Tkinter
 class RoyalScriptLexerGUI(tk.Tk):
