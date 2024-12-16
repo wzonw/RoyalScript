@@ -8,6 +8,8 @@ RegDef = {
     # Period
     'period': {'.'},
 
+    'general_operator': {'+', '-', '*', '/', '%', '>', '<', '='},
+
     # Alphabet letters
     'alpha_small': {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'},
     'alpha_big': {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'},
@@ -135,13 +137,13 @@ Delims = {
     # Dot operator delimiter (e.g., object member access)
     'dot_op': {*RegDef['alpha'], '[', '(', '\n'},
     
-    # "Nuww" might be a typo or special delimiter for null values
-    'nuww': {' ', '~', ')', '}', ',', '=', '\n', '!', '|', '&'},
+    # "Null" might be a typo or special delimiter for null values
+    'null': {' ', '~', ')', '}', ',', '=', '\n', '!', '|', '&'},
     
     # Whitespace delimiters (spaces and newlines)
     'whitespace': {' ', '\n'},
     
-    # Single-line comment delimiter
+    # Single-line comment delimiterA
     'single_line_comment': {'\n'},
     
     # General case for any other delimiter
