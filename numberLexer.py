@@ -258,19 +258,22 @@ class RoyalScriptLexer:
                 continue
 
             if char == 'b':
-                # pos_start = self.position.copy()
-                valid, input_str = self.state1()
+                pos_start = self.position
+                valid, input_str, tokenType= self.state1()
+
                 if valid:
-                    self.tokens.append(Token(input_str, TokenType.BELIEVE, self.position - len(input_str)))
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() is not None and self.current_char() not in TokenType.DELIMS['conditional']:
-                        char = self.current_char()  # Update char after advancing
+                    while self.current_char() is not None and self.current_char() not in ['~', ' ']:
+                        char = self.current_char()
                         input_str += char
                         self.advance()
 
                     raise SyntaxError(
                         f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
                     )
+
 
 
         return self.tokens
@@ -403,10 +406,10 @@ class RoyalScriptLexer:
         match self.current_char():
             case "e":
                 return self.state2(input_str)
-            # case "r":
-            #     return self.state9(input_str)
+            case "r":
+                return self.state9(input_str)
             case _:
-                return False, input_str
+                return False, input_str, None
                     
     def state2(self, input_str):
         input_str += self.current_char()
@@ -416,7 +419,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state3(input_str)
             case _:
-                return False, input_str
+                return False, input_str, None
 
     def state3(self, input_str):
         input_str += self.current_char()
@@ -426,7 +429,7 @@ class RoyalScriptLexer:
             case "i":
                 return self.state4(input_str)
             case _:
-                return False, input_str 
+                return False, input_str, None
                     
     def state4(self, input_str):
         input_str += self.current_char()
@@ -436,7 +439,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state5(input_str)
             case _:
-                return False, input_str
+                return False, input_str, None
                     
     def state5(self, input_str):
         input_str += self.current_char()
@@ -446,7 +449,7 @@ class RoyalScriptLexer:
             case "v":
                 return self.state6(input_str)
             case _:
-                return False, input_str
+                return False, input_str, None
             
     def state6(self, input_str):
         input_str += self.current_char()
@@ -456,7 +459,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state7(input_str)
             case _:
-                return False, input_str
+                return False, input_str, None
                     
     def state7(self, input_str):
         input_str += self.current_char()
@@ -465,12 +468,56 @@ class RoyalScriptLexer:
         if self.current_char() in TokenType.DELIMS['conditional']:
             return self.state8(input_str)
         else:
-            return False, input_str
+            return False, input_str, None
 
     #Final State Believe
     def state8(self, input_str):
-        return True, input_str
+        return True, input_str, TokenType.BELIEVE
 
+
+
+    def state9(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state10(input_str)
+            case _:
+                return False, input_str, None
+
+    def state10(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "a":
+                return self.state11(input_str)
+            case _:
+                return False, input_str, None 
+                    
+    def state11(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "k":
+                return self.state12(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state12(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in ['~', ' ']:
+            return self.state13(input_str)
+        else:
+            return False, input_str, None
+            
+    #Final State Break
+    def state13(self, input_str):
+        return True, input_str, TokenType.BREAK
 
 
 # Create the GUI with Tkinter
