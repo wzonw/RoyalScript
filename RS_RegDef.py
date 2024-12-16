@@ -60,92 +60,89 @@ RegDef = {
 
     # quote
     'double_quote': {'"'},
-    'single_quote': {"'"}
+    'single_quote': {"'"},
+    'whitespace': {' ', '\t', '\n'}
 }
 
 
 Delims = {
-    'end': {'~', ' ', '\n'},
+    'gate_delim': {'~', ' '},    #'end': {'~', ' ', '\n'},
     
     # Data types (e.g., for parsing types like int, float, etc.)
-    'data_type': {'[', ',', '(', ')', ' ', '~', '=', '-', '\n'},
+    'data_type': {' '},
     
     # Dono (could be a special keyword or identifier in your language)
-    'dono': {'~', ',', '(', ')', ' ', '=', '\n'},
+    'arithmetic_operator_delim':{'(', '),' *RegDef['alphanum']},  #'dono': {'~', ',', '(', ')', ' ', '=', '\n'},
+
+    'escape_sequence_delim': {'”', *RegDef['alphanum'], 'escape_sequence_symbol'},
     
     # Class-related delimiters
-    'cwass': {'~', '[', '.', ',', '(', ')', ' ', '=', '\n'},
+    'plus_delim' : {'(', *RegDef['alphanum'], '"'},    #'cwass': {'~', '[', '.', ',', '(', ')', ' ', '=', '\n'},
     
     # Boolean operators
-    'bool': {'|', '&', ']', ',', ' ', '}', ')', '~', '\n'},
+    'logical_operator_delim': {'(', *RegDef['alphanum']}, # same with other assignmen operator  #'bool': {'|', '&', ']', ',', ' ', '}', ')', '~', '\n'},
     
     # Conditional statements (e.g., if, while, etc.)
-    'conditional': {'[', '(', ' ', '\n'},
+    'not_logical_delim': {'(', '"', "'",  *RegDef['alphanum']},    #'conditional': {'[', '(', ' ', '\n'},
     
+    'witch_delim': {'{' },
+
+    'equal_delim':{'‘', '“', '( ', '[', *RegDef['alphanum']}, 
+
     # IO operations (possibly input/output operations)
     'io': {'(', ' ', '\n'},
     
     # Main function delimiters
-    'mainuwu': {'-', ' ', '\n'},
+    'unary_operator_delim': {'~', ')', *RegDef['alphanum']},    #'mainuwu': {'-', ' ', '\n'},
     
     # Integer/Float delimiters (e.g., for parsing numeric expressions)
-    'int_float': {',', ' ', *RegDef['general_operator'], ')', '}', ']', '~', '!', r'&', '|', '>', '<', '=', '\n'},
+    'relational_operator_delim': {'(', '“', '‘', *RegDef['alphanum']},     #'int_float': {',', ' ', *RegDef['general_operator'], ')', '}', ']', '~', '!', r'&', '|', '>', '<', '=', '\n'},
     
     # String delimiters
-    'string': {' ', '|', ')', ',', '&', '}', '[', ']', '~', '!', '=', '\n'},
+        ###### 'string': {' ', '|', ')', ',', '&', '}', '[', ']', '~', '!', '=', '\n'},
     
     # Assignment delimiters (e.g., variable assignments)
-    'assign_delim': {*RegDef['alpha'], *RegDef['number'], '{', ' ', '-', '(', '"', '\n'},
+    'open_parentheses_delim':  {*RegDef['unary_op'], *RegDef['alphanum']},   #'assign_delim': {*RegDef['alpha'], *RegDef['number'], '{', ' ', '-', '(', '"', '\n'},
     
     # General operator delimiters (e.g., for mathematical and logical operators)
-    'operator_delim': {*RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '{', '\n'},
+    'close_parentheses_delim' : {*RegDef['arithmetic_op'], *RegDef['logical_op'], *RegDef['relational_op'],'(', '{',  '~'},    #'operator_delim': {*RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '{', '\n'},
     
     # Logical operator delimiters (e.g., AND, OR, etc.)
-    'logical_delim': {'"', *RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '{', '\n'},
+    'open_curly_bracket_delim' : {'(',  *RegDef['unary_op'], *RegDef['alphanum'], '\n'},    #'logical_delim': {'"', *RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '{', '\n'},
     
     # String parts (for string manipulations or parsing)
-    'string_parts': {'"', *RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '|', '\n', '&'},
+    'close_curly_bracket_delim' : { *RegDef['alpha_small']},    #'string_parts': {'"', *RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '|', '\n', '&'},
     
     # Open brace (used for block definitions or scopes)
-    'open_brace': {'{', '}', '(', *RegDef['number'], ' ', '"', *RegDef['alpha'], '\n', '>', '-'},
+    'open_square_bracket_delim' : {'‘','”', ']', *RegDef['number']},   #'open_brace': {'{', '}', '(', *RegDef['number'], ' ', '"', *RegDef['alpha'], '\n', '>', '-'},
     
     # Close brace (used for block terminations or scopes)
-    'close_brace': {'{', '}', '.', '~', ' ', ',', ')', '\n', '>', '&', *RegDef['general_operator'], '!', '|'},
-    
-    # Parentheses delimiters (for function calls, expressions, etc.)
-    'open_parenthesis': {'{', *RegDef['number'], *RegDef['alpha'], ' ', '-', '\n', '>', '(', ')', '"'},
-    'close_parenthesis': {'{', ' ', *RegDef['general_operator'], '!', '&', '|', '\n', '~', '>', '.', ',', ')', '(', '[', ']', '}'},
-
-    # Bracket delimiters (typically for arrays or lists)
-    'open_bracket': {']', *RegDef['number'], '-', *RegDef['alpha'], '(', ' ', '\n'},
-    'double_open_bracket': {' ', '\n', *RegDef['alpha'], '>'},
-    'close_bracket': {'\n', '(', ' ', '~', ',', ')', '[', ']', '}', *RegDef['general_operator'], '!', r'&', '|', '.', '\n'},
-    'double_close_bracket': {']', ' ', '\n', *RegDef['alpha'], '>'},
+    'close_square_bracket_delim' : {'~', '[', '='},    #'close_brace': {'{', '}', '.', '~', ' ', ',', ')', '\n', '>', '&', *RegDef['general_operator'], '!', '|'},
     
     # Unary operation delimiters (e.g., negation or logical NOT)
-    'unary': {'|', '~', ')', *RegDef['general_operator'], '!', ' ', '\n'},
+    'comma_delim' : {*RegDef['alphanum'], '-' , '‘' , '“' },    #'unary': {'|', '~', ')', *RegDef['general_operator'], '!', ' ', '\n'},
     
     # Concatenation delimiters (likely for string concatenation)
-    'concat': {' ', '"', *RegDef['alpha'], *RegDef['number'], '(', '{', '\n'},
+    'id_delim' : {'(', ')', '~', *RegDef['unary_op'], *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op']},  #'concat': {' ', '"', *RegDef['alpha'], *RegDef['number'], '(', '{', '\n'},
     
     # Line terminators
-    'line': {'\n', ' ', *RegDef['alpha'], ']'},
+    'book_delim' : {'~',')', '+'},     #'line': {'\n', ' ', *RegDef['alpha'], ']'},
     
     # Comma delimiter (used for separating elements in a list, parameters, etc.)
-    'comma': {*RegDef['alpha'], ' ', *RegDef['number'], '"', '-', '\n', '>', '{'},
+    'number_delim' : {')','}',']','~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['logical_op'], *RegDef['relational_op'], *RegDef['unary_op']},     #'comma': {*RegDef['alpha'], ' ', *RegDef['number'], '"', '-', '\n', '>', '{'},
     
     # Dot operator delimiter (e.g., object member access)
-    'dot_op': {*RegDef['alpha'], '[', '(', '\n'},
+    'genie_delim' : {'('}    #'dot_op': {*RegDef['alpha'], '[', '(', '\n'},
     
     # "Null" might be a typo or special delimiter for null values
-    'null': {' ', '~', ')', '}', ',', '=', '\n', '!', '|', '&'},
+    'gate_delim' : {' ', '~'}    #'null': {' ', '~', ')', '}', ',', '=', '\n', '!', '|', '&'},
     
     # Whitespace delimiters (spaces and newlines)
     'whitespace': {' ', '\n'},
     
     # Single-line comment delimiterA
-    'single_line_comment': {'\n'},
+    #'single_line_comment': {'\n'},
     
     # General case for any other delimiter
-    'all': {None}
+    #'all': {None}
 }
