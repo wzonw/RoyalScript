@@ -31,10 +31,10 @@ RegDef = {
     },
     
     # Arithmetic operators
-    'arithmetic_operator': {'+', '-', '*', '/', '%'},
+    'arithmetic_op': {'+', '-', '*', '/', '%'},
 
     # Assignemnt operators
-    'assignment_operator': {'+=', '-=', '*=', '/=', '%='},
+    'assignment_op': {'+=', '-=', '*=', '/=', '%='},
 
     'equal' : {'='},
     
@@ -72,7 +72,7 @@ Delims = {
     'data_type': {' '},
     
     # Dono (could be a special keyword or identifier in your language)
-    'arithmetic_operator_delim':{'(', '),' *RegDef['alphanum']},  #'dono': {'~', ',', '(', ')', ' ', '=', '\n'},
+    'arithmetic_operator_delim':{'(', ')', *RegDef['alphanum']},  #'dono': {'~', ',', '(', ')', ' ', '=', '\n'},
 
     'escape_sequence_delim': {'”', *RegDef['alphanum'], 'escape_sequence_symbol'},
     
@@ -123,7 +123,7 @@ Delims = {
     'comma_delim' : {*RegDef['alphanum'], '-' , '‘' , '“' },    #'unary': {'|', '~', ')', *RegDef['general_operator'], '!', ' ', '\n'},
     
     # Concatenation delimiters (likely for string concatenation)
-    'id_delim' : {'(', ')', '~', *RegDef['unary_op'], *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op']},  #'concat': {' ', '"', *RegDef['alpha'], *RegDef['number'], '(', '{', '\n'},
+    'id_delim' : {'(', ')', '~', ' ', '=' , *RegDef['unary_op'], *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op']},  #'concat': {' ', '"', *RegDef['alpha'], *RegDef['number'], '(', '{', '\n'},
     
     # Line terminators
     'book_delim' : {'~',')', '+'},     #'line': {'\n', ' ', *RegDef['alpha'], ']'},
@@ -132,10 +132,10 @@ Delims = {
     'number_delim' : {')','}',']','~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['logical_op'], *RegDef['relational_op'], *RegDef['unary_op']},     #'comma': {*RegDef['alpha'], ' ', *RegDef['number'], '"', '-', '\n', '>', '{'},
     
     # Dot operator delimiter (e.g., object member access)
-    'genie_delim' : {'('}    #'dot_op': {*RegDef['alpha'], '[', '(', '\n'},
+    'genie_delim' : {'('},    #'dot_op': {*RegDef['alpha'], '[', '(', '\n'},
     
     # "Null" might be a typo or special delimiter for null values
-    'gate_delim' : {' ', '~'}    #'null': {' ', '~', ')', '}', ',', '=', '\n', '!', '|', '&'},
+    'gate_delim' : {' ', '~'},    #'null': {' ', '~', ')', '}', ',', '=', '\n', '!', '|', '&'},
     
     # Whitespace delimiters (spaces and newlines)
     'whitespace': {' ', '\n'},

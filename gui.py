@@ -1,8 +1,9 @@
 import tkinter as tk
 from tkinter import scrolledtext
 import re
-import RS_regdef as regdef
-from RS_regdef import Delims
+import RS_RegDef as regdef
+from RS_RegDef  import Delims
+from RS_RegDef  import RegDef
 
 
 # Token class to represent individual tokens
@@ -70,13 +71,13 @@ class TokenType:
     # Symbols
     COMMA = "COMMA"
     DOT = "DOT"
-    OPEN_PAREN = "OPEN_PAREN"
-    CLOSE_PAREN = "CLOSE_PAREN"
-    OPEN_BRACKET = "OPEN_BRACKET"
-    CLOSE_BRACKET = "CLOSE_BRACKET"
+    OPEN_PAREN = "OPEN PARENTHESIS"
+    CLOSE_PAREN = "CLOSE PARENTHESIS"
+    OPEN_SQUARE = "OPEN SQUARE BRACKET"
+    CLOSE_SQUARE = "CLOSE SQUARE BRACKET"
     TERMINATOR = "TERMINATOR"
-    OPEN_CURLY = "OPEN_CURLY"
-    CLOSE_CURLY = "CLOSE_CURLY"
+    OPEN_CURLY = "OPEN CURLY BRACKET"
+    CLOSE_CURLY = "CLOSE CURLY BRACKET"
 
     # Other token types
     IDENTIFIER = "IDENTIFIER"
@@ -89,6 +90,10 @@ class TokenType:
     ESCAPE_TAB = "ESCAPE_TAB"
     ESCAPE_BACKSLASH = "ESCAPE_BACKSLASH"
     ESCAPE_QUOTE = "ESCAPE_QUOTE"
+
+    EQUAL = 'EQUAL SIGN'
+    NOT = 'NOT LOGIC'
+
 
     #DELIMS haha
     DELIMS = {
@@ -239,16 +244,16 @@ class RoyalScriptLexer:
         while self.position < len(self.code):
             char = self.current_char()
 
-            # Handle terminator (~)
-            if char == '~':
-                if char in TokenType.DELIMS:  # Check if it's a delimiter
-                    token = Token(char, TokenType.DELIMS, self.position)
-                    self.tokens.append(token)
-                else:
-                    token = Token(char, TokenType.TERMINATOR, self.position)
-                    self.tokens.append(token)
-                self.advance()
-                continue
+            # # Handle terminator (~)
+            # if char == '~':
+            #     if char in TokenType.DELIMS:  # Check if it's a delimiter
+            #         token = Token(char, TokenType.DELIMS, self.position)
+            #         self.tokens.append(token)
+            #     else:
+            #         token = Token(char, TokenType.TERMINATOR, self.position)
+            #         self.tokens.append(token)
+            #     self.advance()
+            #     continue
 
             if char in ['\n', ' ', '\t']:
                 match = self.match(r'\s+')
@@ -460,7 +465,387 @@ class RoyalScriptLexer:
 
                     raise SyntaxError(
                         f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )  
+
+
+            if char == '=':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state173()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
                     )    
+            
+            if char == '+':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state177()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+
+            if char == '-':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state183()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )  
+                
+            if char == '*':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state189()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )  
+                
+            if char == '/':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state193()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )  
+                
+            if char == '%':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state197()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )  
+
+            if char == '!':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state201()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    )  
+                
+            if char == '&':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state205()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+                
+            if char == '|':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state208()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+
+            if char == '>':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state211()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+            
+            if char == '<':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state215()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+
+
+            if char == '(':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state219()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+                
+            if char == ')':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state221()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+            
+            if char == '{':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state223()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+                
+            if char == '}':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state225()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+                
+            if char == '[':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state227()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+                
+            if char == ']':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state229()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+                
+            if char == '~':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state231()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+            
+            if char == ',':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state233()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+                
+            if char == '\\':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state235()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() not in [' ', '(']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                    ) 
+                
+            if char in RegDef['alpha_big']:
+                pos_start = self.position
+                valid, input_str, tokenType = self.state246("")
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    # Handle invalid input
+                    while self.current_char() is not None and self.current_char() not in Delims['id_delim']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter after identifier at position {self.position}"
+                    )
+                
+            if char == '?':
+                pos_start = self.position
+                valid, input_str, tokenType = self.state249("")
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    # Handle invalid input
+                    while self.current_char() is not None and self.current_char() not in Delims['id_delim']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter after identifier at position {self.position}"
+                    )
+
+                
         return self.tokens
 
 
@@ -2052,6 +2437,618 @@ class RoyalScriptLexer:
     #Final State wish
     def state172(self, input_str):
         return True, input_str, TokenType.WISH
+
+#Symbols
+
+    def state173(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "=":
+                return self.state175(input_str)
+            case " ":
+                return self.state174(input_str)
+            case _:
+                return False, input_str, None
+    
+    #Final State equal
+    def state174(self, input_str):
+        return True, input_str, TokenType.EQUAL
+    
+    def state175(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" "]:
+            return self.state176(input_str)
+        else:
+            return False, input_str, None
+
+    #Final State relational ==
+    def state176(self, input_str):
+        return True, input_str, TokenType.RELATIONAL_OPERATOR
+    
+
+    def state177(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state178(input_str)
+            case "+":
+                return self.state179(input_str)
+            case "=":
+                return self.state181(input_str)
+            case _:
+                return False, input_str, None
+            
+    #Final State arithmetic operator +
+    def state178(self, input_str):
+        return True, input_str, TokenType.ARITHMETIC_OPERATOR
+    
+    def state179(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" ", ")"]:
+            return self.state180(input_str)
+        else:
+            return False, input_str, None
+        
+        
+    #Final State unary ++
+    def state180(self, input_str):
+        return True, input_str, TokenType.UNARY_OPERATOR
+    
+    def state181(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" "]:
+            return self.state182(input_str)
+        else:
+            return False, input_str, None
+    
+     #Final State assignment +=
+    def state182(self, input_str):
+        return True, input_str, TokenType.ASSIGNMENT_OPERATOR
+    
+    def state183(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " " | ".":
+                return self.state184(input_str)
+            case "-":
+                return self.state185(input_str)
+            case "=":
+                return self.state187(input_str)
+            case _:
+                return False, input_str, None
+            
+    #Final State arithmetic operator -
+    def state184(self, input_str):
+        return True, input_str, TokenType.ARITHMETIC_OPERATOR
+    
+    def state185(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" ", ")"]:
+            return self.state186(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State unary ++
+    def state186(self, input_str):
+        return True, input_str, TokenType.UNARY_OPERATOR
+    
+    def state187(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" "]:
+            return self.state188(input_str)
+        else:
+            return False, input_str, None
+        
+     #Final State assignment +=
+    def state188(self, input_str):
+        return True, input_str, TokenType.ASSIGNMENT_OPERATOR
+            
+    def state189(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state190(input_str)
+            case "=":
+                return self.state191(input_str)
+            case _:
+                return False, input_str, None
+    
+    #Final State arithmetic operator * 
+    def state190(self, input_str):
+        return True, input_str, TokenType.ARITHMETIC_OPERATOR
+    
+    def state191(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" "]:
+            return self.state192(input_str)
+        else:
+            return False, input_str, None
+
+    #Final State assignment operator *=
+    def state192(self, input_str):
+        return True, input_str, TokenType.ASSIGNMENT_OPERATOR
+    
+
+    def state193(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state194(input_str)
+            case "=":
+                return self.state195(input_str)
+            case _:
+                return False, input_str, None
+    
+    #Final State arithmetic operator / 
+    def state194(self, input_str):
+        return True, input_str, TokenType.ARITHMETIC_OPERATOR
+    
+    def state195(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" "]:
+            return self.state196(input_str)
+        else:
+            return False, input_str, None
+
+    #Final State assignment operator /=
+    def state196(self, input_str):
+        return True, input_str, TokenType.ASSIGNMENT_OPERATOR
+    
+    def state197(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state198(input_str)
+            case "=":
+                return self.state199(input_str)
+            case _:
+                return False, input_str, None
+    
+    #Final State arithmetic operator %
+    def state198(self, input_str):
+        return True, input_str, TokenType.ARITHMETIC_OPERATOR
+    
+    def state199(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" "]:
+            return self.state200(input_str)
+        else:
+            return False, input_str, None
+
+    #Final State assignment operator %=
+    def state200(self, input_str):
+        return True, input_str, TokenType.ASSIGNMENT_OPERATOR
+    
+    def state201(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state202(input_str)
+            case "=":
+                return self.state203(input_str)
+            case _:
+                return False, input_str, None
+    
+    #Final State arithmetic operator %
+    def state202(self, input_str):
+        return True, input_str, TokenType.NOT
+    
+    def state203(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" "]:
+            return self.state204(input_str)
+        else:
+            return False, input_str, None
+
+    #Final State assignment operator /=
+    def state204(self, input_str):
+        return True, input_str, TokenType.RELATIONAL_OPERATOR
+    
+
+    def state205(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "&":
+                return self.state206(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state206(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" "]:
+            return self.state207(input_str)
+        else:
+            return False, input_str, None
+    
+    #Final State logical operator &&
+    def state207(self, input_str):
+        return True, input_str, TokenType.LOGICAL_OPERATOR
+    
+    def state208(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "|":
+                return self.state209(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state209(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" "]:
+            return self.state210(input_str)
+        else:
+            return False, input_str, None
+    
+    #Final State logical operator ||
+    def state210(self, input_str):
+        return True, input_str, TokenType.LOGICAL_OPERATOR
+    
+
+    def state211(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state212(input_str)
+            case "=":
+                return self.state213(input_str)
+            case _:
+                return False, input_str, None
+            
+    #Final State relational operator >
+    def state212(self, input_str):
+        return True, input_str, TokenType.RELATIONAL_OPERATOR
+            
+    def state213(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" "]:
+            return self.state214(input_str)
+        else:
+            return False, input_str, None
+    
+    #Final State relational operator >=
+    def state214(self, input_str):
+        return True, input_str, TokenType.RELATIONAL_OPERATOR
+    
+
+    def state215(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state216(input_str)
+            case "=":
+                return self.state217(input_str)
+            case _:
+                return False, input_str, None
+            
+    #Final State relational operator <
+    def state216(self, input_str):
+        return True, input_str, TokenType.RELATIONAL_OPERATOR
+            
+    def state217(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [" "]:
+            return self.state218(input_str)
+        else:
+            return False, input_str, None
+    
+    #Final State relational operator <=
+    def state218(self, input_str):
+        return True, input_str, TokenType.RELATIONAL_OPERATOR
+    
+    def state219(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state220(input_str)
+            case _:
+                return False, input_str, None
+            
+    #Final State Open Parenthesis
+    def state220(self, input_str):
+        return True, input_str, TokenType.OPEN_PAREN
+    
+
+    def state221(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state222(input_str)
+            case _:
+                return False, input_str, None
+            
+    #Final State Close Parenthesis
+    def state222(self, input_str):
+        return True, input_str, TokenType.CLOSE_PAREN
+    
+    def state223(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state224(input_str)
+            case _:
+                return False, input_str, None
+            
+    #Final State Open Curly Bracket
+    def state224(self, input_str):
+        return True, input_str, TokenType.OPEN_CURLY
+    
+    def state225(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state226(input_str)
+            case _:
+                return False, input_str, None
+            
+    #Final State Close Curly Bracket
+    def state226(self, input_str):
+        return True, input_str, TokenType.CLOSE_CURLY
+    
+
+    def state227(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state228(input_str)
+            case _:
+                return False, input_str, None
+            
+    #Final State Open Square Bracket
+    def state228(self, input_str):
+        return True, input_str, TokenType.OPEN_SQUARE
+    
+    def state229(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state230(input_str)
+            case _:
+                return False, input_str, None
+            
+    #Final State Close Square Bracket
+    def state230(self, input_str):
+        return True, input_str, TokenType.CLOSE_SQUARE
+    
+    def state231(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state232(input_str)
+            case _:
+                return False, input_str, None
+            
+    #Final State Terminator ~
+    def state232(self, input_str):
+        return True, input_str, TokenType.TERMINATOR
+    
+
+    def state233(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state234(input_str)
+            case _:
+                return False, input_str, None
+            
+    #Final State Comma , 
+    def state234(self, input_str):
+        return True, input_str, TokenType.COMMA
+    
+    def state235(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "n":
+                return self.state236(input_str)
+            case "t":
+                return self.state238(input_str)
+            case "\\":
+                return self.state240(input_str)
+            case '"':
+                return self.state244(input_str)
+            case _:
+                return False, input_str, None
+    
+    def state236(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state237(input_str)  # Pass input_str to state237
+            case _:
+                return False, input_str, None
+            
+    #Final State escape sequence \n 
+    def state237(self, input_str):
+        return True, input_str, TokenType.ESCAPE_NEWLINE
+    
+    def state238(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state239(input_str)  # Pass input_str to state237
+            case _:
+                return False, input_str, None
+            
+    #Final State escape sequence \t 
+    def state239(self, input_str):
+        return True, input_str, TokenType.ESCAPE_TAB
+    
+    def state240(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state241(input_str)  # Pass input_str to state237
+            case _:
+                return False, input_str, None
+            
+    #Final State escape sequence \n 
+    def state241(self, input_str):
+        return True, input_str, TokenType.ESCAPE_BACKSLASH
+    
+    def state244(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        match self.current_char():
+            case " ":
+                return self.state245(input_str)  # Pass input_str to state237
+            case _:
+                return False, input_str, None
+            
+    #Final State escape sequence \n 
+    def state245(self, input_str):
+        return True, input_str, TokenType.ESCAPE_QUOTE
+    
+
+    def state246(self, input_str):
+        """Initial state for identifiers."""
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in RegDef['alphanum'] | {'_'}:
+            return self.state247(input_str)  # Transition to state247
+        elif self.current_char() in Delims['id_delim']:
+            return self.state248(input_str)  # Transition to final state
+        else:
+            return False, input_str, None
+
+    def state247(self, input_str):
+        """Intermediate state for identifiers."""
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in RegDef['alphanum'] | {'_'}:
+            return self.state247(input_str)  # Stay in state247
+        elif self.current_char() in Delims['id_delim']:
+            return self.state248(input_str)  # Transition to final state
+        else:
+            return False, input_str, None
+
+    def state248(self, input_str):
+        """Final state for identifiers."""
+        return True, input_str, TokenType.IDENTIFIER
+    
+
+    # def state249(self, input_str):
+    #     input_str += self.current_char()  # Append the current character
+    #     self.advance()
+
+    #     if self.current_char() in RegDef[]:
+    #         return self.state247(input_str)  # Transition to state247
+    #     elif self.current_char() in Delims['whitespace']:
+    #         return self.state248(input_str)  # Transition to final state
+    #     else:
+    #         return False, input_str, None
+
+    # def state247(self, input_str):
+    #     input_str += self.current_char()  # Append the current character
+    #     self.advance()
+
+    #     if self.current_char() in RegDef['alphanum'] | {'_'}:
+    #         return self.state247(input_str)  # Stay in state247
+    #     elif self.current_char() in Delims['id_delim']:
+    #         return self.state248(input_str)  # Transition to final state
+    #     else:
+    #         return False, input_str, None
+
+    # def state248(self, input_str):
+    #     return True, input_str, TokenType.IDENTIFIER
+
+
+    
+
+
     
 # Create the GUI with Tkinter
 class RoyalScriptLexerGUI(tk.Tk):
