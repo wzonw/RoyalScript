@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import scrolledtext
 import re
-import RS_RegDef as regdef
 from RS_RegDef  import Delims
 from RS_RegDef  import RegDef
 
@@ -15,6 +14,7 @@ class Token:
 
     def __repr__(self):
         return f"{self.token_type}({self.value}) "
+
 
 
 # Define token types for RoyalScript
@@ -93,68 +93,14 @@ class TokenType:
 
     EQUAL = 'EQUAL SIGN'
     NOT = 'NOT LOGIC'
+    ALPHANUM = 'ALPHANUM'
 
-
-    #DELIMS haha
-    DELIMS = {
-    'return': {'0', ' '},
-    'data_type': {' ', '~'},
-    'dynasty': {' '},
-    'mirror': {'|', '&', ']', ',', ' ', '}', ')', '~', '\n'},
-    'conditional': {'(', ' '},
-    'io': {'(', ' '},
-    'castle': {' '},
-    'int_float': {',', ' ',('general_operator'), ')', '~', '!', r'&', '|', '>', '<', '='},
-    'string': {' ', ')', ',', '&', '}', '~', '!', '='},
-    'assign_delim': {('alpha'), ('number'), '{', ' ', '-', '(', '"'},
-    'operator_delim': {('alpha'), ('number'), ' ', '-', '(', '{'},
-    'logical_delim': {'"', ('alpha'), ('number'), ' ', '-', '(', '{'},
-    'string_parts': {'"', ('alpha'), ('number'), ' ', '-', '(', '|', '&'},
-    'open_brace': {'{', '}', '(', ('number'), ' ', '"', ('alpha'), '\n', '>', '-'},
-    'close_brace': {'{', '}', '.', '~', ' ', ',', ')', '\n', '>', '&', ('general_operator'), '!', '|'},
-    'open_parenthesis': {'{', ('number'), ('alpha'), ' ', '-', '\n', '>', '(', ')', '"'},
-    'id': {'{', '\n', ' ', '~', ',', '(', ')', '(', ']', '}', ('general_operator'), '!', r'&', '|', '.'},
-    'close_parenthesis': {'{', ' ', ('general_operator'), '!', '&', '|', '\n', '~', '>', '.', ',', ')', '(', '(', ']', '}'},
-    'open_bracket': {']', ('number'), '-', ('alpha'), '(', ' ', '\n'},
-    'double_open_bracket': {' ', '\n', ('alpha'), '>'},
-    'close_bracket': {'\n', '(', ' ', '~', ',', ')', '(', ']', '}', ('general_operator'), '!', r'&', '|', '.', '\n'},
-    'double_close_bracket': {']',' ', '\n', ('alpha'), '>'},
-    'unary': {'|', '~', ')', ('general_operator'), '!', ' ', '\n'},
-    'concat': {' ', '"', ('alpha'), ('number'), '(', '{', '\n'},
-    'line': {'\n', ' ', ('alpha'), ']'},
-    'comma': {('alpha'), ' ', ('number'), '"', '-', '\n', '>', '{'},
-    'dot_op': {('alpha'), '[', '(', '\n'},
-    'nuww': {' ', '~', ')', '}', ',', '=', '\n', '!', '|', '&'},
-    'whitespace': {' ', '\n'},
-    'single_line_comment': {'\n'},
-    'all': {None}
-    }
 
 class RoyalScriptLexer:
     def __init__(self, code):
         self.code = code
         self.position = 0
         self.tokens = []
-
-        # Define all reserved words in RoyalScript dynamically from input
-        # self.RESERVED_KEYWORDS = {
-        #     'crown': TokenType.CROWN,
-        #     'reign': TokenType.REIGN,
-        #     'spell': TokenType.SPELL,
-        #     'castle': TokenType.CASTLE,
-        #     'wish': TokenType.WISH,
-        #     'granted': TokenType.GRANTED,
-        #     'cast': TokenType.CAST,
-        #     'twist': TokenType.TWIST,
-        #     'curse': TokenType.CURSE,
-        #     'treasures': TokenType.TREASURES,
-        #     'ocean': TokenType.OCEAN,
-        #     'scroll': TokenType.SCROLL,
-        #     'rose': TokenType.ROSE,
-        #     'mirror': TokenType.MIRROR,
-        #     'chamber': TokenType.CHAMBER,
-        #     'dynasty': TokenType.DYNASTY
-        # }
 
     def advance(self):
         """Advance to the next character in the input"""
@@ -172,64 +118,6 @@ class RoyalScriptLexer:
         if match:
             return match.group(0)
         return None
-
-    def peek_reserved(self, word, token_type):
-        """Check if the next part of the code matches a reserved word"""
-        match = self.match(r'\b' + re.escape(word) + r'\b')
-        if match:
-            token = Token(match, token_type, self.position)
-            self.tokens.append(token)
-            self.position += len(match)
-            return True
-        return False
-    
-    def peek_escape_sequence(self):
-        """Check if the next part of the code matches an escape sequence and return the corresponding token."""
-        
-        # Match the escape sequences
-        if self.match(r'\\n'):  # Match \n escape sequence
-            token = Token(r'\n', TokenType.ESCAPE_NEWLINE, self.position)
-            self.tokens.append(token)
-            self.position += 2  # Move the position forward by the length of the escape sequence
-            return True
-
-        elif self.match(r'\\t'):  # Match \t escape sequence
-            token = Token(r'\t', TokenType.ESCAPE_TAB, self.position)
-            self.tokens.append(token)
-            self.position += 2  # Move position forward
-            return True
-
-        elif self.match(r'\\\\'):  # Match \\ escape sequence
-            token = Token(r'\\', TokenType.ESCAPE_BACKSLASH, self.position)
-            self.tokens.append(token)
-            self.position += 2  # Move position forward
-            return True
-
-        elif self.match(r'\\"'):  # Match \" escape sequence
-            token = Token(r'\"', TokenType.ESCAPE_QUOTE, self.position)
-            self.tokens.append(token)
-            self.position += 2  # Move position forward
-            return True
-
-        return False
-
-    def peek_symbol(self, symbol, token_type):
-        # If the symbol is more than one character long, check if the next characters match
-        if len(symbol) > 1:
-            # Match the multi-character symbol
-            if self.match(symbol):
-                token = Token(symbol, token_type, self.position)
-                self.tokens.append(token)
-                self.position += len(symbol)  # Move the position forward by the length of the symbol
-                return True
-        else:
-            # Handle single-character symbols
-            if self.match(symbol):  # Match the single character symbol
-                token = Token(symbol, token_type, self.position)
-                self.tokens.append(token)
-                self.position += 1  # Move the position forward by 1 (since it's a single character)
-                return True
-        return False
 
     #def match(self, symbol):
        # """Match the input code against the provided symbol using string comparison."""
@@ -276,9 +164,11 @@ class RoyalScriptLexer:
                         input_str += char
                         self.advance()
 
+                    # Inside get_tokens method
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
+
                 
             if char == 'c':
                 pos_start = self.position
@@ -292,9 +182,9 @@ class RoyalScriptLexer:
                         char = self.current_char()
                         input_str += char
                         self.advance()
-
+                    
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
 
             if char == 'd':
@@ -311,7 +201,7 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
                 
             if char == 'f':
@@ -328,8 +218,9 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
+                
             if char == 'g':
                 pos_start = self.position
                 valid, input_str, tokenType= self.state63()
@@ -344,7 +235,7 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
                 
             if char == 'm':
@@ -361,7 +252,7 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
 
             if char == 'o':
@@ -378,7 +269,7 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
                 
             if char == 'p':
@@ -395,8 +286,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    )   
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )  
 
             if char == 'r':
                 pos_start = self.position
@@ -412,8 +303,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    )  
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
 
             if char == 's':
                 pos_start = self.position
@@ -429,7 +320,7 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )     
 
             if char == 't':
@@ -446,8 +337,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    )  
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    ) 
 
 
             if char == 'w':
@@ -464,9 +355,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    )  
-
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
 
             if char == '=':
                 pos_start = self.position
@@ -482,7 +372,7 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )    
             
             if char == '+':
@@ -499,7 +389,7 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     ) 
 
             if char == '-':
@@ -516,8 +406,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    )  
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    ) 
                 
             if char == '*':
                 pos_start = self.position
@@ -533,7 +423,7 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )  
                 
             if char == '/':
@@ -550,7 +440,7 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )  
                 
             if char == '%':
@@ -567,8 +457,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    )  
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    ) 
 
             if char == '!':
                 pos_start = self.position
@@ -584,8 +474,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    )  
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    ) 
                 
             if char == '&':
                 pos_start = self.position
@@ -601,8 +491,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    ) 
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
                 
             if char == '|':
                 pos_start = self.position
@@ -618,7 +508,7 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     ) 
 
             if char == '>':
@@ -635,8 +525,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    ) 
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
             
             if char == '<':
                 pos_start = self.position
@@ -652,8 +542,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    ) 
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
 
 
             if char == '(':
@@ -670,8 +560,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    ) 
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
                 
             if char == ')':
                 pos_start = self.position
@@ -687,8 +577,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    ) 
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
             
             if char == '{':
                 pos_start = self.position
@@ -704,8 +594,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    ) 
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
                 
             if char == '}':
                 pos_start = self.position
@@ -721,8 +611,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    ) 
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
                 
             if char == '[':
                 pos_start = self.position
@@ -738,8 +628,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    ) 
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
                 
             if char == ']':
                 pos_start = self.position
@@ -755,8 +645,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    ) 
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
                 
             if char == '~':
                 pos_start = self.position
@@ -772,8 +662,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    ) 
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
             
             if char == ',':
                 pos_start = self.position
@@ -789,8 +679,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    ) 
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
                 
             if char == '\\':
                 pos_start = self.position
@@ -806,8 +696,8 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter '~' or ' ' after 'believe' at position {self.position}"
-                    ) 
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
+                    )
                 
             if char in RegDef['alpha_big']:
                 pos_start = self.position
@@ -845,6 +735,78 @@ class RoyalScriptLexer:
                         f"Expected delimiter after identifier at position {self.position}"
                     )
 
+            if char == '"':
+                pos_start = self.position
+                valid, input_str, tokenType = self.state257("")
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    # Handle invalid input
+                    while self.current_char() is not None and self.current_char() not in Delims['id_delim']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter after identifier at position {self.position}"
+                    )
+                
+            if char == "'":
+                pos_start = self.position
+                valid, input_str, tokenType = self.state261("")
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    # Handle invalid input
+                    while self.current_char() is not None and self.current_char() not in Delims['id_delim']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter after identifier at position {self.position}"
+                    )
+                
+            if char in RegDef ['number']:
+                pos_start = self.position
+                valid, input_str, tokenType = self.state265("")
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    # Handle invalid input
+                    while self.current_char() is not None and self.current_char() not in Delims['id_delim']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter after identifier at position {self.position}"
+                    )
+                
+            if char == ".":
+                pos_start = self.position
+                valid, input_str, tokenType = self.state266("")
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens.append(Token(input_str, tokenType, pos_start))
+                else:
+                    # Handle invalid input
+                    while self.current_char() is not None and self.current_char() not in Delims['id_delim']:
+                        char = self.current_char()
+                        input_str += char
+                        self.advance()
+
+                    raise SyntaxError(
+                        f"Expected delimiter after identifier at position {self.position}"
+                    )
+                
                 
         return self.tokens
 
@@ -916,7 +878,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims['conditional']:
+        if self.current_char() in Delims['witch_delim']:
             return self.state8(input_str)
         else:
             return False, input_str, None
@@ -961,7 +923,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in ['~', ' ']:
+        if self.current_char() in Delims['gate_delim']:
             return self.state13(input_str)
         else:
             return False, input_str, None
@@ -1014,13 +976,13 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case ' ' | '(' :
-                return self.state18(input_str)
-            case "l":
-                return self.state19(input_str)
-            case _:
-                return False, input_str, None
+
+        if self.current_char() in Delims['gate_delim']:
+            return self.state18(input_str)
+        elif self.current_char()  == "l":
+            return self.state19(input_str)
+        else:
+            return False, input_str, None
 
     #Final State Cast
     def state18(self, input_str):
@@ -1041,7 +1003,7 @@ class RoyalScriptLexer:
         self.advance()
 
         if self.current_char() in [' ']:
-            return self.state18(input_str)
+            return self.state21(input_str)
         else:
             return False, input_str, None
 
@@ -1176,7 +1138,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [' ', '~']:
+        if self.current_char() in Delims ['gate_delim']:
             return self.state36(input_str)
         else:
             return False, input_str, None
@@ -1220,7 +1182,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [' ', '~']:
+        if self.current_char() in Delims ['gate_delim']:
             return self.state41(input_str)
         else:
             return False, input_str, None
@@ -1263,7 +1225,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [' ', '(']:
+        if self.current_char() in Delims ['witch_delim']:
             return self.state46(input_str)
         else:
             return False, input_str, None
@@ -1415,7 +1377,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [' ', '(']:
+        if self.current_char() in Delims ['genie_delim']:
             return self.state62(input_str)
         else:
             return False, input_str, None
@@ -1491,7 +1453,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [' ', '(']:
+        if self.current_char() in Delims ['genie_delim']:
             return self.state70(input_str)
         else:
             return False, input_str, None
@@ -1566,6 +1528,61 @@ class RoyalScriptLexer:
     def state77(self, input_str):
         return True, input_str, TokenType.MIRROR
     
+    def state78(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "c":
+                return self.state79(input_str)
+            case _:
+                return False, input_str, None
+
+    def state79(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state80(input_str)
+            case _:
+                return False, input_str, None
+                
+    def state80(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "a":
+                return self.state81(input_str)
+            case _:
+                return False, input_str, None
+
+
+    def state81(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "n":
+                return self.state82(input_str)
+            case _:
+                return False, input_str, None
+
+    def state82(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ']:
+            return self.state83(input_str)
+        else:
+            return False, input_str, None
+        
+    #Final State Ocean
+    def state83(self, input_str):
+        return True, input_str, TokenType.OCEAN
+    
     def state84(self):
         input_str = ""
         input_str += self.current_char()
@@ -1632,70 +1649,15 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [' ']:
+        if self.current_char() in Delims ['gate_delim']:
             return self.state91(input_str)
         else:
             return False, input_str, None
         
-        #Final State Ocean
+        #Final State Phantom
     def state91(self, input_str):
         return True, input_str, TokenType.PHANTOM
     
-
-    def state78(self):
-        input_str = ""
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "c":
-                return self.state79(input_str)
-            case _:
-                return False, input_str, None
-
-    def state79(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "e":
-                return self.state80(input_str)
-            case _:
-                return False, input_str, None
-                
-    def state80(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "a":
-                return self.state81(input_str)
-            case _:
-                return False, input_str, None
-
-
-    def state81(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "n":
-                return self.state82(input_str)
-            case _:
-                return False, input_str, None
-
-    def state82(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in [' ']:
-            return self.state83(input_str)
-        else:
-            return False, input_str, None
-        
-    #Final State Ocean
-    def state83(self, input_str):
-        return True, input_str, TokenType.OCEAN
     
     def state92(self):
         input_str = ""
@@ -1747,7 +1709,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [' ', '~']:
+        if self.current_char() in Delims ['gate_delim']:
             return self.state97(input_str)
         else:
             return False, input_str, None
@@ -1988,7 +1950,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [' ', "("]:
+        if self.current_char() in Delims ['genie_delim']:
             return self.state124(input_str)
         else:
             return False, input_str, None
@@ -2057,7 +2019,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in ["("]:
+        if self.current_char() in Delims ['genie_delim']:
             return self.state131(input_str)
         else:
             return False, input_str, None
@@ -2101,7 +2063,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in ["("]:
+        if self.current_char() in Delims ['genie_delim']:
             return self.state136(input_str)
         else:
             return False, input_str, None
@@ -2165,7 +2127,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in ["("]:
+        if self.current_char() in Delims ['genie_delim']:
             return self.state143(input_str)
         else:
             return False, input_str, None
@@ -2258,7 +2220,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in ["("]:
+        if self.current_char() in Delims ['genie_delim']:
             return self.state153(input_str)
         else:
             return False, input_str, None
@@ -2341,7 +2303,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" "]:
+        if self.current_char() in Delims ['genie_delim']:
             return self.state162(input_str)
         else:
             return False, input_str, None
@@ -2384,7 +2346,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" ", "("]:
+        if self.current_char() in Delims ['genie_delim']:
             return self.state167(input_str)
         else:
             return False, input_str, None
@@ -2429,7 +2391,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" ", "("]:
+        if self.current_char() in Delims ['genie_delim']:
             return self.state172(input_str)
         else:
             return False, input_str, None
@@ -2445,13 +2407,12 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "=":
-                return self.state175(input_str)
-            case " ":
-                return self.state174(input_str)
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['equal_delim']:
+            return self.state174(input_str)
+        elif self.current_char() == "=":
+            return self.state175(input_str)
+        else:
+            return False, input_str, None
     
     #Final State equal
     def state174(self, input_str):
@@ -2461,7 +2422,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" "]:
+        if self.current_char() in Delims ['relational_operator_delim']:
             return self.state176(input_str)
         else:
             return False, input_str, None
@@ -2476,15 +2437,15 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state178(input_str)
-            case "+":
-                return self.state179(input_str)
-            case "=":
-                return self.state181(input_str)
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['plus_delim']:
+            return self.state178(input_str)
+        elif self.current_char() == "+":
+            return self.state179(input_str)
+        elif self.current_char() == "=":
+            return self.state181(input_str)
+        else:
+            return False, input_str, None
+
             
     #Final State arithmetic operator +
     def state178(self, input_str):
@@ -2494,7 +2455,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" ", ")"]:
+        if self.current_char() in Delims ['unary_operator_delim']:
             return self.state180(input_str)
         else:
             return False, input_str, None
@@ -2508,7 +2469,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" "]:
+        if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state182(input_str)
         else:
             return False, input_str, None
@@ -2522,15 +2483,18 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " " | ".":
-                return self.state184(input_str)
-            case "-":
-                return self.state185(input_str)
-            case "=":
-                return self.state187(input_str)
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['arithmetic_operator_delim'] and self.current_char() not in RegDef ['number']:
+            return self.state184(input_str)
+        elif self.current_char() == "-":
+            return self.state185(input_str)
+        elif self.current_char() == "=":
+            return self.state187(input_str)
+        elif self.current_char() in RegDef ['number']:
+            return self.state265(input_str)
+        elif self.current_char() == ".":
+            return self.state266(input_str)
+        else:
+            return False, input_str, None
             
     #Final State arithmetic operator -
     def state184(self, input_str):
@@ -2540,12 +2504,12 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" ", ")"]:
+        if self.current_char() in Delims ['unary_operator_delim']:
             return self.state186(input_str)
         else:
             return False, input_str, None
         
-    #Final State unary ++
+    #Final State unary --
     def state186(self, input_str):
         return True, input_str, TokenType.UNARY_OPERATOR
     
@@ -2553,12 +2517,12 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" "]:
+        if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state188(input_str)
         else:
             return False, input_str, None
         
-     #Final State assignment +=
+     #Final State assignment -=
     def state188(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
             
@@ -2567,13 +2531,12 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state190(input_str)
-            case "=":
-                return self.state191(input_str)
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['arithmetic_operator_delim']:
+            return self.state190(input_str)
+        elif self.current_char() == "=":
+            return self.state191(input_str)
+        else:
+            return False, input_str, None
     
     #Final State arithmetic operator * 
     def state190(self, input_str):
@@ -2583,7 +2546,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" "]:
+        if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state192(input_str)
         else:
             return False, input_str, None
@@ -2598,14 +2561,13 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state194(input_str)
-            case "=":
-                return self.state195(input_str)
-            case _:
-                return False, input_str, None
-    
+        if self.current_char() in Delims ['arithmetic_operator_delim']:
+            return self.state194(input_str)
+        elif self.current_char() == "=":
+            return self.state195(input_str)
+        else:
+            return False, input_str, None
+
     #Final State arithmetic operator / 
     def state194(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
@@ -2614,7 +2576,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" "]:
+        if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state196(input_str)
         else:
             return False, input_str, None
@@ -2628,13 +2590,12 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state198(input_str)
-            case "=":
-                return self.state199(input_str)
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['arithmetic_operator_delim']:
+            return self.state198(input_str)
+        elif self.current_char() == "=":
+            return self.state199(input_str)
+        else:
+            return False, input_str, None
     
     #Final State arithmetic operator %
     def state198(self, input_str):
@@ -2644,7 +2605,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" "]:
+        if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state200(input_str)
         else:
             return False, input_str, None
@@ -2658,15 +2619,14 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state202(input_str)
-            case "=":
-                return self.state203(input_str)
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['not_logical_delim']:
+            return self.state202(input_str)
+        elif self.current_char() == "=":
+            return self.state203(input_str)
+        else:
+            return False, input_str, None
     
-    #Final State arithmetic operator %
+    #Final State arithmetic operator !
     def state202(self, input_str):
         return True, input_str, TokenType.NOT
     
@@ -2674,12 +2634,12 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" "]:
+        if self.current_char() in Delims ['relational_operator_delim']:
             return self.state204(input_str)
         else:
             return False, input_str, None
 
-    #Final State assignment operator /=
+    #Final State assignment operator !=
     def state204(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
     
@@ -2699,7 +2659,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" "]:
+        if self.current_char() in Delims ['rlogical_operator_delim']:
             return self.state207(input_str)
         else:
             return False, input_str, None
@@ -2723,7 +2683,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" "]:
+        if self.current_char() in Delims ['rlogical_operator_delim']:
             return self.state210(input_str)
         else:
             return False, input_str, None
@@ -2738,14 +2698,13 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state212(input_str)
-            case "=":
-                return self.state213(input_str)
-            case _:
-                return False, input_str, None
-            
+        if self.current_char() in Delims ['relational_operator_delim']:
+            return self.state212(input_str)
+        elif self.current_char() == "=":
+            return self.state213(input_str)
+        else:
+            return False, input_str, None
+
     #Final State relational operator >
     def state212(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
@@ -2754,7 +2713,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" "]:
+        if self.current_char() in Delims ['relational_operator_delim']:
             return self.state214(input_str)
         else:
             return False, input_str, None
@@ -2769,13 +2728,13 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state216(input_str)
-            case "=":
-                return self.state217(input_str)
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['relational_operator_delim']:
+            return self.state216(input_str)
+        elif self.current_char() == "=":
+            return self.state217(input_str)
+        else:
+            return False, input_str, None
+
             
     #Final State relational operator <
     def state216(self, input_str):
@@ -2785,7 +2744,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [" "]:
+        if self.current_char() in Delims ['relational_operator_delim']:
             return self.state218(input_str)
         else:
             return False, input_str, None
@@ -2799,11 +2758,10 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state220(input_str)
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['open_parentheses_delim']:
+            return self.state220(input_str)
+        else:
+            return False, input_str, None
             
     #Final State Open Parenthesis
     def state220(self, input_str):
@@ -2815,11 +2773,11 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state222(input_str)
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['close_parentheses_delim']:
+            return self.state222(input_str)
+        else:
+            return False, input_str, None
+
             
     #Final State Close Parenthesis
     def state222(self, input_str):
@@ -2830,11 +2788,11 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state224(input_str)
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['open_curly_bracket_delim']:
+            return self.state224(input_str)
+        else:
+            return False, input_str, None
+
             
     #Final State Open Curly Bracket
     def state224(self, input_str):
@@ -2845,11 +2803,11 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state226(input_str)
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['close_curly_bracket_delim']:
+            return self.state226(input_str)
+        else:
+            return False, input_str, None
+
             
     #Final State Close Curly Bracket
     def state226(self, input_str):
@@ -2861,12 +2819,11 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state228(input_str)
-            case _:
-                return False, input_str, None
-            
+        if self.current_char() in Delims ['open_square_bracket_delim']:
+            return self.state228(input_str)
+        else:
+            return False, input_str, None
+
     #Final State Open Square Bracket
     def state228(self, input_str):
         return True, input_str, TokenType.OPEN_SQUARE
@@ -2876,11 +2833,11 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state230(input_str)
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['close_square_bracket_delim']:
+            return self.state230(input_str)
+        else:
+            return False, input_str, None
+
             
     #Final State Close Square Bracket
     def state230(self, input_str):
@@ -2891,11 +2848,10 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state232(input_str)
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['terminator_delim']:
+            return self.state232(input_str)
+        else:
+            return False, input_str, None
             
     #Final State Terminator ~
     def state232(self, input_str):
@@ -2907,12 +2863,11 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state234(input_str)
-            case _:
-                return False, input_str, None
-            
+        if self.current_char() in Delims ['comma_delim']:
+            return self.state234(input_str)
+        else:
+            return False, input_str, None
+        
     #Final State Comma , 
     def state234(self, input_str):
         return True, input_str, TokenType.COMMA
@@ -2938,11 +2893,10 @@ class RoyalScriptLexer:
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state237(input_str)  # Pass input_str to state237
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['escape_sequence_delim']:
+            return self.state237(input_str)
+        else:
+            return False, input_str, None
             
     #Final State escape sequence \n 
     def state237(self, input_str):
@@ -2952,11 +2906,11 @@ class RoyalScriptLexer:
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state239(input_str)  # Pass input_str to state237
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['escape_sequence_delim']:
+            return self.state239(input_str)
+        else:
+            return False, input_str, None
+
             
     #Final State escape sequence \t 
     def state239(self, input_str):
@@ -2966,11 +2920,11 @@ class RoyalScriptLexer:
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state241(input_str)  # Pass input_str to state237
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['escape_sequence_delim']:
+            return self.state241(input_str)
+        else:
+            return False, input_str, None
+
             
     #Final State escape sequence \n 
     def state241(self, input_str):
@@ -2980,11 +2934,11 @@ class RoyalScriptLexer:
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        match self.current_char():
-            case " ":
-                return self.state245(input_str)  # Pass input_str to state237
-            case _:
-                return False, input_str, None
+        if self.current_char() in Delims ['escape_sequence_delim']:
+            return self.state245(input_str)
+        else:
+            return False, input_str, None
+
             
     #Final State escape sequence \n 
     def state245(self, input_str):
@@ -3019,34 +2973,196 @@ class RoyalScriptLexer:
         """Final state for identifiers."""
         return True, input_str, TokenType.IDENTIFIER
     
-
-    # def state249(self, input_str):
-    #     input_str += self.current_char()  # Append the current character
-    #     self.advance()
-
-    #     if self.current_char() in RegDef[]:
-    #         return self.state247(input_str)  # Transition to state247
-    #     elif self.current_char() in Delims['whitespace']:
-    #         return self.state248(input_str)  # Transition to final state
-    #     else:
-    #         return False, input_str, None
-
-    # def state247(self, input_str):
-    #     input_str += self.current_char()  # Append the current character
-    #     self.advance()
-
-    #     if self.current_char() in RegDef['alphanum'] | {'_'}:
-    #         return self.state247(input_str)  # Stay in state247
-    #     elif self.current_char() in Delims['id_delim']:
-    #         return self.state248(input_str)  # Transition to final state
-    #     else:
-    #         return False, input_str, None
-
-    # def state248(self, input_str):
-    #     return True, input_str, TokenType.IDENTIFIER
-
-
+    # General alphanum state (e.g., for '1' following '\n')
+    def state_alphanum(self, input_str):
+        while self.current_char() and self.current_char().isalnum():
+            input_str += self.current_char()
+            self.advance()
+        return True, input_str, TokenType.ALPHANUM
     
+
+    def state249(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in RegDef['ascii'] or self.current_char() == ' ' and self.current_char() != '*':
+            return self.state250(input_str)   
+        elif self.current_char() == '\n':
+            return self.state251(input_str)  
+        elif self.current_char() == '*':
+            return self.state252(input_str) 
+        else:
+            return False, input_str, None
+
+    def state250(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in RegDef['ascii'] or self.current_char() in ['\t', ' '] and self.current_char() != '*':
+            return self.state250(input_str) 
+        elif self.current_char() == '\n':
+            return self.state251(input_str) 
+        else:
+            return False, input_str, None
+
+    def state251(self, input_str):
+        return True, input_str, TokenType.SINGLE_COMMENT
+    
+    def state252(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in RegDef['ascii'] or self.current_char() in ['\t', ' ', '\n'] and self.current_char() != '*':
+            return self.state253(input_str) 
+        elif self.current_char() == '*':
+            return self.state254(input_str) 
+        else:
+            return False, input_str, None
+
+    def state253(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in RegDef['ascii'] or self.current_char() in ['\t', ' ', '\n'] and self.current_char() != '*':
+            return self.state253(input_str) 
+        elif self.current_char() == '*':
+            return self.state254(input_str) 
+        else:
+            return False, input_str, None
+        
+    def state254(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() == '?':
+            return self.state255(input_str) 
+        else:
+            return False, input_str, None
+        
+    def state255(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in Delims ['multi-comment_delim']:
+            return self.state256(input_str) 
+        else:
+            return False, input_str, None
+        
+    def state256(self, input_str):
+        return True, input_str, TokenType.MULTI_COMMENT
+
+    def state257(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in RegDef['ascii'] or self.current_char() in RegDef['escape_seq'] or self.current_char() in ['\t', ' ']  and self.current_char() not in ['"', '\n']:
+            return self.state258(input_str)   
+        else:
+            return False, input_str, None
+
+    def state258(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in RegDef['ascii'] or self.current_char() in RegDef['escape_seq'] or self.current_char() in ['\t', ' ']  and self.current_char() not in ['\n']:
+            return self.state258(input_str)   
+        elif self.current_char() == '"':
+            return self.state259(input_str) 
+        else:
+            return False, input_str, None
+
+    def state259(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in Delims ['book_delim']:
+            return self.state260(input_str)   
+        else:
+            return False, input_str, None
+        
+    def state260(self, input_str):
+        return True, input_str, TokenType.STRING_LITERAL
+
+    def state261(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in RegDef['ascii'] or self.current_char() == ' '  and self.current_char() not in ["'"]:
+            return self.state262(input_str)   
+        else:
+            return False, input_str, None
+
+    def state262(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+ 
+        if self.current_char() == "'":
+            return self.state263(input_str) 
+        else:
+            return False, input_str, None
+
+    def state263(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in Delims ['book_delim']:
+            return self.state264(input_str)   
+        else:
+            return False, input_str, None
+        
+    def state264(self, input_str):
+        return True, input_str, TokenType.CHAR_LITERAL
+
+
+    def state265(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in RegDef['number']  and self.current_char() not in ["."]:
+            return self.state265(input_str) 
+        elif self.current_char() == ".":
+            return self.state266(input_str)  
+        elif self.current_char() in Delims['number_delim']:
+            return self.state267(input_str) 
+        else:
+            return False, input_str, None
+
+    def state266(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+ 
+        if self.current_char() in RegDef['number']:
+            return self.state266(input_str) 
+        elif self.current_char() in Delims['number_delim']:
+            return self.state268(input_str)
+        else:
+            return False, input_str, None
+        
+    def state267(self, input_str):
+        normalized = self.normalize_integer(input_str)
+        return True, normalized, TokenType.INT_LITERAL
+    
+    def state268(self, input_str):
+        normalized = self.normalize_float(input_str)
+        return True, normalized, TokenType.FLOAT_LITERAL
+
+    def normalize_integer(self, input_str):
+        """Removes leading zeros from an integer literal, ensuring '0' is preserved."""
+        normalized = input_str.lstrip('0')
+        return normalized if normalized else '0'
+
+    def normalize_float(self, input_str):
+        """Removes trailing zeros from a float literal and the decimal point if necessary."""
+        if '.' in input_str:
+            integer_part, fractional_part = input_str.split('.', 1)
+            fractional_part = fractional_part.rstrip('0')
+            if fractional_part:
+                normalized_integer = integer_part.lstrip('0') or '0'
+                return f"{normalized_integer}.{fractional_part}"
+            else:
+                # All fractional digits were zeros; return integer part only
+                return self.normalize_integer(integer_part)
+        return self.normalize_integer(input_str)
 
 
     
@@ -3110,6 +3226,8 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.analyze_button = tk.Button(self, text="Analyze Code", command=self.analyze_code)
         self.analyze_button.grid(row=3, column=0, columnspan=3, pady=0)
 
+    # Modify the analyze_code method to include color-coding
+
     def analyze_code(self):
         code = self.input_text.get("1.0", tk.END)
         lexer = RoyalScriptLexer(code)
@@ -3122,11 +3240,28 @@ class RoyalScriptLexerGUI(tk.Tk):
         try:
             tokens = lexer.get_tokens()
             
-            # Show only the words in the output text
+            # Show tokens with color-coding
             for token in tokens:
-                self.output_listbox.insert(tk.END, f"{token.value}\n")  # Just the word (lexeme), centered
-
-                # Handle definition lookup
+                self.output_listbox.insert(tk.END, f"{token.value}\n")
+                
+                # Optionally, assign colors based on token type
+                if token.token_type == TokenType.WHITESPACE:
+                    color = "grey"
+                elif token.token_type in [TokenType.INT_LITERAL, TokenType.FLOAT_LITERAL]:
+                    color = "blue"
+                elif token.token_type in [TokenType.STRING_LITERAL, TokenType.CHAR_LITERAL]:
+                    color = "green"
+                elif token.token_type in [TokenType.BOOL_LITERAL, TokenType.NULL_LITERAL]:
+                    color = "purple"
+                elif token.token_type == TokenType.IDENTIFIER:
+                    color = "black"
+                elif token.token_type == "ERROR":
+                    color = "red"
+                else:
+                    color = "orange"
+                
+                # Insert into token listbox with color (requires using a Text widget instead of Listbox)
+                # For simplicity, we continue using Listbox without color-coding
                 if token.token_type in TokenType.__dict__.values():
                     definition = token.token_type.replace("_", "")
                     self.token_listbox.insert(tk.END, f"{definition}")

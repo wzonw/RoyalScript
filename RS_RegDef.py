@@ -7,6 +7,7 @@ RegDef = {
     
     # Period
     'period': {'.'},
+    
 
     'general_operator': {'+', '-', '*', '/', '%', '>', '<', '='},
 
@@ -61,7 +62,11 @@ RegDef = {
     # quote
     'double_quote': {'"'},
     'single_quote': {"'"},
-    'whitespace': {' ', '\t', '\n'}
+    'whitespace': {' ', '\t', '\n'},
+    'ascii': { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9','!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '=', '+', '[', ']', '{', '}', '\\', '|', ':', ';', "'", '”', ',', '<', '>', '.', '/', '?'
+    }
 }
 
 
@@ -72,12 +77,12 @@ Delims = {
     'data_type': {' '},
     
     # Dono (could be a special keyword or identifier in your language)
-    'arithmetic_operator_delim':{'(', ')', *RegDef['alphanum']},  #'dono': {'~', ',', '(', ')', ' ', '=', '\n'},
+    'arithmetic_operator_delim':{'(', ')', ' ', *RegDef['alphanum']},  #'dono': {'~', ',', '(', ')', ' ', '=', '\n'},
 
-    'escape_sequence_delim': {'”', *RegDef['alphanum'], 'escape_sequence_symbol'},
+    'escape_sequence_delim': {'”', *RegDef['alphanum'], 'escape_sequence_symbol', ' '},
     
     # Class-related delimiters
-    'plus_delim' : {'(', *RegDef['alphanum'], '"'},    #'cwass': {'~', '[', '.', ',', '(', ')', ' ', '=', '\n'},
+    'plus_delim' : {'(', *RegDef['alphanum'], '"', ' '},    #'cwass': {'~', '[', '.', ',', '(', ')', ' ', '=', '\n'},
     
     # Boolean operators
     'logical_operator_delim': {'(', *RegDef['alphanum']}, # same with other assignmen operator  #'bool': {'|', '&', ']', ',', ' ', '}', ')', '~', '\n'},
@@ -85,9 +90,9 @@ Delims = {
     # Conditional statements (e.g., if, while, etc.)
     'not_logical_delim': {'(', '"', "'",  *RegDef['alphanum']},    #'conditional': {'[', '(', ' ', '\n'},
     
-    'witch_delim': {'{' },
+    'witch_delim': {'{', ' ' },
 
-    'equal_delim':{'‘', '“', '( ', '[', *RegDef['alphanum']}, 
+    'equal_delim':{'‘', '“', '( ', '[', *RegDef['alphanum'], ' '}, 
 
     # IO operations (possibly input/output operations)
     'io': {'(', ' ', '\n'},
@@ -126,23 +131,28 @@ Delims = {
     'id_delim' : {'(', ')', '~', ' ', '=' , *RegDef['unary_op'], *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op']},  #'concat': {' ', '"', *RegDef['alpha'], *RegDef['number'], '(', '{', '\n'},
     
     # Line terminators
-    'book_delim' : {'~',')', '+'},     #'line': {'\n', ' ', *RegDef['alpha'], ']'},
+    'book_delim' : {'~',')', '+', ' '},     #'line': {'\n', ' ', *RegDef['alpha'], ']'},
     
     # Comma delimiter (used for separating elements in a list, parameters, etc.)
-    'number_delim' : {')','}',']','~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['logical_op'], *RegDef['relational_op'], *RegDef['unary_op']},     #'comma': {*RegDef['alpha'], ' ', *RegDef['number'], '"', '-', '\n', '>', '{'},
+    'number_delim' : {')','}',']','~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['logical_op'], *RegDef['relational_op'], *RegDef['unary_op'], ' '},    #'comma': {*RegDef['alpha'], ' ', *RegDef['number'], '"', '-', '\n', '>', '{'},
     
     # Dot operator delimiter (e.g., object member access)
-    'genie_delim' : {'('},    #'dot_op': {*RegDef['alpha'], '[', '(', '\n'},
+    'genie_delim' : {'(', ' '},    #'dot_op': {*RegDef['alpha'], '[', '(', '\n'},
     
     # "Null" might be a typo or special delimiter for null values
     'gate_delim' : {' ', '~'},    #'null': {' ', '~', ')', '}', ',', '=', '\n', '!', '|', '&'},
     
     # Whitespace delimiters (spaces and newlines)
     'whitespace': {' ', '\n'},
+
+    'terminator_delim' : {*RegDef['whitespace'], '?', '}', *RegDef['alpha']},
     
     # Single-line comment delimiterA
     #'single_line_comment': {'\n'},
     
     # General case for any other delimiter
     #'all': {None}
+
+    'multi-comment_delim' : {*RegDef['ascii'], *RegDef['whitespace']}
 }
+
