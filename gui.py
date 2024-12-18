@@ -3200,7 +3200,7 @@ class RoyalScriptLexer:
     def state259(self, input_str):
         return True, input_str, TokenType.CHAR_LITERAL
 
-
+    
     def state260(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
