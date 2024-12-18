@@ -1009,7 +1009,7 @@ class RoyalScriptLexer:
         self.advance()
 
 
-        if self.current_char() in Delims['gate_delim']:
+        if self.current_char() in Delims['genie_delim']:
             return self.state18(input_str)
         elif self.current_char()  == "l":
             return self.state19(input_str)
