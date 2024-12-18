@@ -76,7 +76,7 @@ Delims = {
     # Data types (e.g., for parsing types like int, float, etc.)
     'data_type': {' '},
     
-    'other_assignment_operator_delim' : {'(', *RegDef['alphanum']},
+    'other_assignment_operator_delim' : {'(', *RegDef['number'], ' '},
     # Dono (could be a special keyword or identifier in your language)
     'arithmetic_operator_delim':{'(', ')', ' ', *RegDef['alphanum']},  #'dono': {'~', ',', '(', ')', ' ', '=', '\n'},
 
@@ -98,6 +98,8 @@ Delims = {
     # IO operations (possibly input/output operations)
     'io': {'(', ' ', '\n'},
     
+    'mirror-lit_delim': {' ', '~', ')'},
+
     # Main function delimiters
     'unary_operator_delim': {'~', ')', *RegDef['alphanum']},    #'mainuwu': {'-', ' ', '\n'},
     
@@ -108,7 +110,7 @@ Delims = {
         ###### 'string': {' ', '|', ')', ',', '&', '}', '[', ']', '~', '!', '=', '\n'},
     
     # Assignment delimiters (e.g., variable assignments)
-    'open_parentheses_delim':  {*RegDef['unary_op'], *RegDef['alphanum'], ' '},   #'assign_delim': {*RegDef['alpha'], *RegDef['number'], '{', ' ', '-', '(', '"', '\n'},
+    'open_parentheses_delim':  {*RegDef['unary_op'], *RegDef['alphanum'], ' ', ')', '"'},   #'assign_delim': {*RegDef['alpha'], *RegDef['number'], '{', ' ', '-', '(', '"', '\n'},
     
     # General operator delimiters (e.g., for mathematical and logical operators)
     'close_parentheses_delim' : {*RegDef['arithmetic_op'], *RegDef['logical_op'], *RegDef['relational_op'],'(', '{',  '~', ' '},    #'operator_delim': {*RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '{', '\n'},
@@ -132,7 +134,7 @@ Delims = {
     'id_delim' : {'(', ')', '~', ' ', '=' , *RegDef['unary_op'], *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op']},  #'concat': {' ', '"', *RegDef['alpha'], *RegDef['number'], '(', '{', '\n'},
     
     # Line terminators
-    'book_delim' : {'~',')', '+', ' '},     #'line': {'\n', ' ', *RegDef['alpha'], ']'},
+    'book_delim' : {'~',')', '+', ' ', ',', },     #'line': {'\n', ' ', *RegDef['alpha'], ']'},
     
     # Comma delimiter (used for separating elements in a list, parameters, etc.)
     'number_delim' : {')','}',']','~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['logical_op'], *RegDef['relational_op'], *RegDef['unary_op'], ' '},    #'comma': {*RegDef['alpha'], ' ', *RegDef['number'], '"', '-', '\n', '>', '{'},
