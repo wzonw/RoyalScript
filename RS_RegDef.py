@@ -108,7 +108,7 @@ Delims = {
         ###### 'string': {' ', '|', ')', ',', '&', '}', '[', ']', '~', '!', '=', '\n'},
     
     # Assignment delimiters (e.g., variable assignments)
-    'open_parentheses_delim':  {*RegDef['unary_op'], *RegDef['alphanum'], '"', ' ',')'},   #'assign_delim': {*RegDef['alpha'], *RegDef['number'], '{', ' ', '-', '(', '"', '\n'},
+    'open_parentheses_delim':  {*RegDef['alphanum'], '"',"'", ' ',')'},   #'assign_delim': {*RegDef['alpha'], *RegDef['number'], '{', ' ', '-', '(', '"', '\n'},
     
     # General operator delimiters (e.g., for mathematical and logical operators)
     'close_parentheses_delim' : {*RegDef['arithmetic_op'], *RegDef['logical_op'], *RegDef['relational_op'],'(', '{',  '~', ' '},    #'operator_delim': {*RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '{', '\n'},
