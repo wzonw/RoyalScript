@@ -3,6 +3,8 @@ from tkinter import scrolledtext
 import re
 from RS_RegDef  import Delims
 from RS_RegDef  import RegDef
+from decimal import Decimal, ROUND_HALF_UP
+
 
 
 # Token class to represent individual tokens
@@ -119,29 +121,10 @@ class RoyalScriptLexer:
             return match.group(0)
         return None
 
-    #def match(self, symbol):
-       # """Match the input code against the provided symbol using string comparison."""
-        # Check if the current position can match the symbol
-        #if self.input_code[self.position:self.position + len(symbol)] == symbol:
-         #   return True
-      #  return False
-
     def get_tokens(self):
         """Tokenize the entire input code"""
-        cursor_advanced = False
         while self.position < len(self.code):
             char = self.current_char()
-
-            # # Handle terminator (~)
-            # if char == '~':
-            #     if char in TokenType.DELIMS:  # Check if it's a delimiter
-            #         token = Token(char, TokenType.DELIMS, self.position)
-            #         self.tokens.append(token)
-            #     else:
-            #         token = Token(char, TokenType.TERMINATOR, self.position)
-            #         self.tokens.append(token)
-            #     self.advance()
-            #     continue
 
             if char in ['\n', ' ', '\t']:
                 match = self.match(r'\s+')
@@ -169,7 +152,7 @@ class RoyalScriptLexer:
                         f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
 
-                
+            #RESERVED WORDS
             if char == 'c':
                 pos_start = self.position
                 valid, input_str, tokenType= self.state14()
@@ -308,7 +291,7 @@ class RoyalScriptLexer:
 
             if char == 's':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state108()
+                valid, input_str, tokenType= self.state107()
 
                 if valid:
                     # Append the recognized token
@@ -325,7 +308,7 @@ class RoyalScriptLexer:
 
             if char == 't':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state120()
+                valid, input_str, tokenType= self.state119()
 
                 if valid:
                     # Append the recognized token
@@ -343,7 +326,7 @@ class RoyalScriptLexer:
 
             if char == 'w':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state168()
+                valid, input_str, tokenType= self.state167()
 
                 if valid:
                     # Append the recognized token
@@ -358,9 +341,11 @@ class RoyalScriptLexer:
                         f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
 
+
+            #RESERVED SYMBOL
             if char == '=':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state173()
+                valid, input_str, tokenType= self.state172()
 
                 if valid:
                     # Append the recognized token
@@ -377,7 +362,7 @@ class RoyalScriptLexer:
             
             if char == '+':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state177()
+                valid, input_str, tokenType= self.state176()
 
                 if valid:
                     # Append the recognized token
@@ -394,7 +379,7 @@ class RoyalScriptLexer:
 
             if char == '-':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state183()
+                valid, input_str, tokenType= self.state182()
 
                 if valid:
                     # Append the recognized token
@@ -411,7 +396,7 @@ class RoyalScriptLexer:
                 
             if char == '*':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state189()
+                valid, input_str, tokenType= self.state188()
 
                 if valid:
                     # Append the recognized token
@@ -428,7 +413,7 @@ class RoyalScriptLexer:
                 
             if char == '/':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state193()
+                valid, input_str, tokenType= self.state192()
 
                 if valid:
                     # Append the recognized token
@@ -445,7 +430,7 @@ class RoyalScriptLexer:
                 
             if char == '%':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state197()
+                valid, input_str, tokenType= self.state196()
 
                 if valid:
                     # Append the recognized token
@@ -462,7 +447,7 @@ class RoyalScriptLexer:
 
             if char == '!':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state201()
+                valid, input_str, tokenType= self.state200()
 
                 if valid:
                     # Append the recognized token
@@ -479,7 +464,7 @@ class RoyalScriptLexer:
                 
             if char == '&':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state205()
+                valid, input_str, tokenType= self.state204()
 
                 if valid:
                     # Append the recognized token
@@ -496,7 +481,7 @@ class RoyalScriptLexer:
                 
             if char == '|':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state208()
+                valid, input_str, tokenType= self.state207()
 
                 if valid:
                     # Append the recognized token
@@ -513,7 +498,7 @@ class RoyalScriptLexer:
 
             if char == '>':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state211()
+                valid, input_str, tokenType= self.state210()
 
                 if valid:
                     # Append the recognized token
@@ -530,7 +515,7 @@ class RoyalScriptLexer:
             
             if char == '<':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state215()
+                valid, input_str, tokenType= self.state214()
 
                 if valid:
                     # Append the recognized token
@@ -548,7 +533,7 @@ class RoyalScriptLexer:
 
             if char == '(':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state219()
+                valid, input_str, tokenType= self.state218()
 
                 if valid:
                     # Append the recognized token
@@ -565,7 +550,7 @@ class RoyalScriptLexer:
                 
             if char == ')':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state221()
+                valid, input_str, tokenType= self.state220()
 
                 if valid:
                     # Append the recognized token
@@ -582,7 +567,7 @@ class RoyalScriptLexer:
             
             if char == '{':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state223()
+                valid, input_str, tokenType= self.state222()
 
                 if valid:
                     # Append the recognized token
@@ -599,7 +584,7 @@ class RoyalScriptLexer:
                 
             if char == '}':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state225()
+                valid, input_str, tokenType= self.state224()
 
                 if valid:
                     # Append the recognized token
@@ -616,7 +601,7 @@ class RoyalScriptLexer:
                 
             if char == '[':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state227()
+                valid, input_str, tokenType= self.state226()
 
                 if valid:
                     # Append the recognized token
@@ -633,7 +618,7 @@ class RoyalScriptLexer:
                 
             if char == ']':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state229()
+                valid, input_str, tokenType= self.state228()
 
                 if valid:
                     # Append the recognized token
@@ -650,7 +635,7 @@ class RoyalScriptLexer:
                 
             if char == '~':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state231()
+                valid, input_str, tokenType= self.state230()
 
                 if valid:
                     # Append the recognized token
@@ -667,7 +652,7 @@ class RoyalScriptLexer:
             
             if char == ',':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state233()
+                valid, input_str, tokenType= self.state232()
 
                 if valid:
                     # Append the recognized token
@@ -684,7 +669,7 @@ class RoyalScriptLexer:
                 
             if char == '\\':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state235()
+                valid, input_str, tokenType= self.state234()
 
                 if valid:
                     # Append the recognized token
@@ -698,10 +683,12 @@ class RoyalScriptLexer:
                     raise SyntaxError(
                         f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
-                
+
+
+            #IDENTIFIER    
             if char in RegDef['alpha_big']:
                 pos_start = self.position
-                valid, input_str, tokenType = self.state246("")
+                valid, input_str, tokenType = self.state243("")
 
                 if valid:
                     # Append the recognized token
@@ -714,12 +701,13 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter after identifier at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
                 
+            #COMMENTS
             if char == '?':
                 pos_start = self.position
-                valid, input_str, tokenType = self.state249("")
+                valid, input_str, tokenType = self.state245("")
 
                 if valid:
                     # Append the recognized token
@@ -732,9 +720,11 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter after identifier at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
 
+
+            #SCROLL LITERALS 
             if char == '"':
                 pos_start = self.position
                 valid, input_str, tokenType = self.state257("")
@@ -750,9 +740,11 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter after identifier at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
-                
+
+
+            #ROSE LITERALS    
             if char == "'":
                 pos_start = self.position
                 valid, input_str, tokenType = self.state261("")
@@ -768,12 +760,14 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter after identifier at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
-                
+            
+
+            #TREASURES & FLOAT LITERALS
             if char in RegDef ['number']:
                 pos_start = self.position
-                valid, input_str, tokenType = self.state265("")
+                valid, input_str, tokenType = self.state260("")
 
                 if valid:
                     # Append the recognized token
@@ -786,9 +780,11 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter after identifier at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
-                
+            
+            
+            #FLOAT LITERALS STARTING WITH .
             if char == ".":
                 pos_start = self.position
                 valid, input_str, tokenType = self.state266("")
@@ -804,12 +800,43 @@ class RoyalScriptLexer:
                         self.advance()
 
                     raise SyntaxError(
-                        f"Expected delimiter after identifier at position {self.position}"
+                        f"Expected delimiter after '{input_str}' at position {self.position}"
                     )
-                
                 
         return self.tokens
 
+
+    #==================================================#
+    #            STATES => RESERVED WORDS              #
+    #==================================================#
+    #   STATE 1 - STATE 8 => BELIEVE                   #
+    #   STATE 1 & STATE 9-13 => BREAK                  #
+    #   STATE 14 - STATE 18 => CAST                    #
+    #   STATE 17 & STATE 19-21 => CASTLE               #
+    #   STATE 14 & STATE 22-28 => CHAMBER              #
+    #   STATE 14 & STATE 29-36 => CONTINUE             #
+    #   STATE 14 & STATE 37-41 => CROWN                #
+    #   STATE 14 & STATE 42-46 => CURSE                #
+    #   STATE 47 - STATE 54 => DYNASTY                 #
+    #   STATE 55 - STATE 62 => FOREVER                 #
+    #   STATE 63 - STATE 70 => GRANTED                 #
+    #   STATE 71 - STATE 77 => MIRROR                  #
+    #   STATE 78 - STATE 83 => OCEAN                   #
+    #   STATE 84 - STATE 91 => PHANTOM                 #
+    #   STATE 92 - STATE 97 => REIGN                   #
+    #   STATE 93 & STATE 98-102 => RETURN              #
+    #   STATE 92 & STATE 103-106 => ROSE               #
+    #   STATE 107 - STATE 113 => SCROLL                #
+    #   STATE 107 & STATE 114-118 => SPELL             #
+    #   STATE 119 - STATE 123 => TALE                  #
+    #   STATE 119 & STATE 124-130 => TOOCEAN           #
+    #   STATE 124 & STATE 131-135 => TOROSE            #
+    #   STATE 124 & STATE 136-142 => TOSCROLL          #
+    #   STATE 124 & STATE 143-152 => TOTREASURES       #
+    #   STATE 119 & STATE 153-161 => TREASURES         #
+    #   STATE 119 & STATE 162-166 => WISH              #
+    #   STATE 167 - STATE 171 => WISH                  #
+    #==================================================#
 
     def state1(self):
         input_str = ""
@@ -882,12 +909,11 @@ class RoyalScriptLexer:
             return self.state8(input_str)
         else:
             return False, input_str, None
+    
+    #################### FINAL STATE FOR BELIEVE ####################
 
-    #Final State Believe
     def state8(self, input_str):
         return True, input_str, TokenType.BELIEVE
-
-
 
     def state9(self, input_str):
         input_str += self.current_char()
@@ -927,8 +953,9 @@ class RoyalScriptLexer:
             return self.state13(input_str)
         else:
             return False, input_str, None
+    
+    #################### FINAL STATE FOR BREAK ####################
             
-    #Final State Break
     def state13(self, input_str):
         return True, input_str, TokenType.BREAK
     
@@ -984,9 +1011,11 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
 
-    #Final State Cast
+    #################### FINAL STATE FOR CAST ####################
+
     def state18(self, input_str):
         return True, input_str, TokenType.CAST  
+
     
     def state19(self, input_str):
         input_str += self.current_char()
@@ -1007,7 +1036,8 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
 
-    #Final State Castle
+    #################### FINAL STATE FOR CASTLE ####################
+
     def state21(self, input_str):
         return True, input_str, TokenType.CASTLE  
     
@@ -1070,7 +1100,8 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
 
-    #Final State Chamber
+    #################### FINAL STATE FOR CHAMBER ####################
+
     def state28(self, input_str):
         return True, input_str, TokenType.CHAMBER
 
@@ -1143,7 +1174,8 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
 
-    #Final State Continue
+    #################### FINAL STATE FOR CONTINUE ####################
+
     def state36(self, input_str):
         return True, input_str, TokenType.CONTINUE
     
@@ -1187,7 +1219,8 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
 
-    #Final State Crown
+    #################### FINAL STATE FOR CROWN ####################
+
     def state41(self, input_str):
         return True, input_str, TokenType.CROWN
     
@@ -1230,11 +1263,11 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
 
-    #Final State Curse
+    #################### FINAL STATE FOR CURSE ####################
+
     def state46(self, input_str):
         return True, input_str, TokenType.CURSE
     
-
     def state47(self):
         input_str = ""
         input_str += self.current_char()
@@ -1306,7 +1339,8 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
 
-    #Final State Dynasty
+    #################### FINAL STATE FOR DYNASTY ####################
+
     def state54(self, input_str):
         return True, input_str, TokenType.DYNASTY
     
@@ -1382,7 +1416,8 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
 
-    #Final State Forever
+    #################### FINAL STATE FOR FOREVER ####################
+
     def state62(self, input_str):
         return True, input_str, TokenType.FOREVER
     
@@ -1417,7 +1452,6 @@ class RoyalScriptLexer:
                 return self.state66(input_str)
             case _:
                 return False, input_str, None
-
 
     def state66(self, input_str):
         input_str += self.current_char()
@@ -1458,10 +1492,10 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
 
-    #Final State Granted
+    #################### FINAL STATE FOR GRANTED ####################
+
     def state70(self, input_str):
         return True, input_str, TokenType.GRANTED
-
 
     def state71(self):
         input_str = ""
@@ -1524,7 +1558,8 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
 
-    #Final State Mirror
+    #################### FINAL STATE FOR MIRROR ####################
+
     def state77(self, input_str):
         return True, input_str, TokenType.MIRROR
     
@@ -1559,7 +1594,6 @@ class RoyalScriptLexer:
             case _:
                 return False, input_str, None
 
-
     def state81(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -1579,7 +1613,8 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
         
-    #Final State Ocean
+    #################### FINAL STATE FOR OCEAN ####################
+
     def state83(self, input_str):
         return True, input_str, TokenType.OCEAN
     
@@ -1654,7 +1689,7 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
         
-        #Final State Phantom
+    #################### FINAL STATE FOR PHANTOM ####################
     def state91(self, input_str):
         return True, input_str, TokenType.PHANTOM
     
@@ -1668,7 +1703,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state93(input_str)
             case "o":
-                return self.state104(input_str)
+                return self.state103(input_str)
             case _:
                 return False, input_str, None
 
@@ -1714,7 +1749,8 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
         
-    #Final State reign
+    #################### FINAL STATE FOR REIGN ####################
+
     def state97(self, input_str):
         return True, input_str, TokenType.REIGN
     
@@ -1728,7 +1764,6 @@ class RoyalScriptLexer:
             case _:
                 return False, input_str, None
 
-
     def state99(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -1738,7 +1773,6 @@ class RoyalScriptLexer:
                 return self.state100(input_str)
             case _:
                 return False, input_str, None
-            
 
     def state100(self, input_str):
         input_str += self.current_char()
@@ -1759,64 +1793,76 @@ class RoyalScriptLexer:
         else:
             return False, input_str, None
         
-    #Final State return
+    #################### FINAL STATE FOR RETURN ####################
+
     def state102(self, input_str):
         return True, input_str, TokenType.RETURN    
     
-    def state104(self, input_str):
+    def state103(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "s":
-                return self.state105(input_str)
+                return self.state104(input_str)
             case _:
                 return False, input_str, None
 
 
-    def state105(self, input_str):
+    def state104(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "e":
-                return self.state106(input_str)
+                return self.state105(input_str)
             case _:
                 return False, input_str, None
             
 
-    def state106(self, input_str):
+    def state105(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in [' ']:
-            return self.state107(input_str)
+            return self.state106(input_str)
         else:
             return False, input_str, None
         
-    #Final State rose
-    def state107(self, input_str):
+    #################### FINAL STATE FOR ROSE ####################
+
+    def state106(self, input_str):
         return True, input_str, TokenType.ROSE    
 
-    def state108(self):
+    def state107(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "c":
-                return self.state109(input_str)
+                return self.state108(input_str)
             case "p":
-                return self.state115(input_str)
+                return self.state114(input_str)
             case _:
                 return False, input_str, None   
 
-    def state109(self, input_str):
+    def state108(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "r":
+                return self.state109(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state109(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "o":
                 return self.state110(input_str)
             case _:
                 return False, input_str, None
@@ -1826,11 +1872,11 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "o":
+            case "l":
                 return self.state111(input_str)
             case _:
                 return False, input_str, None
-            
+    
     def state111(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -1840,38 +1886,39 @@ class RoyalScriptLexer:
                 return self.state112(input_str)
             case _:
                 return False, input_str, None
-    
+            
+
     def state112(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "l":
-                return self.state113(input_str)
-            case _:
-                return False, input_str, None
-            
-
-    def state113(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
         if self.current_char() in [' ']:
-            return self.state114(input_str)
+            return self.state113(input_str)
         else:
             return False, input_str, None
         
-    #Final State rose
+    #################### FINAL STATE FOR SCROLL ####################
+
+    def state113(self, input_str):
+        return True, input_str, TokenType.SCROLL   
+    
+    
     def state114(self, input_str):
-        return True, input_str, TokenType.ROSE    
-    
-    
-    def state115(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "e":
+                return self.state115(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state115(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "l":
                 return self.state116(input_str)
             case _:
                 return False, input_str, None
@@ -1885,44 +1932,45 @@ class RoyalScriptLexer:
                 return self.state117(input_str)
             case _:
                 return False, input_str, None
-            
+
     def state117(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "l":
-                return self.state118(input_str)
-            case _:
-                return False, input_str, None
-
-    def state118(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
         if self.current_char() in [' ']:
-            return self.state119(input_str)
+            return self.state118(input_str)
         else:
             return False, input_str, None
         
-    #Final State spell
-    def state119(self, input_str):
+    #################### FINAL STATE FOR SPELL ####################
+
+    def state118(self, input_str):
         return True, input_str, TokenType.SPELL  
     
-    def state120(self):
+    def state119(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "a":
-                return self.state121(input_str)
+                return self.state120(input_str)
             case "o":
-                return self.state125(input_str)
+                return self.state124(input_str)
             case "r":
-                return self.state154(input_str)
+                return self.state153(input_str)
             case "w":
-                return self.state163(input_str)
+                return self.state162(input_str)
+            case _:
+                return False, input_str, None
+            
+    def state120(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "l":
+                return self.state121(input_str)
             case _:
                 return False, input_str, None
             
@@ -1931,120 +1979,122 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "l":
+            case "e":
                 return self.state122(input_str)
             case _:
                 return False, input_str, None
-            
+
     def state122(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "e":
-                return self.state123(input_str)
-            case _:
-                return False, input_str, None
-
-    def state123(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
         if self.current_char() in Delims ['genie_delim']:
-            return self.state124(input_str)
+            return self.state123(input_str)
         else:
             return False, input_str, None
         
-    #Final State tale
-    def state124(self, input_str):
+    #################### FINAL STATE FOR TALE ####################
+
+    def state123(self, input_str):
         return True, input_str, TokenType.TALE
     
+    def state124(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "o":
+                return self.state125(input_str)
+            case "r":
+                return self.state131(input_str)
+            case "s":
+                return self.state136(input_str)
+            case "t":
+                return self.state143(input_str)
+            case _:
+                return False, input_str, None
+            
     def state125(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "o":
+            case "c":
                 return self.state126(input_str)
-            case "r":
-                return self.state132(input_str)
-            case "s":
-                return self.state137(input_str)
-            case "t":
-                return self.state144(input_str)
             case _:
                 return False, input_str, None
-            
+    
     def state126(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "c":
+            case "e":
                 return self.state127(input_str)
             case _:
                 return False, input_str, None
-    
+
     def state127(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "e":
+            case "a":
                 return self.state128(input_str)
             case _:
                 return False, input_str, None
-
+    
     def state128(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "a":
+            case "n":
                 return self.state129(input_str)
             case _:
                 return False, input_str, None
-    
+
     def state129(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "n":
-                return self.state130(input_str)
-            case _:
-                return False, input_str, None
-
-    def state130(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
         if self.current_char() in Delims ['genie_delim']:
-            return self.state131(input_str)
+            return self.state130(input_str)
         else:
             return False, input_str, None
         
-    #Final State toocean
-    def state131(self, input_str):
+    #################### FINAL STATE FOR TOOCEAN ####################
+
+    def state130(self, input_str):
         return True, input_str, TokenType.TOOCEAN
     
 
-    def state132(self, input_str):
+    def state131(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "o":
-                return self.state133(input_str)
+                return self.state132(input_str)
             case _:
                 return False, input_str, None
     
-    def state133(self, input_str):
+    def state132(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "s":
+                return self.state133(input_str)
+            case _:
+                return False, input_str, None
+
+    def state133(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
                 return self.state134(input_str)
             case _:
                 return False, input_str, None
@@ -2053,42 +2103,43 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "e":
-                return self.state135(input_str)
-            case _:
-                return False, input_str, None
-
-    def state135(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
         if self.current_char() in Delims ['genie_delim']:
-            return self.state136(input_str)
+            return self.state135(input_str)
         else:
             return False, input_str, None
         
-    #Final State torose
-    def state136(self, input_str):
+    #################### FINAL STATE FOR TOROSE ####################
+
+    def state135(self, input_str):
         return True, input_str, TokenType.TOROSE
     
 
-    def state137(self, input_str):
+    def state136(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "c":
-                return self.state138(input_str)
+                return self.state137(input_str)
             case _:
                 return False, input_str, None
     
-    def state138(self, input_str):
+    def state137(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "r":
+                return self.state138(input_str)
+            case _:
+                return False, input_str, None
+
+    def state138(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "o":
                 return self.state139(input_str)
             case _:
                 return False, input_str, None
@@ -2098,11 +2149,11 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "o":
+            case "l":
                 return self.state140(input_str)
             case _:
                 return False, input_str, None
-
+    
     def state140(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -2112,46 +2163,47 @@ class RoyalScriptLexer:
                 return self.state141(input_str)
             case _:
                 return False, input_str, None
-    
+
     def state141(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "l":
-                return self.state142(input_str)
-            case _:
-                return False, input_str, None
-
-    def state142(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
         if self.current_char() in Delims ['genie_delim']:
-            return self.state143(input_str)
+            return self.state142(input_str)
         else:
             return False, input_str, None
         
-    #Final State torose
-    def state143(self, input_str):
+    #################### FINAL STATE FOR TOSCROLL ####################
+
+    def state142(self, input_str):
         return True, input_str, TokenType.TOSCROLL
+    
+    def state143(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state144(input_str)
+            case _:
+                return False, input_str, None
     
     def state144(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "r":
+            case "e":
                 return self.state145(input_str)
             case _:
                 return False, input_str, None
-    
+
     def state145(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "e":
+            case "a":
                 return self.state146(input_str)
             case _:
                 return False, input_str, None
@@ -2161,80 +2213,81 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "a":
+            case "s":
                 return self.state147(input_str)
             case _:
                 return False, input_str, None
-
+    
     def state147(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "s":
+            case "u":
                 return self.state148(input_str)
             case _:
                 return False, input_str, None
-    
+            
     def state148(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "u":
+            case "r":
                 return self.state149(input_str)
             case _:
                 return False, input_str, None
-            
+
     def state149(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "r":
+            case "e":
                 return self.state150(input_str)
             case _:
                 return False, input_str, None
-
+    
     def state150(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "e":
+            case "s":
                 return self.state151(input_str)
             case _:
                 return False, input_str, None
-    
+
     def state151(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "s":
-                return self.state152(input_str)
-            case _:
-                return False, input_str, None
-
-    def state152(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
         if self.current_char() in Delims ['genie_delim']:
-            return self.state153(input_str)
+            return self.state152(input_str)
         else:
             return False, input_str, None
         
-    #Final State torose
+    #################### FINAL STATE FOR TOTREASURES ####################
+
+    def state152(self, input_str):
+        return True, input_str, TokenType.TOTREASURES
+    
     def state153(self, input_str):
-        return True, input_str, TokenType.TOSCROLL
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state154(input_str)
+            case _:
+                return False, input_str, None
     
     def state154(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "e":
+            case "a":
                 return self.state155(input_str)
             case _:
                 return False, input_str, None
@@ -2244,7 +2297,7 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "a":
+            case "s":
                 return self.state156(input_str)
             case _:
                 return False, input_str, None
@@ -2254,7 +2307,7 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "s":
+            case "u":
                 return self.state157(input_str)
             case _:
                 return False, input_str, None
@@ -2264,7 +2317,7 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "u":
+            case "r":
                 return self.state158(input_str)
             case _:
                 return False, input_str, None
@@ -2274,748 +2327,819 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "r":
+            case "e":
                 return self.state159(input_str)
             case _:
                 return False, input_str, None
-    
+            
     def state159(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "e":
+            case "s":
                 return self.state160(input_str)
             case _:
                 return False, input_str, None
-            
+
     def state160(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "s":
-                return self.state161(input_str)
-            case _:
-                return False, input_str, None
-
-    def state161(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
         if self.current_char() in Delims ['genie_delim']:
-            return self.state162(input_str)
+            return self.state161(input_str)
         else:
             return False, input_str, None
         
-    #Final State treasures
-    def state162(self, input_str):
+    #################### FINAL STATE FOR TREASURES ####################
+
+    def state161(self, input_str):
         return True, input_str, TokenType.TREASURES
     
+    def state162(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "i":
+                return self.state163(input_str)
+            case _:
+                return False, input_str, None
+            
     def state163(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "i":
+            case "s":
                 return self.state164(input_str)
             case _:
                 return False, input_str, None
-            
+    
     def state164(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "s":
+            case "t":
                 return self.state165(input_str)
             case _:
                 return False, input_str, None
-    
+
     def state165(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "t":
-                return self.state166(input_str)
-            case _:
-                return False, input_str, None
-
-    def state166(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
         if self.current_char() in Delims ['genie_delim']:
-            return self.state167(input_str)
+            return self.state166(input_str)
         else:
             return False, input_str, None
         
-    #Final State twist
-    def state167(self, input_str):
+    #################### FINAL STATE FOR TWIST ####################
+
+    def state166(self, input_str):
         return True, input_str, TokenType.TWIST
     
-    def state168(self):
+    def state167(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "i":
-                return self.state169(input_str)
+                return self.state168(input_str)
             case _:
                 return False, input_str, None
     
-    def state169(self, input_str):
+    def state168(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "s":
-                return self.state170(input_str)
+                return self.state169(input_str)
             case _:
                 return False, input_str, None
             
-    def state170(self, input_str):
+    def state169(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "h":
-                return self.state171(input_str)
+                return self.state170(input_str)
             case _:
                 return False, input_str, None
             
 
-    def state171(self, input_str):
+    def state170(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['genie_delim']:
-            return self.state172(input_str)
+            return self.state171(input_str)
         else:
             return False, input_str, None
         
-    #Final State wish
-    def state172(self, input_str):
+    #################### FINAL STATE FOR WISH ####################
+
+    def state171(self, input_str):
         return True, input_str, TokenType.WISH
 
-#Symbols
+    #==================================================#
+    #               STATES => SYMBOLS                  #
+    #==================================================#
+    #   STATE 172 - STATE 173 => -                     #
+    #   STATE 172 & STATE 174-175 => -=                #
+    #   STATE 176 - STATE 177 => +                     #
+    #   STATE 176 & STATE 178-179 => ++                #
+    #   STATE 176 & STATE 180-181 => +=                #
+    #   STATE 182 - STATE 183 => -                     #
+    #   STATE 182 & STATE 184-185 => --                #
+    #   STATE 182 & STATE 186-187 => -=                #
+    #   STATE 188 - STATE 189 => *                     #
+    #   STATE 88 & STATE 190-191 => *=                 #
+    #   STATE 192 - STATE 193 => /                     #
+    #   STATE 192 & STATE 194-195 => /=                #
+    #   STATE 196 - STATE 197 => %                     #
+    #   STATE 196 & STATE 198-199 => %=                #
+    #   STATE 200 - STATE 201 => !                     #
+    #   STATE 200 & STATE 202-203 => !=                #
+    #   STATE 204 - STATE 206 => &&                    #
+    #   STATE 207 - STATE 209 => ||                    #
+    #   STATE 210 - STATE 2011 => >                    #
+    #   STATE 210 & STATE 212-213 => >=                #
+    #   STATE 214 - STATE 215 => <                     #
+    #   STATE 214 & STATE 216-217 => <=                #
+    #   STATE 218 - STATE 219 => (                     #
+    #   STATE 220 - STATE 221 => )                     #
+    #   STATE 222 - STATE 223 => {                     #
+    #   STATE 224 - STATE 225 => }                     #
+    #   STATE 226 - STATE 227 => [                     #
+    #   STATE 228 - STATE 229 => ]                     #
+    #   STATE 230 - STATE 231 => ~                     #
+    #   STATE 232 - STATE 233 => ,                     #
+    #   STATE 234 - STATE 236 => \n                    #
+    #   STATE 234 & STATE 237-238 => \t                #
+    #   STATE 234 & STATE 239-240 => \\                #
+    #   STATE 234 & STATE 241-242 => \"                #
+    #==================================================#
 
-    def state173(self):
+    def state172(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['equal_delim']:
-            return self.state174(input_str)
+            return self.state173(input_str)
         elif self.current_char() == "=":
-            return self.state175(input_str)
+            return self.state174(input_str)
         else:
             return False, input_str, None
     
-    #Final State equal
-    def state174(self, input_str):
+    #################### FINAL STATE FOR EQUAL (=) ####################
+
+    def state173(self, input_str):
         return True, input_str, TokenType.EQUAL
     
-    def state175(self, input_str):
+    def state174(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['relational_operator_delim']:
-            return self.state176(input_str)
+            return self.state175(input_str)
         else:
             return False, input_str, None
 
-    #Final State relational ==
-    def state176(self, input_str):
+    #################### FINAL STATE FOR RELATIONAL (==) ####################
+    def state175(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
     
 
-    def state177(self):
+    def state176(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['plus_delim']:
-            return self.state178(input_str)
+            return self.state177(input_str)
         elif self.current_char() == "+":
-            return self.state179(input_str)
+            return self.state178(input_str)
         elif self.current_char() == "=":
-            return self.state181(input_str)
+            return self.state180(input_str)
         else:
             return False, input_str, None
 
             
-    #Final State arithmetic operator +
-    def state178(self, input_str):
+    #################### FINAL STATE FOR ARITHMETIC OPERATOR (+) ####################
+
+    def state177(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
     
-    def state179(self, input_str):
+    def state178(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['unary_operator_delim']:
-            return self.state180(input_str)
+            return self.state179(input_str)
         else:
             return False, input_str, None
         
         
-    #Final State unary ++
-    def state180(self, input_str):
+    #################### FINAL STATE FOR UNARY OPERATOR (++) ####################
+    def state179(self, input_str):
         return True, input_str, TokenType.UNARY_OPERATOR
     
-    def state181(self, input_str):
+    def state180(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['other_assignment_operator_delim']:
-            return self.state182(input_str)
+            return self.state181(input_str)
         else:
             return False, input_str, None
     
-     #Final State assignment +=
-    def state182(self, input_str):
+    #################### FINAL STATE FOR ASSIGNMENT OPERATOR (+=) ####################
+
+    def state181(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
     
-    def state183(self):
+    def state182(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['arithmetic_operator_delim'] and self.current_char() not in RegDef ['number']:
-            return self.state184(input_str)
+            return self.state183(input_str)
         elif self.current_char() == "-":
-            return self.state185(input_str)
+            return self.state184(input_str)
         elif self.current_char() == "=":
-            return self.state187(input_str)
+            return self.state186(input_str)
         elif self.current_char() in RegDef ['number']:
-            return self.state265(input_str)
+            return self.state260(input_str)
         elif self.current_char() == ".":
-            return self.state266(input_str)
+            return self.state261(input_str)
         else:
             return False, input_str, None
             
-    #Final State arithmetic operator -
-    def state184(self, input_str):
+    #################### FINAL STATE FOR ARITHMETIC OPERATOR (-) ####################
+
+    def state183(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
     
-    def state185(self, input_str):
+    def state184(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['unary_operator_delim']:
-            return self.state186(input_str)
+            return self.state185(input_str)
         else:
             return False, input_str, None
         
-    #Final State unary --
-    def state186(self, input_str):
+    #################### FINAL STATE FOR UNARY OPERATOR (--) ####################
+
+    def state185(self, input_str):
         return True, input_str, TokenType.UNARY_OPERATOR
     
-    def state187(self, input_str):
+    def state186(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['other_assignment_operator_delim']:
-            return self.state188(input_str)
+            return self.state187(input_str)
         else:
             return False, input_str, None
         
-     #Final State assignment -=
-    def state188(self, input_str):
+    #################### FINAL STATE FOR ASSIGNMENT OPERATOR (-=) ####################
+    def state187(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
-            
-    def state189(self):
+    
+    def state188(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['arithmetic_operator_delim']:
-            return self.state190(input_str)
+            return self.state189(input_str)
         elif self.current_char() == "=":
+            return self.state190(input_str)
+        else:
+            return False, input_str, None
+    
+    #################### FINAL STATE FOR ARITHMETIC OPERATOR (*) ####################
+    def state189(self, input_str):
+        return True, input_str, TokenType.ARITHMETIC_OPERATOR
+    
+    def state190(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state191(input_str)
         else:
             return False, input_str, None
-    
-    #Final State arithmetic operator * 
-    def state190(self, input_str):
-        return True, input_str, TokenType.ARITHMETIC_OPERATOR
-    
+
+    #################### FINAL STATE FOR ASSIGNMENT OPERATOR (*=) ####################
     def state191(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['other_assignment_operator_delim']:
-            return self.state192(input_str)
-        else:
-            return False, input_str, None
-
-    #Final State assignment operator *=
-    def state192(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
     
 
-    def state193(self):
+    def state192(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['arithmetic_operator_delim']:
-            return self.state194(input_str)
+            return self.state193(input_str)
         elif self.current_char() == "=":
+            return self.state194(input_str)
+        else:
+            return False, input_str, None
+
+    #################### FINAL STATE FOR ARITHMETIC OPERATOR (/) ####################
+    def state193(self, input_str):
+        return True, input_str, TokenType.ARITHMETIC_OPERATOR
+    
+    def state194(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state195(input_str)
         else:
             return False, input_str, None
 
-    #Final State arithmetic operator / 
-    def state194(self, input_str):
-        return True, input_str, TokenType.ARITHMETIC_OPERATOR
-    
+    #################### FINAL STATE FOR ASSIGNMENT OPERATOR (/=) ####################
+
     def state195(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['other_assignment_operator_delim']:
-            return self.state196(input_str)
-        else:
-            return False, input_str, None
-
-    #Final State assignment operator /=
-    def state196(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
     
-    def state197(self):
+    def state196(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['arithmetic_operator_delim']:
-            return self.state198(input_str)
+            return self.state197(input_str)
         elif self.current_char() == "=":
-            return self.state199(input_str)
+            return self.state198(input_str)
         else:
             return False, input_str, None
     
-    #Final State arithmetic operator %
-    def state198(self, input_str):
+    #################### FINAL STATE FOR ARITHMETIC OPERATOR (%) ####################
+
+    def state197(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
     
-    def state199(self, input_str):
+    def state198(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['other_assignment_operator_delim']:
-            return self.state200(input_str)
+            return self.state199(input_str)
         else:
             return False, input_str, None
 
-    #Final State assignment operator %=
-    def state200(self, input_str):
+    #################### FINAL STATE FOR ASSIGNMENT OPERATOR (%=) ####################
+
+    def state199(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
     
-    def state201(self):
+    def state200(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['not_logical_delim']:
-            return self.state202(input_str)
+            return self.state201(input_str)
         elif self.current_char() == "=":
-            return self.state203(input_str)
+            return self.state202(input_str)
         else:
             return False, input_str, None
     
-    #Final State arithmetic operator !
-    def state202(self, input_str):
+    #################### FINAL STATE FOR NOT LOGIC (!) ####################
+    def state201(self, input_str):
         return True, input_str, TokenType.NOT
     
-    def state203(self, input_str):
+    def state202(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['relational_operator_delim']:
-            return self.state204(input_str)
+            return self.state203(input_str)
         else:
             return False, input_str, None
 
-    #Final State assignment operator !=
-    def state204(self, input_str):
+    #################### FINAL STATE FOR REALTIONAL OPERATOR (!=) ####################
+
+    def state203(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
     
 
-    def state205(self):
+    def state204(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "&":
-                return self.state206(input_str)
+                return self.state205(input_str)
             case _:
                 return False, input_str, None
             
-    def state206(self, input_str):
+    def state205(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['rlogical_operator_delim']:
-            return self.state207(input_str)
+        if self.current_char() in Delims ['logical_operator_delim']:
+            return self.state206(input_str)
         else:
             return False, input_str, None
     
-    #Final State logical operator &&
-    def state207(self, input_str):
+    #################### FINAL STATE FOR LOGICAL OPERATOR (&&) ####################
+
+    def state206(self, input_str):
         return True, input_str, TokenType.LOGICAL_OPERATOR
     
-    def state208(self):
+    def state207(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "|":
-                return self.state209(input_str)
+                return self.state208(input_str)
             case _:
                 return False, input_str, None
             
-    def state209(self, input_str):
+    def state208(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['rlogical_operator_delim']:
-            return self.state210(input_str)
+        if self.current_char() in Delims ['logical_operator_delim']:
+            return self.state209(input_str)
         else:
             return False, input_str, None
     
-    #Final State logical operator ||
-    def state210(self, input_str):
+    #################### FINAL STATE FOR LOGICAL OPERATOR (||) ####################
+
+    def state209(self, input_str):
         return True, input_str, TokenType.LOGICAL_OPERATOR
     
 
-    def state211(self):
+    def state210(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['relational_operator_delim']:
-            return self.state212(input_str)
+            return self.state211(input_str)
         elif self.current_char() == "=":
+            return self.state212(input_str)
+        else:
+            return False, input_str, None
+
+    #################### FINAL STATE FOR RELATIONAL OPERATOR (||) ####################
+
+    def state211(self, input_str):
+        return True, input_str, TokenType.RELATIONAL_OPERATOR
+            
+    def state212(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['relational_operator_delim']:
             return self.state213(input_str)
         else:
             return False, input_str, None
-
-    #Final State relational operator >
-    def state212(self, input_str):
-        return True, input_str, TokenType.RELATIONAL_OPERATOR
-            
+    
+    #################### FINAL STATE FOR RELATIONAL OPERATOR (>=) ####################
     def state213(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['relational_operator_delim']:
-            return self.state214(input_str)
-        else:
-            return False, input_str, None
-    
-    #Final State relational operator >=
-    def state214(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
     
 
-    def state215(self):
+    def state214(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['relational_operator_delim']:
-            return self.state216(input_str)
+            return self.state215(input_str)
         elif self.current_char() == "=":
-            return self.state217(input_str)
+            return self.state216(input_str)
         else:
             return False, input_str, None
 
             
-    #Final State relational operator <
-    def state216(self, input_str):
+    #################### FINAL STATE FOR RELATIONAL OPERATOR (<) ####################
+    def state215(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
             
-    def state217(self, input_str):
+    def state216(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['relational_operator_delim']:
-            return self.state218(input_str)
+            return self.state217(input_str)
         else:
             return False, input_str, None
     
-    #Final State relational operator <=
-    def state218(self, input_str):
+    #################### FINAL STATE FOR RELATIONAL OPERATOR (<=) ####################
+    def state217(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
     
-    def state219(self):
+    def state218(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['open_parentheses_delim']:
-            return self.state220(input_str)
+            return self.state219(input_str)
         else:
             return False, input_str, None
             
-    #Final State Open Parenthesis
-    def state220(self, input_str):
+   #################### FINAL STATE FOR OPEN PARENTHESIS ( ####################
+    def state219(self, input_str):
         return True, input_str, TokenType.OPEN_PAREN
     
 
-    def state221(self):
+    def state220(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['close_parentheses_delim']:
-            return self.state222(input_str)
+            return self.state221(input_str)
         else:
             return False, input_str, None
 
             
-    #Final State Close Parenthesis
-    def state222(self, input_str):
+    #################### FINAL STATE FOR CLOSE PARENTHESIS ) ####################
+    def state221(self, input_str):
         return True, input_str, TokenType.CLOSE_PAREN
     
-    def state223(self):
+    def state222(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['open_curly_bracket_delim']:
-            return self.state224(input_str)
+            return self.state223(input_str)
         else:
             return False, input_str, None
 
             
-    #Final State Open Curly Bracket
-    def state224(self, input_str):
+    #################### FINAL STATE FOR OPEN CURLY BRACKET { ####################
+    def state223(self, input_str):
         return True, input_str, TokenType.OPEN_CURLY
     
-    def state225(self):
+    def state224(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['close_curly_bracket_delim']:
-            return self.state226(input_str)
+            return self.state225(input_str)
         else:
             return False, input_str, None
 
             
-    #Final State Close Curly Bracket
-    def state226(self, input_str):
+    #################### FINAL STATE FOR CLOSE CURLY BRACKET } ####################
+    def state225(self, input_str):
         return True, input_str, TokenType.CLOSE_CURLY
     
 
-    def state227(self):
+    def state226(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['open_square_bracket_delim']:
-            return self.state228(input_str)
+            return self.state227(input_str)
         else:
             return False, input_str, None
 
-    #Final State Open Square Bracket
-    def state228(self, input_str):
+    #################### FINAL STATE FOR OPEN SQUARE BRACKET [ ####################
+    def state227(self, input_str):
         return True, input_str, TokenType.OPEN_SQUARE
     
-    def state229(self):
+    def state228(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['close_square_bracket_delim']:
-            return self.state230(input_str)
+            return self.state229(input_str)
         else:
             return False, input_str, None
 
             
-    #Final State Close Square Bracket
-    def state230(self, input_str):
+    #################### FINAL STATE FOR CLOSE SQUARE BRACKET ] ####################
+    def state229(self, input_str):
         return True, input_str, TokenType.CLOSE_SQUARE
     
-    def state231(self):
+    def state230(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['terminator_delim']:
-            return self.state232(input_str)
+            return self.state231(input_str)
         else:
             return False, input_str, None
             
-    #Final State Terminator ~
-    def state232(self, input_str):
+    #################### FINAL STATE FOR TERMINATOR ~ ####################
+    def state231(self, input_str):
         return True, input_str, TokenType.TERMINATOR
     
 
-    def state233(self):
+    def state232(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['comma_delim']:
-            return self.state234(input_str)
+            return self.state233(input_str)
         else:
             return False, input_str, None
         
-    #Final State Comma , 
-    def state234(self, input_str):
+    #################### FINAL STATE FOR COMMA ####################
+    def state233(self, input_str):
         return True, input_str, TokenType.COMMA
     
-    def state235(self):
+    def state234(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "n":
-                return self.state236(input_str)
+                return self.state235(input_str)
             case "t":
-                return self.state238(input_str)
+                return self.state237(input_str)
             case "\\":
-                return self.state240(input_str)
+                return self.state239(input_str)
             case '"':
-                return self.state244(input_str)
+                return self.state241(input_str)
             case _:
                 return False, input_str, None
     
-    def state236(self, input_str):
+    def state235(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in Delims ['escape_sequence_delim']:
-            return self.state237(input_str)
+            return self.state236(input_str)
         else:
             return False, input_str, None
             
-    #Final State escape sequence \n 
-    def state237(self, input_str):
+    #################### FINAL STATE FOR ESCAPE SEQUENCE \n ####################
+
+    def state236(self, input_str):
         return True, input_str, TokenType.ESCAPE_NEWLINE
     
-    def state238(self, input_str):
+    def state237(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in Delims ['escape_sequence_delim']:
-            return self.state239(input_str)
+            return self.state238(input_str)
         else:
             return False, input_str, None
 
             
-    #Final State escape sequence \t 
-    def state239(self, input_str):
+    #################### FINAL STATE FOR ESCAPE SEQUENCE \t #################### 
+    def state238(self, input_str):
         return True, input_str, TokenType.ESCAPE_TAB
     
-    def state240(self, input_str):
+    def state239(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in Delims ['escape_sequence_delim']:
-            return self.state241(input_str)
+            return self.state240(input_str)
         else:
             return False, input_str, None
 
             
-    #Final State escape sequence \n 
-    def state241(self, input_str):
+    #################### FINAL STATE FOR ESCAPE SEQUENCE \\ #################### 
+    def state240(self, input_str):
         return True, input_str, TokenType.ESCAPE_BACKSLASH
     
-    def state244(self, input_str):
+    def state241(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in Delims ['escape_sequence_delim']:
-            return self.state245(input_str)
+            return self.state242(input_str)
         else:
             return False, input_str, None
 
             
-    #Final State escape sequence \n 
-    def state245(self, input_str):
+    #################### FINAL STATE FOR ESCAPE SEQUENCE \" ####################
+    def state242(self, input_str):
         return True, input_str, TokenType.ESCAPE_QUOTE
     
+    #====================================================#
+    #        STATES => IDENTIFIER, COMMENT               #
+    #====================================================#
+    #   STATE 243 - STATE 244 => IDENTIFIER              #
+    #   STATE 245 - STATE 247 => SINGLE-LINE COMMENT     #
+    #   STATE 245 & STATE 248-251 => MULTI-LINE COMMENT  #
+    #   STATE 176 & STATE 180-181 => +=                  #
+    #   STATE 182 - STATE 183 => -                       # 
+    #   STATE 182 & STATE 184-185 => --                  #
+    #   STATE 182 & STATE 186-187 => -=                  #
+    #   STATE 188 - STATE 189 => *                       #
+    #====================================================#
 
-    def state246(self, input_str):
+    def state243(self, input_str):
         """Initial state for identifiers."""
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() in RegDef['alphanum'] | {'_'}:
-            return self.state247(input_str)  # Transition to state247
+        if self.current_char() in RegDef['alphanum'] | {'_'} and self.current_char() not in Delims['id_delim']:
+            return self.state243(input_str)  # Transition to state247
         elif self.current_char() in Delims['id_delim']:
-            return self.state248(input_str)  # Transition to final state
+            return self.state244(input_str)  # Transition to final state
         else:
             return False, input_str, None
 
-    def state247(self, input_str):
-        """Intermediate state for identifiers."""
+    #################### FINAL STATE FOR IDENTIFIER ####################
+
+    def state244(self, input_str):
+        return True, input_str, TokenType.IDENTIFIER
+    
+    #COMMENT
+    def state245(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() in RegDef['alphanum'] | {'_'}:
-            return self.state247(input_str)  # Stay in state247
-        elif self.current_char() in Delims['id_delim']:
-            return self.state248(input_str)  # Transition to final state
+        if self.current_char() not in ['\n', '*'] and self.current_char() in RegDef['ascii'] or self.current_char() == ' ':
+            return self.state246(input_str)   
+        elif self.current_char() == '\n':
+            return self.state247(input_str)  
+        elif self.current_char() == '*':
+            return self.state248(input_str) 
         else:
             return False, input_str, None
 
-    def state248(self, input_str):
-        """Final state for identifiers."""
-        return True, input_str, TokenType.IDENTIFIER
-    
-    # General alphanum state (e.g., for '1' following '\n')
-    def state_alphanum(self, input_str):
-        while self.current_char() and self.current_char().isalnum():
-            input_str += self.current_char()
-            self.advance()
-        return True, input_str, TokenType.ALPHANUM
-    
+    def state246(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
 
+        if self.current_char() in RegDef['ascii'] or self.current_char() == ' ' and self.current_char() not in ['\n']:
+            return self.state246(input_str)   
+        elif self.current_char() == '\n':
+            return self.state247(input_str)  
+        else:
+            return False, input_str, None
+    
+    #################### FINAL STATE FOR SINGLE-LINE COMMENTS ####################
+
+    def state247(self, input_str):
+        return True, input_str, TokenType.SINGLE_COMMENT
+    
+    def state248(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() != '*' and self.current_char() in RegDef['ascii'] or self.current_char() in ['\t', ' ', '\n']:
+            return self.state248(input_str) 
+        elif self.current_char() == '*':
+            return self.state249(input_str) 
+        else:
+            return False, input_str, None
+        
     def state249(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() in RegDef['ascii'] or self.current_char() == ' ' and self.current_char() != '*':
-            return self.state250(input_str)   
-        elif self.current_char() == '\n':
-            return self.state251(input_str)  
-        elif self.current_char() == '*':
-            return self.state252(input_str) 
+        if self.current_char() == '?':
+            return self.state250(input_str) 
         else:
             return False, input_str, None
-
+        
     def state250(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() in RegDef['ascii'] or self.current_char() in ['\t', ' '] and self.current_char() != '*':
-            return self.state250(input_str) 
-        elif self.current_char() == '\n':
+        if self.current_char() in Delims ['multi-comment_delim']:
             return self.state251(input_str) 
         else:
             return False, input_str, None
-
-    def state251(self, input_str):
-        return True, input_str, TokenType.SINGLE_COMMENT
     
+    #################### FINAL STATE FOR MULTI-LINE COMMENTS ####################
+        
+    def state251(self, input_str):
+        return True, input_str, TokenType.MULTI_COMMENT
+
     def state252(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() in RegDef['ascii'] or self.current_char() in ['\t', ' ', '\n'] and self.current_char() != '*':
-            return self.state253(input_str) 
-        elif self.current_char() == '*':
-            return self.state254(input_str) 
+        if self.current_char() in RegDef['ascii'] or self.current_char() in RegDef['escape_seq'] or self.current_char() in ['\t', ' ']  and self.current_char() not in ['"', '\n']:
+            return self.state253(input_str)   
         else:
             return False, input_str, None
 
@@ -3023,40 +3147,42 @@ class RoyalScriptLexer:
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() in RegDef['ascii'] or self.current_char() in ['\t', ' ', '\n'] and self.current_char() != '*':
-            return self.state253(input_str) 
-        elif self.current_char() == '*':
+        if self.current_char() in RegDef['ascii'] or self.current_char() in RegDef['escape_seq'] or self.current_char() in ['\t', ' ']  and self.current_char() not in ['\n']:
+            return self.state253(input_str)   
+        elif self.current_char() == '"':
             return self.state254(input_str) 
         else:
             return False, input_str, None
-        
+
     def state254(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() == '?':
-            return self.state255(input_str) 
+        if self.current_char() in Delims ['book_delim']:
+            return self.state255(input_str)   
         else:
             return False, input_str, None
         
+    #################### FINAL STATE FOR STRING LITERALS ####################
+        
     def state255(self, input_str):
+        return True, input_str, TokenType.STRING_LITERAL
+
+    def state256(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() in Delims ['multi-comment_delim']:
-            return self.state256(input_str) 
+        if self.current_char() in RegDef['ascii'] or self.current_char() == ' '  and self.current_char() not in ["'"]:
+            return self.state257(input_str)   
         else:
             return False, input_str, None
-        
-    def state256(self, input_str):
-        return True, input_str, TokenType.MULTI_COMMENT
 
     def state257(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
-
-        if self.current_char() in RegDef['ascii'] or self.current_char() in RegDef['escape_seq'] or self.current_char() in ['\t', ' ']  and self.current_char() not in ['"', '\n']:
-            return self.state258(input_str)   
+ 
+        if self.current_char() == "'":
+            return self.state258(input_str) 
         else:
             return False, input_str, None
 
@@ -3064,105 +3190,155 @@ class RoyalScriptLexer:
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() in RegDef['ascii'] or self.current_char() in RegDef['escape_seq'] or self.current_char() in ['\t', ' ']  and self.current_char() not in ['\n']:
-            return self.state258(input_str)   
-        elif self.current_char() == '"':
-            return self.state259(input_str) 
+        if self.current_char() in Delims ['book_delim']:
+            return self.state259(input_str)   
         else:
             return False, input_str, None
-
+        
+    #################### FINAL STATE FOR CHAR LITERALS ####################
+        
     def state259(self, input_str):
-        input_str += self.current_char()  # Append the current character
-        self.advance()
-
-        if self.current_char() in Delims ['book_delim']:
-            return self.state260(input_str)   
-        else:
-            return False, input_str, None
-        
-    def state260(self, input_str):
-        return True, input_str, TokenType.STRING_LITERAL
-
-    def state261(self, input_str):
-        input_str += self.current_char()  # Append the current character
-        self.advance()
-
-        if self.current_char() in RegDef['ascii'] or self.current_char() == ' '  and self.current_char() not in ["'"]:
-            return self.state262(input_str)   
-        else:
-            return False, input_str, None
-
-    def state262(self, input_str):
-        input_str += self.current_char()  # Append the current character
-        self.advance()
- 
-        if self.current_char() == "'":
-            return self.state263(input_str) 
-        else:
-            return False, input_str, None
-
-    def state263(self, input_str):
-        input_str += self.current_char()  # Append the current character
-        self.advance()
-
-        if self.current_char() in Delims ['book_delim']:
-            return self.state264(input_str)   
-        else:
-            return False, input_str, None
-        
-    def state264(self, input_str):
         return True, input_str, TokenType.CHAR_LITERAL
 
 
-    def state265(self, input_str):
+    def state260(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in RegDef['number']  and self.current_char() not in ["."]:
-            return self.state265(input_str) 
+            return self.state260(input_str) 
         elif self.current_char() == ".":
-            return self.state266(input_str)  
+            return self.state261(input_str)  
         elif self.current_char() in Delims['number_delim']:
-            return self.state267(input_str) 
+            return self.state262(input_str) 
         else:
             return False, input_str, None
 
-    def state266(self, input_str):
+    def state261(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
  
-        if self.current_char() in RegDef['number']:
-            return self.state266(input_str) 
+        if self.current_char() in RegDef['number'] and self.current_char() != '':
+            return self.state261(input_str) 
         elif self.current_char() in Delims['number_delim']:
-            return self.state268(input_str)
+            return self.state263(input_str)
         else:
             return False, input_str, None
-        
-    def state267(self, input_str):
+    
+    #################### FINAL STATE FOR TREASURES LITERALS ####################
+
+    def state262(self, input_str):
         normalized = self.normalize_integer(input_str)
         return True, normalized, TokenType.INT_LITERAL
     
-    def state268(self, input_str):
+    #################### FINAL STATE FOR OCEAN LITERALS ####################
+    
+    def state263(self, input_str):
         normalized = self.normalize_float(input_str)
         return True, normalized, TokenType.FLOAT_LITERAL
 
     def normalize_integer(self, input_str):
-        """Removes leading zeros from an integer literal, ensuring '0' is preserved."""
-        normalized = input_str.lstrip('0')
-        return normalized if normalized else '0'
+        """
+        Removes leading zeros from an integer literal.
+        If the number is negative, removes zeros after the '-'.
+        Ensures that '0' and '-0' are preserved.
 
+        Args:
+            input_str (str): The integer literal as a string.
+
+        Returns:
+            str: The normalized integer literal.
+        """
+        if not input_str:
+            return '0'  # Default to '0' if input is empty
+
+        # Check if the number is negative
+        if input_str[0] == '-':
+            # Remove leading zeros after the '-'
+            normalized = '-' + input_str[1:].lstrip('0')
+            # If all characters were zeros, return '-0'
+            return normalized if normalized != '-' else '-0'
+        else:
+            # Remove leading zeros
+            normalized = input_str.lstrip('0')
+            # If all characters were zeros, return '0'
+            return normalized if normalized else '0'
+        
     def normalize_float(self, input_str):
-        """Removes trailing zeros from a float literal and the decimal point if necessary."""
+        """
+        Normalizes a float literal by:
+        - Removing leading zeros from the integer part (after '-' if negative).
+        - Removing trailing zeros from the fractional part only after non-zero digits.
+        - Preserving the fractional part if it consists solely of zeros.
+        - Limiting the fractional part to a maximum of 15 decimal places, rounding if necessary.
+        - Ensuring that if the fractional part is empty after the decimal point, an error is raised.
+        - Preserving '0' and '-0' appropriately.
+
+        Args:
+            input_str (str): The float literal as a string.
+
+        Returns:
+            str: The normalized float literal.
+
+        Raises:
+            ValueError: If the input format is invalid or fractional part is missing.
+        """
+        if not input_str:
+            raise ValueError("Empty input for float normalization.")
+
+        # Check if the number is negative
+        is_negative = False
+        if input_str[0] == '-':
+            is_negative = True
+            input_str = input_str[1:]  # Remove '-' for processing
+
         if '.' in input_str:
             integer_part, fractional_part = input_str.split('.', 1)
-            fractional_part = fractional_part.rstrip('0')
-            if fractional_part:
-                normalized_integer = integer_part.lstrip('0') or '0'
-                return f"{normalized_integer}.{fractional_part}"
+
+            # **Error Check:** Ensure that there is at least one digit after the decimal point
+            if not fractional_part:
+                raise ValueError("Invalid float format: fractional part is missing after decimal point.")
+
+            # Normalize integer part by removing leading zeros
+            normalized_integer = integer_part.lstrip('0') or '0'
+
+            if all(c == '0' for c in fractional_part):
+                # Fractional part consists solely of zeros; preserve it
+                normalized_fractional = fractional_part
+                normalized = f"{normalized_integer}.{normalized_fractional}"
             else:
-                # All fractional digits were zeros; return integer part only
-                return self.normalize_integer(integer_part)
-        return self.normalize_integer(input_str)
+                # Remove trailing zeros after the last non-zero digit
+                normalized_fractional = fractional_part.rstrip('0')
+
+                # **Error Check:** After stripping, ensure there's at least one digit in the fractional part
+                if not normalized_fractional:
+                    raise ValueError("Invalid float format: fractional part has only zeros.")
+
+                # Limit to 15 decimal places, rounding if necessary
+                if len(normalized_fractional) > 15:
+                    # Use Decimal for accurate rounding
+                    number = Decimal(f"{normalized_integer}.{normalized_fractional}")
+                    # Define the quantize pattern for 15 decimal places
+                    quantize_pattern = Decimal('1.' + '0' * 15)
+                    # Round the number to 15 decimal places
+                    number = number.quantize(quantize_pattern, rounding=ROUND_HALF_UP)
+                    normalized = format(number, 'f')  # Convert back to string without scientific notation
+                else:
+                    normalized = f"{normalized_integer}.{normalized_fractional}"
+
+            # Reapply the negative sign if necessary
+            if is_negative:
+                normalized = '-' + normalized
+
+            return normalized
+        else:
+            # No decimal point; treat as integer
+            normalized_integer = self.normalize_integer(input_str)
+            if is_negative:
+                normalized_integer = '-' + normalized_integer
+            return normalized_integer
+
+
 
 
     

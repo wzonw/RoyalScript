@@ -76,6 +76,7 @@ Delims = {
     # Data types (e.g., for parsing types like int, float, etc.)
     'data_type': {' '},
     
+    'other_assignment_operator_delim' : {'(', *RegDef['alphanum']},
     # Dono (could be a special keyword or identifier in your language)
     'arithmetic_operator_delim':{'(', ')', ' ', *RegDef['alphanum']},  #'dono': {'~', ',', '(', ')', ' ', '=', '\n'},
 
@@ -85,7 +86,7 @@ Delims = {
     'plus_delim' : {'(', *RegDef['alphanum'], '"', ' '},    #'cwass': {'~', '[', '.', ',', '(', ')', ' ', '=', '\n'},
     
     # Boolean operators
-    'logical_operator_delim': {'(', *RegDef['alphanum']}, # same with other assignmen operator  #'bool': {'|', '&', ']', ',', ' ', '}', ')', '~', '\n'},
+    'logical_operator_delim': {'(', *RegDef['alphanum'], ' '}, # same with other assignmen operator  #'bool': {'|', '&', ']', ',', ' ', '}', ')', '~', '\n'},
     
     # Conditional statements (e.g., if, while, etc.)
     'not_logical_delim': {'(', '"', "'",  *RegDef['alphanum']},    #'conditional': {'[', '(', ' ', '\n'},
@@ -101,31 +102,31 @@ Delims = {
     'unary_operator_delim': {'~', ')', *RegDef['alphanum']},    #'mainuwu': {'-', ' ', '\n'},
     
     # Integer/Float delimiters (e.g., for parsing numeric expressions)
-    'relational_operator_delim': {'(', '“', '‘', *RegDef['alphanum']},     #'int_float': {',', ' ', *RegDef['general_operator'], ')', '}', ']', '~', '!', r'&', '|', '>', '<', '=', '\n'},
+    'relational_operator_delim': {'(', '“', '‘', *RegDef['alphanum'], ' '},     #'int_float': {',', ' ', *RegDef['general_operator'], ')', '}', ']', '~', '!', r'&', '|', '>', '<', '=', '\n'},
     
     # String delimiters
         ###### 'string': {' ', '|', ')', ',', '&', '}', '[', ']', '~', '!', '=', '\n'},
     
     # Assignment delimiters (e.g., variable assignments)
-    'open_parentheses_delim':  {*RegDef['unary_op'], *RegDef['alphanum']},   #'assign_delim': {*RegDef['alpha'], *RegDef['number'], '{', ' ', '-', '(', '"', '\n'},
+    'open_parentheses_delim':  {*RegDef['unary_op'], *RegDef['alphanum'], ' '},   #'assign_delim': {*RegDef['alpha'], *RegDef['number'], '{', ' ', '-', '(', '"', '\n'},
     
     # General operator delimiters (e.g., for mathematical and logical operators)
-    'close_parentheses_delim' : {*RegDef['arithmetic_op'], *RegDef['logical_op'], *RegDef['relational_op'],'(', '{',  '~'},    #'operator_delim': {*RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '{', '\n'},
+    'close_parentheses_delim' : {*RegDef['arithmetic_op'], *RegDef['logical_op'], *RegDef['relational_op'],'(', '{',  '~', ' '},    #'operator_delim': {*RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '{', '\n'},
     
     # Logical operator delimiters (e.g., AND, OR, etc.)
-    'open_curly_bracket_delim' : {'(',  *RegDef['unary_op'], *RegDef['alphanum'], '\n'},    #'logical_delim': {'"', *RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '{', '\n'},
+    'open_curly_bracket_delim' : {'(',  *RegDef['unary_op'], *RegDef['alphanum'], '\n', ' '},    #'logical_delim': {'"', *RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '{', '\n'},
     
     # String parts (for string manipulations or parsing)
-    'close_curly_bracket_delim' : { *RegDef['alpha_small']},    #'string_parts': {'"', *RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '|', '\n', '&'},
+    'close_curly_bracket_delim' : { *RegDef['alpha_small'], ' '},    #'string_parts': {'"', *RegDef['alpha'], *RegDef['number'], ' ', '-', '(', '|', '\n', '&'},
     
     # Open brace (used for block definitions or scopes)
-    'open_square_bracket_delim' : {'‘','”', ']', *RegDef['number']},   #'open_brace': {'{', '}', '(', *RegDef['number'], ' ', '"', *RegDef['alpha'], '\n', '>', '-'},
+    'open_square_bracket_delim' : {'‘','”', ']', *RegDef['number'], ' '},   #'open_brace': {'{', '}', '(', *RegDef['number'], ' ', '"', *RegDef['alpha'], '\n', '>', '-'},
     
     # Close brace (used for block terminations or scopes)
-    'close_square_bracket_delim' : {'~', '[', '='},    #'close_brace': {'{', '}', '.', '~', ' ', ',', ')', '\n', '>', '&', *RegDef['general_operator'], '!', '|'},
+    'close_square_bracket_delim' : {'~', '[', '=', ' '},    #'close_brace': {'{', '}', '.', '~', ' ', ',', ')', '\n', '>', '&', *RegDef['general_operator'], '!', '|'},
     
     # Unary operation delimiters (e.g., negation or logical NOT)
-    'comma_delim' : {*RegDef['alphanum'], '-' , '‘' , '“' },    #'unary': {'|', '~', ')', *RegDef['general_operator'], '!', ' ', '\n'},
+    'comma_delim' : {*RegDef['alphanum'], '-' , '‘' , '“' , ' '},    #'unary': {'|', '~', ')', *RegDef['general_operator'], '!', ' ', '\n'},
     
     # Concatenation delimiters (likely for string concatenation)
     'id_delim' : {'(', ')', '~', ' ', '=' , *RegDef['unary_op'], *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op']},  #'concat': {' ', '"', *RegDef['alpha'], *RegDef['number'], '(', '{', '\n'},
