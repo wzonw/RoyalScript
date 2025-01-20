@@ -58,7 +58,7 @@ class TokenType:
 
     # Literals
     NEG_TREASURES_INT = "NEG-TREASURES LITERAL"
-    POS_TREASURES_INT = "POS-REASURES LITERAL"
+    POS_TREASURES_INT = "POS-TREASURES LITERAL"
     NEG_FLOAT_LITERAL = "NEG-FLOAT LITERAL"
     POS_FLOAT_LITERAL = "POS-FLOAT LITERAL"
     STRING_LITERAL = "STRING LITERAL"
@@ -100,16 +100,20 @@ class TokenType:
     NOT = 'NOT LOGIC'
     ALPHANUM = 'ALPHANUM'
 
+allowed_symbols = ['b', 'c', 'd', 'f', 'g', 'm', 'o', 'p', 'r', 's', 't', 'w', '=', 'M', '+', '-', '*', '/', '%', '!', '&', '|', '<', '>', '(', ')', '{', '}', '[', ']', '~', ',', '\\', '"', "'", '?', '.']
 
 class RoyalScriptLexer:
     def __init__(self, code):
         self.code = code
         self.position = 0
+        self.line = 1
         self.tokens = []
 
     def advance(self):
         """Advance to the next character in the input"""
         self.position += 1
+        if self.current_char() == '\n':
+            self.line += 1
 
     def current_char(self):
         """Return the current character at the position"""
@@ -131,9 +135,9 @@ class RoyalScriptLexer:
 
             if char in ['\n', ' ', '\t']:
                 match = self.match(r'\s+')
-                if match and self.position < len(self.code) - 1:  # Avoid trailing whitespace
-                    token = Token(match, TokenType.WHITESPACE, self.position)
-                    self.tokens.append(token)
+                # if match and self.position < len(self.code) - 1:  # Avoid trailing whitespace
+                    # token = Token(match, TokenType.WHITESPACE, self.position)
+                    # self.tokens.append(token)
                 self.advance()  # Move to the next character
                 continue
 
@@ -479,7 +483,16 @@ class RoyalScriptLexer:
                 if valid:
                     # Append the recognized token
                     self.tokens.append(Token(input_str, tokenType, pos_start))
-                
+
+            # After all the if-block checks for known states, handle invalid character:
+            if (char not in allowed_symbols 
+                and char not in RegDef['alpha_big']
+                and char not in RegDef['number']):
+                pos_start = self.position
+                # you might want to raise an error with more info
+                raise SyntaxError(f"Invalid input '{char}' at line {self.line}, position {self.position}")
+
+            
                 
         return self.tokens
 
@@ -529,7 +542,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state9(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                     
     def state2(self, input_str):
         input_str += self.current_char()
@@ -539,7 +552,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state3(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state3(self, input_str):
         input_str += self.current_char()
@@ -549,7 +562,7 @@ class RoyalScriptLexer:
             case "i":
                 return self.state4(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
                     
     def state4(self, input_str):
@@ -560,7 +573,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state5(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                     
     def state5(self, input_str):
         input_str += self.current_char()
@@ -570,7 +583,7 @@ class RoyalScriptLexer:
             case "v":
                 return self.state6(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state6(self, input_str):
         input_str += self.current_char()
@@ -580,7 +593,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state7(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                     
     def state7(self, input_str):
         input_str += self.current_char()
@@ -589,7 +602,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims['witch_delim']:
             return self.state8(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR BELIEVE ####################
 
@@ -604,7 +617,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state10(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state10(self, input_str):
         input_str += self.current_char()
@@ -614,7 +627,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state11(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                     
     def state11(self, input_str):
         input_str += self.current_char()
@@ -624,7 +637,7 @@ class RoyalScriptLexer:
             case "k":
                 return self.state12(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state12(self, input_str):
         input_str += self.current_char()
@@ -633,7 +646,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims['gate_delim']:
             return self.state13(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR BREAK ####################
             
@@ -658,7 +671,7 @@ class RoyalScriptLexer:
             case "u":
                 return self.state42(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                     
     def state15(self, input_str):
         input_str += self.current_char()
@@ -668,7 +681,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state16(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state16(self, input_str):
         input_str += self.current_char()
@@ -678,7 +691,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state17(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state17(self, input_str):
         input_str += self.current_char()
@@ -690,7 +703,7 @@ class RoyalScriptLexer:
         elif self.current_char()  == "l":
             return self.state19(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR CAST ####################
 
@@ -706,7 +719,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state20(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state20(self, input_str):
         input_str += self.current_char()
@@ -715,7 +728,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state21(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR CASTLE ####################
 
@@ -730,7 +743,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state23(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state23(self, input_str):
         input_str += self.current_char()
@@ -740,7 +753,7 @@ class RoyalScriptLexer:
             case "m":
                 return self.state24(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state24(self, input_str):
         input_str += self.current_char()
@@ -750,7 +763,7 @@ class RoyalScriptLexer:
             case "b":
                 return self.state25(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state25(self, input_str):
         input_str += self.current_char()
@@ -760,7 +773,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state26(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state26(self, input_str):
         input_str += self.current_char()
@@ -770,7 +783,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state27(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state27(self, input_str):
         input_str += self.current_char()
@@ -779,7 +792,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state28(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR CHAMBER ####################
 
@@ -794,7 +807,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state30(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state30(self, input_str):
         input_str += self.current_char()
@@ -804,7 +817,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state31(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state31(self, input_str):
         input_str += self.current_char()
@@ -814,7 +827,7 @@ class RoyalScriptLexer:
             case "i":
                 return self.state32(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state32(self, input_str):
         input_str += self.current_char()
@@ -824,7 +837,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state33(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state33(self, input_str):
         input_str += self.current_char()
@@ -834,7 +847,7 @@ class RoyalScriptLexer:
             case "u":
                 return self.state34(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state34(self, input_str):
         input_str += self.current_char()
@@ -844,7 +857,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state35(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state35(self, input_str):
         input_str += self.current_char()
@@ -853,7 +866,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['gate_delim']:
             return self.state36(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR CONTINUE ####################
 
@@ -869,7 +882,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state38(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state38(self, input_str):
         input_str += self.current_char()
@@ -879,7 +892,7 @@ class RoyalScriptLexer:
             case "w":
                 return self.state39(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state39(self, input_str):
         input_str += self.current_char()
@@ -889,7 +902,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state40(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state40(self, input_str):
         input_str += self.current_char()
@@ -898,7 +911,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['gate_delim']:
             return self.state41(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR CROWN ####################
 
@@ -913,7 +926,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state43(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state43(self, input_str):
         input_str += self.current_char()
@@ -923,7 +936,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state44(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state44(self, input_str):
         input_str += self.current_char()
@@ -933,7 +946,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state45(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state45(self, input_str):
         input_str += self.current_char()
@@ -942,7 +955,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['witch_delim']:
             return self.state46(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR CURSE ####################
 
@@ -958,7 +971,7 @@ class RoyalScriptLexer:
             case "y":
                 return self.state48(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state48(self, input_str):
         input_str += self.current_char()
@@ -968,7 +981,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state49(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state49(self, input_str):
         input_str += self.current_char()
@@ -978,7 +991,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state50(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
 
     def state50(self, input_str):
@@ -989,7 +1002,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state51(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state51(self, input_str):
         input_str += self.current_char()
@@ -999,7 +1012,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state52(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state52(self, input_str):
         input_str += self.current_char()
@@ -1009,7 +1022,7 @@ class RoyalScriptLexer:
             case "y":
                 return self.state53(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state53(self, input_str):
         input_str += self.current_char()
@@ -1018,7 +1031,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state54(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR DYNASTY ####################
 
@@ -1037,7 +1050,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state61(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state56(self, input_str):
         input_str += self.current_char()
@@ -1047,7 +1060,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state57(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state57(self, input_str):
         input_str += self.current_char()
@@ -1057,7 +1070,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state58(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
 
     def state58(self, input_str):
@@ -1068,7 +1081,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state59(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state59(self, input_str):
         input_str += self.current_char()
@@ -1077,7 +1090,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['mirror-lit_delim']:
             return self.state60(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR FALSE ####################
         
@@ -1092,7 +1105,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state62(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state62(self, input_str):
         input_str += self.current_char()
@@ -1102,7 +1115,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state63(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
 
     def state63(self, input_str):
@@ -1113,7 +1126,7 @@ class RoyalScriptLexer:
             case "v":
                 return self.state64(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state64(self, input_str):
         input_str += self.current_char()
@@ -1123,7 +1136,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state65(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state65(self, input_str):
         input_str += self.current_char()
@@ -1133,7 +1146,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state66(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state66(self, input_str):
         input_str += self.current_char()
@@ -1142,7 +1155,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state67(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR FOREVER ####################
 
@@ -1159,7 +1172,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state69(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state69(self, input_str):
         input_str += self.current_char()
@@ -1169,7 +1182,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state70(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state70(self, input_str):
         input_str += self.current_char()
@@ -1179,7 +1192,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state71(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state71(self, input_str):
         input_str += self.current_char()
@@ -1189,7 +1202,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state72(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state72(self, input_str):
         input_str += self.current_char()
@@ -1199,7 +1212,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state73(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state73(self, input_str):
         input_str += self.current_char()
@@ -1209,7 +1222,7 @@ class RoyalScriptLexer:
             case "d":
                 return self.state74(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state74(self, input_str):
         input_str += self.current_char()
@@ -1218,7 +1231,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state75(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR GRANTED ####################
 
@@ -1234,7 +1247,7 @@ class RoyalScriptLexer:
             case "i":
                 return self.state77(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state77(self, input_str):
         input_str += self.current_char()
@@ -1244,7 +1257,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state78(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state78(self, input_str):
         input_str += self.current_char()
@@ -1254,7 +1267,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state79(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
 
     def state79(self, input_str):
@@ -1265,7 +1278,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state80(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state80(self, input_str):
         input_str += self.current_char()
@@ -1275,7 +1288,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state81(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state81(self, input_str):
         input_str += self.current_char()
@@ -1284,7 +1297,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state82(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR MIRROR ####################
 
@@ -1300,7 +1313,7 @@ class RoyalScriptLexer:
             case "c":
                 return self.state84(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state84(self, input_str):
         input_str += self.current_char()
@@ -1310,7 +1323,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state85(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state85(self, input_str):
         input_str += self.current_char()
@@ -1320,7 +1333,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state86(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state86(self, input_str):
         input_str += self.current_char()
@@ -1330,7 +1343,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state87(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state87(self, input_str):
         input_str += self.current_char()
@@ -1339,7 +1352,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state88(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR OCEAN ####################
 
@@ -1355,7 +1368,7 @@ class RoyalScriptLexer:
             case "h":
                 return self.state90(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state90(self, input_str):
         input_str += self.current_char()
@@ -1365,7 +1378,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state91(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state91(self, input_str):
         input_str += self.current_char()
@@ -1375,7 +1388,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state92(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
 
     def state92(self, input_str):
@@ -1386,7 +1399,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state93(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state93(self, input_str):
         input_str += self.current_char()
@@ -1396,7 +1409,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state94(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state94(self, input_str):
         input_str += self.current_char()
@@ -1406,7 +1419,7 @@ class RoyalScriptLexer:
             case "m":
                 return self.state95(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state95(self, input_str):
         input_str += self.current_char()
@@ -1415,7 +1428,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['gate_delim']:
             return self.state96(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR PHANTOM ####################
     def state96(self, input_str):
@@ -1433,7 +1446,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state108(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state98(self, input_str):
         input_str += self.current_char()
@@ -1445,7 +1458,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state103(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
                 
     def state99(self, input_str):
         input_str += self.current_char()
@@ -1455,7 +1468,7 @@ class RoyalScriptLexer:
             case "g":
                 return self.state100(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
 
     def state100(self, input_str):
@@ -1466,7 +1479,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state101(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state101(self, input_str):
         input_str += self.current_char()
@@ -1475,7 +1488,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['gate_delim']:
             return self.state102(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR REIGN ####################
 
@@ -1490,7 +1503,7 @@ class RoyalScriptLexer:
             case "u":
                 return self.state104(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state104(self, input_str):
         input_str += self.current_char()
@@ -1500,7 +1513,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state105(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state105(self, input_str):
         input_str += self.current_char()
@@ -1510,7 +1523,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state106(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state106(self, input_str):
         input_str += self.current_char()
@@ -1519,7 +1532,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state107(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR RETURN ####################
 
@@ -1534,7 +1547,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state109(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
 
     def state109(self, input_str):
@@ -1545,7 +1558,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state110(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
 
     def state110(self, input_str):
@@ -1555,7 +1568,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state111(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR ROSE ####################
 
@@ -1573,7 +1586,7 @@ class RoyalScriptLexer:
             case "p":
                 return self.state119(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")   
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")   
 
     def state113(self, input_str):
         input_str += self.current_char()
@@ -1583,7 +1596,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state114(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state114(self, input_str):
         input_str += self.current_char()
@@ -1593,7 +1606,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state115(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state115(self, input_str):
         input_str += self.current_char()
@@ -1603,7 +1616,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state116(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state116(self, input_str):
         input_str += self.current_char()
@@ -1613,7 +1626,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state117(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
 
     def state117(self, input_str):
@@ -1623,7 +1636,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state118(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR SCROLL ####################
 
@@ -1639,7 +1652,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state120(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state120(self, input_str):
         input_str += self.current_char()
@@ -1649,7 +1662,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state121(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state121(self, input_str):
         input_str += self.current_char()
@@ -1659,7 +1672,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state122(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state122(self, input_str):
         input_str += self.current_char()
@@ -1668,7 +1681,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state123(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR SPELL ####################
 
@@ -1690,7 +1703,7 @@ class RoyalScriptLexer:
             case "w":
                 return self.state170(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state125(self, input_str):
         input_str += self.current_char()
@@ -1700,7 +1713,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state126(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state126(self, input_str):
         input_str += self.current_char()
@@ -1710,7 +1723,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state127(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state127(self, input_str):
         input_str += self.current_char()
@@ -1719,7 +1732,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state128(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TALE ####################
 
@@ -1740,7 +1753,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state148(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state130(self, input_str):
         input_str += self.current_char()
@@ -1750,7 +1763,7 @@ class RoyalScriptLexer:
             case "c":
                 return self.state131(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state131(self, input_str):
         input_str += self.current_char()
@@ -1760,7 +1773,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state132(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state132(self, input_str):
         input_str += self.current_char()
@@ -1770,7 +1783,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state133(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state133(self, input_str):
         input_str += self.current_char()
@@ -1780,7 +1793,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state134(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state134(self, input_str):
         input_str += self.current_char()
@@ -1789,7 +1802,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state135(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TOOCEAN ####################
 
@@ -1805,7 +1818,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state137(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state137(self, input_str):
         input_str += self.current_char()
@@ -1815,7 +1828,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state138(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state138(self, input_str):
         input_str += self.current_char()
@@ -1825,7 +1838,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state139(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state139(self, input_str):
         input_str += self.current_char()
@@ -1834,7 +1847,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state140(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TOROSE ####################
 
@@ -1850,7 +1863,7 @@ class RoyalScriptLexer:
             case "c":
                 return self.state142(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state142(self, input_str):
         input_str += self.current_char()
@@ -1860,7 +1873,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state143(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state143(self, input_str):
         input_str += self.current_char()
@@ -1870,7 +1883,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state144(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state144(self, input_str):
         input_str += self.current_char()
@@ -1880,7 +1893,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state145(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state145(self, input_str):
         input_str += self.current_char()
@@ -1890,7 +1903,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state146(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state146(self, input_str):
         input_str += self.current_char()
@@ -1899,7 +1912,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state147(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TOSCROLL ####################
 
@@ -1914,7 +1927,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state149(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state149(self, input_str):
         input_str += self.current_char()
@@ -1924,7 +1937,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state150(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state150(self, input_str):
         input_str += self.current_char()
@@ -1934,7 +1947,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state151(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state151(self, input_str):
         input_str += self.current_char()
@@ -1944,7 +1957,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state152(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state152(self, input_str):
         input_str += self.current_char()
@@ -1954,7 +1967,7 @@ class RoyalScriptLexer:
             case "u":
                 return self.state153(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state153(self, input_str):
         input_str += self.current_char()
@@ -1964,7 +1977,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state154(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state154(self, input_str):
         input_str += self.current_char()
@@ -1974,7 +1987,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state155(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state155(self, input_str):
         input_str += self.current_char()
@@ -1984,7 +1997,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state156(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state156(self, input_str):
         input_str += self.current_char()
@@ -1993,7 +2006,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state157(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TOTREASURES ####################
 
@@ -2010,7 +2023,7 @@ class RoyalScriptLexer:
             case "u":
                 return self.state167(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state159(self, input_str):
         input_str += self.current_char()
@@ -2020,7 +2033,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state160(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state160(self, input_str):
         input_str += self.current_char()
@@ -2030,7 +2043,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state161(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state161(self, input_str):
         input_str += self.current_char()
@@ -2040,7 +2053,7 @@ class RoyalScriptLexer:
             case "u":
                 return self.state162(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state162(self, input_str):
         input_str += self.current_char()
@@ -2050,7 +2063,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state163(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state163(self, input_str):
         input_str += self.current_char()
@@ -2060,7 +2073,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state164(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state164(self, input_str):
         input_str += self.current_char()
@@ -2070,7 +2083,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state165(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state165(self, input_str):
         input_str += self.current_char()
@@ -2079,7 +2092,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state166(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TREASURES ####################
 
@@ -2094,7 +2107,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state168(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state168(self, input_str):
         input_str += self.current_char()
@@ -2103,7 +2116,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['mirror-lit_delim']:
             return self.state169(input_str)
         else:
-           raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+           raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR TRUE ####################
 
@@ -2118,7 +2131,7 @@ class RoyalScriptLexer:
             case "i":
                 return self.state171(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state171(self, input_str):
         input_str += self.current_char()
@@ -2128,7 +2141,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state172(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state172(self, input_str):
         input_str += self.current_char()
@@ -2138,7 +2151,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state173(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state173(self, input_str):
         input_str += self.current_char()
@@ -2147,7 +2160,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state174(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TWIST ####################
 
@@ -2163,7 +2176,7 @@ class RoyalScriptLexer:
             case "i":
                 return self.state176(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state176(self, input_str):
         input_str += self.current_char()
@@ -2173,7 +2186,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state177(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state177(self, input_str):
         input_str += self.current_char()
@@ -2183,7 +2196,7 @@ class RoyalScriptLexer:
             case "h":
                 return self.state178(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
 
     def state178(self, input_str):
@@ -2193,7 +2206,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state179(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR WISH ####################
 
@@ -2203,8 +2216,8 @@ class RoyalScriptLexer:
     #==================================================#
     #               STATES => SYMBOLS                  #
     #==================================================#
-    #   STATE 180 - STATE 181 => -                     #
-    #   STATE 180 & STATE 182-183 => -=                #
+    #   STATE 180 - STATE 181 => =                     #
+    #   STATE 180 & STATE 182-183 => ==                #
     #   STATE 184 - STATE 185 => +                     #
     #   STATE 184 & STATE 186-187 => ++                #
     #   STATE 184 & STATE 188-189 => +=                #
@@ -2249,7 +2262,7 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state182(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR EQUAL (=) ####################
 
@@ -2263,7 +2276,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['relational_operator_delim']:
             return self.state183(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR RELATIONAL (==) ####################
     def state183(self, input_str):
@@ -2282,7 +2295,7 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state188(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (+) ####################
@@ -2297,7 +2310,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['unary_operator_delim']:
             return self.state187(input_str)
         else:
-           raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+           raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
         
     #################### FINAL STATE FOR UNARY OPERATOR (++) ####################
@@ -2311,7 +2324,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state189(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (+=) ####################
 
@@ -2334,7 +2347,7 @@ class RoyalScriptLexer:
         elif self.current_char() == ".":
             return self.state257(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (-) ####################
 
@@ -2348,7 +2361,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['unary_operator_delim']:
             return self.state193(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR UNARY OPERATOR (--) ####################
 
@@ -2362,7 +2375,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state195(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (-=) ####################
     def state195(self, input_str):
@@ -2378,7 +2391,7 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state198(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (*) ####################
     def state197(self, input_str):
@@ -2391,7 +2404,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state199(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (*=) ####################
     def state199(self, input_str):
@@ -2408,7 +2421,7 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state202(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (/) ####################
     def state201(self, input_str):
@@ -2421,7 +2434,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state203(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (/=) ####################
 
@@ -2438,7 +2451,7 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state206(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (%) ####################
 
@@ -2452,7 +2465,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state207(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (%=) ####################
 
@@ -2469,7 +2482,7 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state210(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR NOT LOGIC (!) ####################
     def state209(self, input_str):
@@ -2482,7 +2495,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['relational_operator_delim']:
             return self.state211(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR REALTIONAL OPERATOR (!=) ####################
 
@@ -2499,7 +2512,7 @@ class RoyalScriptLexer:
             case "&":
                 return self.state213(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state213(self, input_str):
         input_str += self.current_char()
@@ -2508,7 +2521,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['logical_operator_delim']:
             return self.state214(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR LOGICAL OPERATOR (&&) ####################
 
@@ -2524,7 +2537,7 @@ class RoyalScriptLexer:
             case "|":
                 return self.state216(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
     def state216(self, input_str):
         input_str += self.current_char()
@@ -2533,7 +2546,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['logical_operator_delim']:
             return self.state217(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR LOGICAL OPERATOR (||) ####################
 
@@ -2551,7 +2564,7 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state220(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR RELATIONAL OPERATOR (||) ####################
 
@@ -2565,7 +2578,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['relational_operator_delim']:
             return self.state221(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR RELATIONAL OPERATOR (>=) ####################
     def state221(self, input_str):
@@ -2582,7 +2595,7 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state224(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR RELATIONAL OPERATOR (<) ####################
@@ -2596,7 +2609,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['relational_operator_delim']:
             return self.state225(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR RELATIONAL OPERATOR (<=) ####################
     def state225(self, input_str):
@@ -2610,7 +2623,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['open_parentheses_delim']:
             return self.state227(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
             
    #################### FINAL STATE FOR OPEN PARENTHESIS ( ####################
     def state227(self, input_str):
@@ -2625,7 +2638,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['close_parentheses_delim']:
             return self.state229(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR CLOSE PARENTHESIS ) ####################
@@ -2640,7 +2653,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['open_curly_bracket_delim']:
             return self.state231(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR OPEN CURLY BRACKET { ####################
@@ -2655,7 +2668,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['close_curly_bracket_delim']:
             return self.state233(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR CLOSE CURLY BRACKET } ####################
@@ -2671,7 +2684,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['open_square_bracket_delim']:
             return self.state235(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR OPEN SQUARE BRACKET [ ####################
     def state235(self, input_str):
@@ -2685,7 +2698,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['close_square_bracket_delim']:
             return self.state237(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR CLOSE SQUARE BRACKET ] ####################
@@ -2700,7 +2713,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['terminator_delim']:
             return self.state239(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
             
     #################### FINAL STATE FOR TERMINATOR ~ ####################
     def state239(self, input_str):
@@ -2715,7 +2728,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['comma_delim']:
             return self.state241(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR COMMA ####################
     def state241(self, input_str):
@@ -2736,7 +2749,7 @@ class RoyalScriptLexer:
             case '"':
                 return self.state249(input_str)
             case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     def state243(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -2745,7 +2758,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['escape_sequence_delim']:
             return self.state244(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
             
     #################### FINAL STATE FOR ESCAPE SEQUENCE \n ####################
 
@@ -2759,7 +2772,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['escape_sequence_delim']:
             return self.state246(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR ESCAPE SEQUENCE \t #################### 
@@ -2773,7 +2786,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['escape_sequence_delim']:
             return self.state248(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR ESCAPE SEQUENCE \\ #################### 
@@ -2787,7 +2800,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['escape_sequence_delim']:
             return self.state250(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR ESCAPE SEQUENCE \" ####################
@@ -2818,7 +2831,7 @@ class RoyalScriptLexer:
         elif self.current_char() in Delims['id_delim']:
             return self.state252(input_str)  # Transition to final state
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR IDENTIFIER ####################
 
@@ -2838,7 +2851,7 @@ class RoyalScriptLexer:
         elif self.current_char() == ".":
             return self.state257(input_str)  
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR NEGATIVE TREASURES LITERALS ####################
 
@@ -2857,7 +2870,7 @@ class RoyalScriptLexer:
         elif self.current_char() == ".":
             return self.state257(input_str)  
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR POSITIVE TREASURES LITERALS ####################
 
@@ -2872,7 +2885,7 @@ class RoyalScriptLexer:
         if self.current_char() in RegDef['number']:
             return self.state258(input_str) 
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
 
     def state258(self, input_str):
@@ -2884,7 +2897,7 @@ class RoyalScriptLexer:
         elif self.current_char() in Delims['number_delim']:
             return self.state259(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR NEGATIVE OCEAN LITERALS ####################
     
@@ -2900,7 +2913,7 @@ class RoyalScriptLexer:
         if self.current_char() in RegDef['number']:
             return self.state261(input_str) 
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
 
     def state261(self, input_str):
@@ -2912,7 +2925,7 @@ class RoyalScriptLexer:
         elif self.current_char() in Delims['number_delim']:
             return self.state262(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR POSITIVE OCEAN LITERALS ####################
     
@@ -2925,12 +2938,12 @@ class RoyalScriptLexer:
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() not in ['"', '\n'] and (self.current_char() in RegDef['ascii'] or self.current_char() in RegDef['escape_seq'] or self.current_char() in ['\t', ' ']):
+        if self.current_char() not in ['"', '\n'] and (self.current_char() in RegDef['ascii'] or self.current_char() in RegDef['escape_seq'] or self.current_char() in ['\t', ' ', '_']):
             return self.state263(input_str)   
         elif self.current_char() == '"':
             return self.state264(input_str) 
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state264(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -2939,7 +2952,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['book_delim']:
             return self.state265(input_str)   
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
 
     #################### FINAL STATE FOR SCROLL LITERALS ####################
@@ -2956,7 +2969,7 @@ class RoyalScriptLexer:
         elif self.current_char() == "'":
             return self.state268(input_str)  
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state267(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -2965,7 +2978,7 @@ class RoyalScriptLexer:
         if self.current_char() == "'":
             return self.state268(input_str) 
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     def state268(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -2974,7 +2987,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['book_delim']:
             return self.state269(input_str)   
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR rose LITERALS ####################
         
@@ -2993,7 +3006,7 @@ class RoyalScriptLexer:
         elif self.current_char() == '*':
             return self.state272(input_str) 
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR SINGLE-LINE COMMENTS ####################
 
@@ -3009,7 +3022,7 @@ class RoyalScriptLexer:
         elif self.current_char() == '*':
             return self.state273(input_str) 
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
     def state273(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -3018,7 +3031,7 @@ class RoyalScriptLexer:
         if self.current_char() == '?':
             return self.state274(input_str) 
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at position {self.position}")
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
     def state274(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -3027,7 +3040,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims['multi-comment_delim']:
             return self.state275(input_str) 
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at position {self.position}")
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     
     #################### FINAL STATE FOR MULTI-LINE COMMENTS ####################
@@ -3140,19 +3153,18 @@ class RoyalScriptLexer:
 
 
 
-
-    
-# Create the GUI with Tkinter
 class RoyalScriptLexerGUI(tk.Tk):
     def __init__(self):
         super().__init__()
 
         self.title("RoyalScript Lexer")
-        self.geometry("945x700")
+        self.geometry("1030x700")
+        self.resizable(False, False)
+
 
         # Load the image and set it as the background
         self.bg_image = Image.open("3.jpg")  # Replace with your image path
-        self.bg_image = self.bg_image.resize((945, 700), Image.Resampling.LANCZOS)  # Resize to fit window size
+        self.bg_image = self.bg_image.resize((1030, 700), Image.Resampling.LANCZOS)  # Resize to fit window size
         self.bg_photo = ImageTk.PhotoImage(self.bg_image)
 
         # Create a label to place the image as background
@@ -3160,7 +3172,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.bg_label.place(relwidth=1, relheight=1)  # Cover the entire window
 
         # Create frames for each section without background color
-        self.left_frame = tk.Frame(self, bg="#ff87d1")
+        self.left_frame = tk.Frame(self, bg="#ff87d1", padx=5) 
         self.left_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
 
         self.middle_frame = tk.Frame(self, bg="#ff87d1")
@@ -3177,46 +3189,223 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.program_frame = tk.Frame(self, bg="#ff87d1")
         self.program_frame.grid(row=2, column=0, columnspan=3, padx=10, pady=10)
 
-        # Left: Input code with title (larger box)
-        self.input_label = tk.Label(self.left_frame, text="Input Code", fg="white", font=("Arial", 14, "bold"), bg="#ff87d1")
-        self.input_label.grid(row=0, column=0)
-        self.input_text = scrolledtext.ScrolledText(self.left_frame, width=60, height=20, wrap=tk.WORD, fg="#d60083")
-        self.input_text.grid(row=1, column=0, padx=0, pady=5)
+        # -- Left Section: Input Code (with line numbers) --
 
-        # Middle: Lexer output with title (same width as the token box)
-        self.output_label = tk.Label(self.middle_frame, text="Lexer", fg="white", font=("Arial", 14, "bold"), bg="#ff87d1")
-        self.output_label.grid(row=0, column=0)
-        self.output_listbox = tk.Listbox(self.middle_frame, width=30, height=20, justify="center", fg="#d60083")
-        self.output_listbox.grid(row=1, column=0, padx=0, pady=5)
+        # Label
+        self.input_label = tk.Label(
+            self.left_frame, text="Input Code", fg="white",
+            font=("Arial", 14, "bold"), bg="#ff87d1"
+        )
+        self.input_label.grid(row=0, column=0, columnspan=3)
 
-        # Right: Tokens with title (same width as lexer output)
-        self.tokens_label = tk.Label(self.right_frame, text="Tokens", fg="white", font=("Arial", 14, "bold"), bg="#ff87d1")
-        self.tokens_label.grid(row=0, column=0)
-        self.token_listbox = tk.Listbox(self.right_frame, width=30, height=20, justify="center", fg="#d60083")
-        self.token_listbox.grid(row=1, column=0, padx=0, pady=5)
+        # Line Numbers Text
+        self.line_numbers = tk.Text(
+            self.left_frame, width=4, height=20, wrap=tk.NONE,
+            fg="#d60083", bg="#f3f3f3", state="disabled"
+        )
+        self.line_numbers.grid(row=1, column=0, padx=0, pady=5, sticky="nsew")
 
-        # Errors Box (left side of the combined frame)
-        self.errors_label = tk.Label(self.bottom_frame, text="Errors", fg="white", font=("Arial", 14, "bold"), bg="#ff87d1")
+        # Main Text widget
+        self.input_text = tk.Text(
+            self.left_frame, width=60, height=20,
+            wrap=tk.WORD, fg="#d60083"
+        )
+        self.input_text.grid(row=1, column=1, padx=0, pady=5, sticky="nsew")
+
+        # Create a shared scrollbar
+        self.shared_scrollbar = tk.Scrollbar(self.left_frame, orient="vertical")
+        self.shared_scrollbar.grid(row=1, column=2, padx=0, pady=5, sticky="nsew")
+
+        # Prevent scrolling for both widgets
+        def prevent_scroll(event):
+            return "break"
+
+        # Apply scroll prevention to both widgets
+        for widget in (self.input_text, self.line_numbers):
+            widget.bind("<MouseWheel>", prevent_scroll)
+            widget.bind("<Button-4>", prevent_scroll)
+            widget.bind("<Button-5>", prevent_scroll)
+            widget.bind("<Key-Up>", prevent_scroll)
+            widget.bind("<Key-Down>", prevent_scroll)
+            widget.bind("<Key-Prior>", prevent_scroll)
+            widget.bind("<Key-Next>", prevent_scroll)
+
+        # Configure scrollbar and synced scrolling
+        def on_scrollbar_move(*args):
+            """Called when scrollbar moves"""
+            self.input_text.yview(*args)
+            self.line_numbers.yview(*args)
+            
+        def update_scrollbar(*args):
+            """Update scrollbar and sync text widgets"""
+            self.shared_scrollbar.set(*args)
+            self.line_numbers.yview_moveto(args[0])
+            self.input_text.yview_moveto(args[0])
+
+        # Connect everything together
+        self.shared_scrollbar.config(command=on_scrollbar_move)
+        self.input_text.config(yscrollcommand=update_scrollbar)
+        self.line_numbers.config(yscrollcommand=update_scrollbar)
+
+        # Update line numbers
+        def update_line_numbers(event=None):
+            # Reset modified flag
+            if event:
+                self.input_text.edit_modified(False)
+            
+            # Get current text and count lines
+            text_content = self.input_text.get("1.0", "end-1c")
+            num_lines = text_content.count('\n') + 1
+            
+            # Create line numbers text
+            line_numbers_text = '\n'.join(str(i).rjust(3) for i in range(1, num_lines + 1))
+            
+            # Update line numbers
+            self.line_numbers.config(state='normal')
+            self.line_numbers.delete("1.0", "end")
+            self.line_numbers.insert("1.0", line_numbers_text)
+            self.line_numbers.config(state='disabled')
+            
+            # Get current cursor line
+            try:
+                cursor_pos = self.input_text.index("insert")
+                line_num = int(cursor_pos.split('.')[0])
+                
+                # Ensure current line is visible
+                self.input_text.see(f"{line_num}.0")
+                self.line_numbers.see(f"{line_num}.0")
+            except:
+                pass
+
+        # Bind text changes
+        self.input_text.bind('<<Modified>>', update_line_numbers)
+
+        # Initialize line numbers
+        update_line_numbers()
+
+       # ---- Combined Frame for Lexer + Tokens ----
+        self.lr_frame = tk.Frame(self, bg="#ff87d1")
+        self.lr_frame.grid(row=0, column=1, columnspan=2, padx=0, pady=20, sticky="nsew")
+
+        # Create a scrollbar that will be shared by both listboxes
+        self.shared_scrollbar = tk.Scrollbar(self.lr_frame, orient="vertical")
+
+        def sync_scroll(*args):
+            """
+            A custom command function to tie both Listboxes' yview together.
+            Ensures they scroll together with one scrollbar.
+            """
+            self.output_listbox.yview(*args)
+            self.token_listbox.yview(*args)
+
+        self.shared_scrollbar.config(command=sync_scroll)
+        self.shared_scrollbar.grid(row=1, column=2, sticky="ns")
+
+        # ---- Middle Section: Lexer Output ----
+        self.output_label = tk.Label(
+            self.lr_frame, text="Lexer", fg="white",
+            font=("Arial", 14, "bold"), bg="#ff87d1"
+        )
+        self.output_label.grid(row=0, column=0, padx=5, pady=0)
+
+        self.output_listbox = tk.Listbox(
+            self.lr_frame, width=30, height=20, justify="center", fg="#d60083"
+        )
+        self.output_listbox.grid(row=1, column=0, padx=5, pady=5)
+
+        # ---- Right Section: Tokens ----
+        self.tokens_label = tk.Label(
+            self.lr_frame, text="Tokens", fg="white",
+            font=("Arial", 14, "bold"), bg="#ff87d1"
+        )
+        self.tokens_label.grid(row=0, column=1, padx=5, pady=0)
+
+        self.token_listbox = tk.Listbox(
+            self.lr_frame, width=30, height=20, justify="center", fg="#d60083"
+        )
+        self.token_listbox.grid(row=1, column=1, padx=5, pady=5)
+
+        # Tie both listboxes to the same scrollbar
+        self.output_listbox.config(yscrollcommand=self.shared_scrollbar.set)
+        self.token_listbox.config(yscrollcommand=self.shared_scrollbar.set)
+
+        # ---- Disable individual mouse-wheel AND keyboard arrow/page scrolling ----
+        def ignore_events(event):
+            """
+            Returning 'break' stops the default behavior for these events,
+            preventing individual scrolling in the focused listbox.
+            """
+            return "break"
+
+        # Disable mouse wheel events (Windows/Mac + Linux)
+        for listbox in (self.output_listbox, self.token_listbox):
+            listbox.bind("<MouseWheel>", ignore_events)       # Windows/Mac
+            listbox.bind("<Button-4>", ignore_events)         # Linux (up)
+            listbox.bind("<Button-5>", ignore_events)         # Linux (down)
+
+            # Disable arrow key scrolling
+            listbox.bind("<Up>", ignore_events)
+            listbox.bind("<Down>", ignore_events)
+            # Optionally disable Page Up / Page Down keys, too
+            listbox.bind("<Next>", ignore_events)   # Page Down
+            listbox.bind("<Prior>", ignore_events)  # Page Up
+
+
+        # ---- Bottom Section: Errors ----
+        self.errors_label = tk.Label(
+            self.bottom_frame, text="Errors", fg="white",
+            font=("Arial", 14, "bold"), bg="#ff87d1"
+        )
         self.errors_label.grid(row=0, column=0, padx=5)
-        self.errors_listbox = tk.Listbox(self.bottom_frame, width=145, height=10, fg="red")
+        self.errors_listbox = tk.Listbox(
+            self.bottom_frame, width=160, height=10, fg="red"
+        )
         self.errors_listbox.grid(row=1, column=0, padx=5, pady=5)
 
-      
-        # Create a Canvas to simulate the multi-colored button
-        self.analyze_button = tk.Canvas(self, height=50, width=200, highlightthickness=0, relief="raised", bg="#f7e1d3")  # Canvas widget as a button
+        # ---- "Analyze" Button (Canvas trick) ----
+        self.analyze_button = tk.Canvas(
+            self, height=50, width=200, highlightthickness=0,
+            relief="raised", bg="#f7e1d3"
+        )
         self.analyze_button.grid(row=3, column=0, columnspan=3, pady=0)
 
-        # Add multi-colored text to the Canvas with proper spacing
-        self.analyze_button.create_text(20, 25, text="✨", font=("Arial", 14, "bold"), fill="#efbf04")
-        self.analyze_button.create_text(100, 25, text="Analyze Code", font=("Arial", 14, "bold"), fill="#d60083")  # Adjusted x position for spacing
-        self.analyze_button.create_text(180, 25, text="✨", font=("Arial", 14, "bold"), fill="#efbf04")
+        self.analyze_button.create_text(
+            20, 25, text="✨", font=("Arial", 14, "bold"), fill="#efbf04"
+        )
+        self.analyze_button.create_text(
+            100, 25, text="Analyze Code", font=("Arial", 14, "bold"), fill="#d60083"
+        )
+        self.analyze_button.create_text(
+            180, 25, text="✨", font=("Arial", 14, "bold"), fill="#efbf04"
+        )
 
         # Bind the Canvas click event to the analyze_code function
         self.analyze_button.bind("<Button-1>", self.analyze_code)
-
         # Add hover effect (when mouse enters)
         self.analyze_button.bind("<Enter>", self.on_hover)
         self.analyze_button.bind("<Leave>", self.on_leave)
+
+        # Initialize line numbers once
+        self.update_line_numbers()
+
+    def update_line_numbers(self, event=None):
+        """
+        Update the line_numbers widget to reflect the current number of lines
+        in the input_text widget.
+        """
+        # Enable the line_numbers widget to update it
+        self.line_numbers.config(state='normal')
+        self.line_numbers.delete('1.0', tk.END)
+
+        # Count how many lines are in the ScrolledText
+        line_count = int(self.input_text.index('end-1c').split('.')[0])
+
+        # Insert line numbers
+        for i in range(1, line_count + 1):
+            self.line_numbers.insert(tk.END, f"{i}\n")
+
+        # Disable editing of the line_numbers text
+        self.line_numbers.config(state='disabled')
 
     def analyze_code(self, event=None):
         """Method to analyze the code provided in the input_text area."""
@@ -3235,28 +3424,14 @@ class RoyalScriptLexerGUI(tk.Tk):
             # Tokenize the input code
             tokens = lexer.get_tokens()
             
-            # Show tokens with color-coding
+            # Show tokens with optional color-coding (currently plain in the Listbox)
             for token in tokens:
                 self.output_listbox.insert(tk.END, f"{token.value}\n")
                 
-                # Optionally, assign colors based on token type
-                if token.token_type == TokenType.WHITESPACE:
-                    color = "grey"
-                # elif token.token_type in [TokenType.INT_LITERAL, TokenType.FLOAT_LITERAL]:
-                    color = "blue"
-                elif token.token_type in [TokenType.STRING_LITERAL, TokenType.CHAR_LITERAL]:
-                    color = "green"
-                elif token.token_type in [TokenType.BOOL_LITERAL, TokenType.NULL_LITERAL]:
-                    color = "purple"
-                elif token.token_type == TokenType.IDENTIFIER:
-                    color = "black"
-                elif token.token_type == "ERROR":
-                    color = "red"
-                else:
-                    color = "orange"
-                
-                # Insert into token listbox with color (requires using a Text widget instead of Listbox)
-                # For simplicity, we continue using Listbox without color-coding
+                # Decide color if implementing advanced text-based color, etc.
+                # color = "black"  # Just an example
+
+                # Insert token type into the token_listbox
                 if token.token_type in TokenType.__dict__.values():
                     definition = token.token_type.replace("_", "")
                     self.token_listbox.insert(tk.END, f"{definition}")
@@ -3268,14 +3443,13 @@ class RoyalScriptLexerGUI(tk.Tk):
             # Handle any unexpected errors
             self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}\n")
 
-    # Change the button's appearance when hovered
     def on_hover(self, event):
-        self.analyze_button.config(bg="#f0a6ca")  # Change background on hover
+        """Change the button's appearance when hovered."""
+        self.analyze_button.config(bg="#f0a6ca")
 
-    # Change the button's appearance when mouse leaves
     def on_leave(self, event):
-        self.analyze_button.config(bg="#f7e1d3")  # Reset the background when mouse leaves
-
+        """Reset the button's appearance when the mouse leaves."""
+        self.analyze_button.config(bg="#f7e1d3")
 
 
 if __name__ == "__main__":
