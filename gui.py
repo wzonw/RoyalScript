@@ -598,6 +598,7 @@ class RoyalScriptLexer:
     def state7(self, input_str):
         input_str += self.current_char()
         self.advance()
+        
 
         if self.current_char() in Delims['witch_delim']:
             return self.state8(input_str)
@@ -642,7 +643,7 @@ class RoyalScriptLexer:
     def state12(self, input_str):
         input_str += self.current_char()
         self.advance()
-
+        
         if self.current_char() in Delims['gate_delim']:
             return self.state13(input_str)
         else:
@@ -728,7 +729,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state21(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR CASTLE ####################
 
@@ -792,7 +793,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state28(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR CHAMBER ####################
 
@@ -1031,7 +1032,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state54(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR DYNASTY ####################
 
@@ -1297,7 +1298,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state82(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR MIRROR ####################
 
@@ -1352,7 +1353,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state88(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR OCEAN ####################
 
@@ -1532,7 +1533,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state107(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR RETURN ####################
 
@@ -1568,7 +1569,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state111(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR ROSE ####################
 
@@ -1636,7 +1637,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state118(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR SCROLL ####################
 
@@ -1681,7 +1682,7 @@ class RoyalScriptLexer:
         if self.current_char() in [' ']:
             return self.state123(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR SPELL ####################
 
