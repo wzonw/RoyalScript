@@ -414,19 +414,19 @@ class RoyalScriptLexer:
                     self.tokens.append(Token(input_str, tokenType, pos_start))
                 
                 
-            if char == '\\':
-                pos_start = self.position
-                valid, input_str, tokenType= self.state242()
+            # if char == '\\':
+            #     pos_start = self.position
+            #     valid, input_str, tokenType= self.state242()
 
-                if valid:
-                    # Append the recognized token
-                    self.tokens.append(Token(input_str, tokenType, pos_start))
+            #     if valid:
+            #         # Append the recognized token
+            #         self.tokens.append(Token(input_str, tokenType, pos_start))
                 
 
             #IDENTIFIER    
             if char in RegDef['alpha_big']:
                 pos_start = self.position
-                valid, input_str, tokenType = self.state251("")
+                valid, input_str, tokenType = self.state247("")
 
                 if valid:
                     # Append the recognized token
@@ -436,7 +436,7 @@ class RoyalScriptLexer:
             #COMMENTS
             if char == '?':
                 pos_start = self.position
-                valid, input_str, tokenType = self.state270("")
+                valid, input_str, tokenType = self.state266("")
 
                 if valid:
                     # Append the recognized token
@@ -446,7 +446,7 @@ class RoyalScriptLexer:
             #SCROLL LITERALS 
             if char == '"':
                 pos_start = self.position
-                valid, input_str, tokenType = self.state263("")
+                valid, input_str, tokenType = self.state259("")
 
                 if valid:
                     # Append the recognized token
@@ -457,7 +457,7 @@ class RoyalScriptLexer:
             #ROSE LITERALS    
             if char == "'":
                 pos_start = self.position
-                valid, input_str, tokenType = self.state266("")
+                valid, input_str, tokenType = self.state262("")
 
                 if valid:
                     # Append the recognized token
@@ -467,7 +467,7 @@ class RoyalScriptLexer:
             #TREASURES & FLOAT LITERALS
             if char in RegDef ['number']:
                 pos_start = self.position
-                valid, input_str, tokenType = self.state255("")
+                valid, input_str, tokenType = self.state251("")
 
                 if valid:
                     # Append the recognized token
@@ -478,7 +478,7 @@ class RoyalScriptLexer:
             #FLOAT LITERALS STARTING WITH .
             if char == ".":
                 pos_start = self.position
-                valid, input_str, tokenType = self.state258("")
+                valid, input_str, tokenType = self.state256("")
 
                 if valid:
                     # Append the recognized token
@@ -2343,9 +2343,9 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state194(input_str)
         elif self.current_char() in RegDef ['number']:
-            return self.state253(input_str)
+            return self.state249(input_str)
         elif self.current_char() == ".":
-            return self.state257(input_str)
+            return self.state253(input_str)
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
@@ -2734,78 +2734,77 @@ class RoyalScriptLexer:
     def state241(self, input_str):
         return True, input_str, TokenType.COMMA
     
-    def state242(self):
-        input_str = ""
+    def state242(self, input_str):
         input_str += self.current_char()
         self.advance()
-
-        match self.current_char():
-            case "n":
-                return self.state243(input_str)
-            case "t":
-                return self.state245(input_str)
-            case "\\":
-                return self.state247(input_str)
-            case '"':
-                return self.state249(input_str)
-            case _:
-                raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+        
+        if self.current_char() == "n":
+            return self.state243(input_str)
+        elif self.current_char() == "t":
+            return self.state244(input_str)
+        elif self.current_char() == "\\":
+            return self.state245(input_str)
+        elif self.current_char() == '"':
+            return self.state246(input_str)
+        elif self.current_char() not in ["n", "t", "\\", '"']:
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+        
     
     def state243(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() in Delims ['escape_sequence_delim']:
-            return self.state244(input_str)
+        if self.current_char() in Delims ['escape_sequence_delim'] or self.current_char() == '"':
+            return self.state259(input_str)
         else:
             raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
             
     #################### FINAL STATE FOR ESCAPE SEQUENCE \n ####################
 
+    # def state244(self, input_str):
+    #     return True, input_str, TokenType.ESCAPE_NEWLINE
+    
     def state244(self, input_str):
-        return True, input_str, TokenType.ESCAPE_NEWLINE
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in Delims ['escape_sequence_delim']:
+            return self.state259(input_str)
+        else:
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+
+            
+    # #################### FINAL STATE FOR ESCAPE SEQUENCE \t #################### 
+    # def state246(self, input_str):
+    #     return True, input_str, TokenType.ESCAPE_TAB
     
     def state245(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in Delims ['escape_sequence_delim']:
-            return self.state246(input_str)
-        else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
-
-            
-    #################### FINAL STATE FOR ESCAPE SEQUENCE \t #################### 
-    def state246(self, input_str):
-        return True, input_str, TokenType.ESCAPE_TAB
-    
-    def state247(self, input_str):
-        input_str += self.current_char()  # Append the current character
-        self.advance()
-
-        if self.current_char() in Delims ['escape_sequence_delim']:
-            return self.state248(input_str)
+            return self.state259(input_str)
         else:
             raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR ESCAPE SEQUENCE \\ #################### 
-    def state248(self, input_str):
-        return True, input_str, TokenType.ESCAPE_BACKSLASH
+    # def state248(self, input_str):
+    #     return True, input_str, TokenType.ESCAPE_BACKSLASH
     
-    def state249(self, input_str):
+    def state246(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in Delims ['escape_sequence_delim']:
-            return self.state250(input_str)
+            return self.state259(input_str)
         else:
             raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR ESCAPE SEQUENCE \" ####################
-    def state250(self, input_str):
-        return True, input_str, TokenType.ESCAPE_QUOTE
+    # def state250(self, input_str):
+    #     return True, input_str, TokenType.ESCAPE_QUOTE
     
     #=====================================================#
     #        STATES => IDENTIFIER, COMMENT                #
@@ -2821,126 +2820,189 @@ class RoyalScriptLexer:
     #   STATE 270 & STATE 272-275 => MULTI-LINE COMMENT   #
     #=====================================================#
 
-    def state251(self, input_str):
+    def state247(self, input_str):
         """Initial state for identifiers."""
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in RegDef['alphanum'] | {'_'} and self.current_char() not in Delims['id_delim']:
-            return self.state251(input_str)  # Transition to state247
+            return self.state247(input_str) 
         elif self.current_char() in Delims['id_delim']:
-            return self.state252(input_str)  # Transition to final state
+            return self.state248(input_str)  
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR IDENTIFIER ####################
 
-    def state252(self, input_str):
+    def state248(self, input_str):
         return True, input_str, TokenType.IDENTIFIER
 
 
     
-    def state253(self, input_str):
+    def state249(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in RegDef['number']  and self.current_char() not in ["."]:
-            return self.state253(input_str) 
+            return self.state249(input_str) 
         elif self.current_char() in Delims['number_delim']:
-            return self.state254(input_str) 
+            return self.state250(input_str) 
         elif self.current_char() == ".":
-            return self.state257(input_str)  
+            return self.state253(input_str)  
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR NEGATIVE TREASURES LITERALS ####################
 
-    def state254(self, input_str):
+    def state250(self, input_str):
         normalized = self.normalize_integer(input_str)
         return True, normalized, TokenType.NEG_TREASURES_INT
     
-    def state255(self, input_str):
+    def state251(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in RegDef['number']  and self.current_char() not in ["."]:
-            return self.state255(input_str) 
+            return self.state251(input_str) 
         elif self.current_char() in Delims['number_delim']:
-            return self.state256(input_str) 
+            return self.state252(input_str) 
         elif self.current_char() == ".":
-            return self.state257(input_str)  
+            return self.state256(input_str)  
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR POSITIVE TREASURES LITERALS ####################
 
-    def state256(self, input_str):
+    def state252(self, input_str):
         normalized = self.normalize_integer(input_str)
         return True, normalized, TokenType.POS_TREASURES_INT
 
-    def state257(self, input_str):
+    def state253(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
  
         if self.current_char() in RegDef['number']:
-            return self.state258(input_str) 
+            return self.state254(input_str) 
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
 
-    def state258(self, input_str):
+    def state254(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
  
+        # if self.current_char() in RegDef['number']:
+        #     deci=1
+        #     while deci<=14:
+        #         deci+=1
+        #         return self.state254(input_str) 
+        # elif self.current_char() in Delims['number_delim']:
+        #     return self.state256(input_str)
+        # else:
+        #     raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+
         if self.current_char() in RegDef['number']:
-            return self.state258(input_str) 
+            deci = 1  # Start counting decimals
+            while deci <= 14:  # Allow up to 14 decimals
+                deci += 1
+                return self.state254(input_str)
+            raise SyntaxError(f"Too many decimals: max 15 allowed, found more at line {self.line}, position {self.position}")
         elif self.current_char() in Delims['number_delim']:
-            return self.state259(input_str)
+            return self.state255(input_str)
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR NEGATIVE OCEAN LITERALS ####################
     
-    def state259(self, input_str):
+    def state255(self, input_str):
         normalized = self.normalize_float(input_str)
         return True, normalized, TokenType.NEG_FLOAT_LITERAL
     
 
-    def state260(self, input_str):
+    def state256(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
  
         if self.current_char() in RegDef['number']:
-            return self.state261(input_str) 
+            return self.state257(input_str) 
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
 
-    def state261(self, input_str):
+    def state257(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
  
+        # if self.current_char() in RegDef['number']:
+        #     return self.state257(input_str) 
+        # elif self.current_char() in Delims['number_delim']:
+        #     return self.state258(input_str)
+        # else:
+        #     raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+
         if self.current_char() in RegDef['number']:
-            return self.state258(input_str) 
+            deci = 1  # Start counting decimals
+            while deci <= 14:  # Allow up to 14 decimals
+                deci += 1
+                return self.state257(input_str)
+            raise SyntaxError(f"Too many decimals: max 15 allowed, found more at line {self.line}, position {self.position}")
         elif self.current_char() in Delims['number_delim']:
-            return self.state262(input_str)
+            return self.state258(input_str)
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR POSITIVE OCEAN LITERALS ####################
     
-    def state262(self, input_str):
+    def state258(self, input_str):
         normalized = self.normalize_float(input_str)
         return True, normalized, TokenType.POS_FLOAT_LITERAL
     
 
-    def state263(self, input_str):
+    def state259(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() not in ['"', '\n'] and (self.current_char() in RegDef['ascii'] or self.current_char() in RegDef['escape_seq'] or self.current_char() in ['\t', ' ', '_']):
-            return self.state263(input_str)   
+        if self.current_char() not in ['\n', '\\', '"'] and (self.current_char() in RegDef['ascii'] or self.current_char() in ['\t', ' ', '_']):
+            return self.state259(input_str)
+        elif self.current_char() == '\\':  # Correct representation of backslash
+            return self.state242(input_str)
         elif self.current_char() == '"':
+            return self.state260(input_str)  # Handle double-quote
+        else:
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+
+
+    def state260(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in Delims ['book_delim']:
+            return self.state261(input_str)   
+        else:
+            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+        
+
+    #################### FINAL STATE FOR SCROLL LITERALS ####################
+        
+    def state261(self, input_str):
+        return True, input_str, TokenType.STRING_LITERAL
+
+    def state262(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if  self.current_char() not in ["'"] and self.current_char() in RegDef['ascii'] or self.current_char() == ' ':
+            return self.state263(input_str)  
+        elif self.current_char() == "'":
+            return self.state264(input_str)  
+        else:
+            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+
+    def state263(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+ 
+        if self.current_char() == "'":
             return self.state264(input_str) 
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
@@ -2954,98 +3016,63 @@ class RoyalScriptLexer:
         else:
             raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
-
-    #################### FINAL STATE FOR SCROLL LITERALS ####################
+    #################### FINAL STATE FOR rose LITERALS ####################
         
     def state265(self, input_str):
-        return True, input_str, TokenType.STRING_LITERAL
-
+        return True, input_str, TokenType.CHAR_LITERAL
+    
+    #COMMENT
     def state266(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if  self.current_char() not in ["'"] and self.current_char() in RegDef['ascii'] or self.current_char() == ' ':
-            return self.state267(input_str)  
-        elif self.current_char() == "'":
-            return self.state268(input_str)  
-        else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
-
-    def state267(self, input_str):
-        input_str += self.current_char()  # Append the current character
-        self.advance()
- 
-        if self.current_char() == "'":
-            return self.state268(input_str) 
-        else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
-
-    def state268(self, input_str):
-        input_str += self.current_char()  # Append the current character
-        self.advance()
-
-        if self.current_char() in Delims ['book_delim']:
-            return self.state269(input_str)   
-        else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
-        
-    #################### FINAL STATE FOR rose LITERALS ####################
-        
-    def state269(self, input_str):
-        return True, input_str, TokenType.CHAR_LITERAL
-    
-    #COMMENT
-    def state270(self, input_str):
-        input_str += self.current_char()  # Append the current character
-        self.advance()
-
         if self.current_char() not in ['\n', '*'] and self.current_char() in RegDef['ascii'] or self.current_char() in [' ', '\t']:
-            return self.state270(input_str)   
+            return self.state266(input_str)   
         elif self.current_char() == '\n':
-            return self.state271(input_str)  
+            return self.state267(input_str)  
         elif self.current_char() == '*':
-            return self.state272(input_str) 
+            return self.state268(input_str) 
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR SINGLE-LINE COMMENTS ####################
 
-    def state271(self, input_str):
+    def state267(self, input_str):
         return True, input_str, TokenType.SINGLE_COMMENT
     
-    def state272(self, input_str):
+    def state268(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() != '*' and self.current_char() in RegDef['ascii'] or self.current_char() in ['\t', ' ', '\n']:
-            return self.state272(input_str) 
+            return self.state268(input_str) 
         elif self.current_char() == '*':
-            return self.state273(input_str) 
+            return self.state269(input_str) 
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
-    def state273(self, input_str):
+    def state269(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() == '?':
-            return self.state274(input_str) 
+            return self.state270(input_str) 
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
-    def state274(self, input_str):
+    def state270(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in Delims['multi-comment_delim']:
-            return self.state275(input_str) 
+            return self.state271(input_str) 
         else:
             raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     
     #################### FINAL STATE FOR MULTI-LINE COMMENTS ####################
         
-    def state275(self, input_str):
+    def state271(self, input_str):
         return True, input_str, TokenType.MULTI_COMMENT
 
     

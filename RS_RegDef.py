@@ -100,7 +100,7 @@ Delims = {
     
     'arithmetic_operator_delim':{'(', ' ', *RegDef['number'], *RegDef['alpha_big']},  
 
-    'escape_sequence_delim': {'”', *RegDef['ascii'], *RegDef['escape_seq'], ' '},
+    'escape_sequence_delim': { '"', *RegDef['ascii'], *RegDef['escape_seq'], ' '},
     
     'plus_delim' : {'(', *RegDef['alphanum'], '"', "'", ' '},   
 
@@ -118,9 +118,9 @@ Delims = {
 
     'relational_operator_delim': {'(', '“', '‘', *RegDef['alphanum'], ' '},     
 
-    'open_parentheses_delim':  {*RegDef['alphanum'], ' ', ')', '"'},   
+    'open_parentheses_delim':  {*RegDef['alphanum'], ' ', ')', '"', "!"},   
 
-    'close_parentheses_delim' : {*RegDef['arithmetic_op'], *RegDef['logical_op'], *RegDef['relational_op'], '{',  '~', ' ', '\n'},
+    'close_parentheses_delim' : {*RegDef['arithmetic_op'], *RegDef['logical_op'], *RegDef['relational_op'], '{',  '~', ' ', '\n', ')'},
 
     'open_curly_bracket_delim' : {'(',  *RegDef['alphanum'], *RegDef['whitespace'], '{', '-'},    
 
