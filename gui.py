@@ -602,7 +602,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims['witch_delim']:
             return self.state8(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR BELIEVE ####################
 
@@ -646,7 +646,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims['gate_delim']:
             return self.state13(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR BREAK ####################
             
@@ -703,7 +703,7 @@ class RoyalScriptLexer:
         elif self.current_char()  == "l":
             return self.state19(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR CAST ####################
 
@@ -866,7 +866,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['gate_delim']:
             return self.state36(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR CONTINUE ####################
 
@@ -911,7 +911,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['gate_delim']:
             return self.state41(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR CROWN ####################
 
@@ -955,7 +955,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['witch_delim']:
             return self.state46(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR CURSE ####################
 
@@ -1090,7 +1090,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['mirror-lit_delim']:
             return self.state60(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR FALSE ####################
         
@@ -1155,7 +1155,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state67(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR FOREVER ####################
 
@@ -1231,7 +1231,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state75(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR GRANTED ####################
 
@@ -1428,7 +1428,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['gate_delim']:
             return self.state96(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR PHANTOM ####################
     def state96(self, input_str):
@@ -1488,7 +1488,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['gate_delim']:
             return self.state102(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR REIGN ####################
 
@@ -1732,7 +1732,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state128(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TALE ####################
 
@@ -1802,7 +1802,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state135(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TOOCEAN ####################
 
@@ -1847,7 +1847,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state140(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TOROSE ####################
 
@@ -1912,7 +1912,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state147(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TOSCROLL ####################
 
@@ -2006,7 +2006,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state157(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TOTREASURES ####################
 
@@ -2092,7 +2092,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state166(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TREASURES ####################
 
@@ -2116,7 +2116,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['mirror-lit_delim']:
             return self.state169(input_str)
         else:
-           raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+           raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR TRUE ####################
 
@@ -2160,7 +2160,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state174(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR TWIST ####################
 
@@ -2206,7 +2206,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['genie_delim']:
             return self.state179(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR WISH ####################
 
@@ -2276,7 +2276,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['relational_operator_delim']:
             return self.state183(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR RELATIONAL (==) ####################
     def state183(self, input_str):
@@ -2310,7 +2310,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['unary_operator_delim']:
             return self.state187(input_str)
         else:
-           raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+           raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
         
     #################### FINAL STATE FOR UNARY OPERATOR (++) ####################
@@ -2324,7 +2324,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state189(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (+=) ####################
 
@@ -2361,7 +2361,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['unary_operator_delim']:
             return self.state193(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR UNARY OPERATOR (--) ####################
 
@@ -2375,7 +2375,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state195(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (-=) ####################
     def state195(self, input_str):
@@ -2404,7 +2404,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state199(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (*=) ####################
     def state199(self, input_str):
@@ -2434,7 +2434,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state203(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (/=) ####################
 
@@ -2465,7 +2465,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['other_assignment_operator_delim']:
             return self.state207(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (%=) ####################
 
@@ -2495,7 +2495,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['relational_operator_delim']:
             return self.state211(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR REALTIONAL OPERATOR (!=) ####################
 
@@ -2521,7 +2521,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['logical_operator_delim']:
             return self.state214(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR LOGICAL OPERATOR (&&) ####################
 
@@ -2546,7 +2546,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['logical_operator_delim']:
             return self.state217(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR LOGICAL OPERATOR (||) ####################
 
@@ -2578,7 +2578,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['relational_operator_delim']:
             return self.state221(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR RELATIONAL OPERATOR (>=) ####################
     def state221(self, input_str):
@@ -2609,7 +2609,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['relational_operator_delim']:
             return self.state225(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR RELATIONAL OPERATOR (<=) ####################
     def state225(self, input_str):
@@ -2623,7 +2623,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['open_parentheses_delim']:
             return self.state227(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
             
    #################### FINAL STATE FOR OPEN PARENTHESIS ( ####################
     def state227(self, input_str):
@@ -2638,7 +2638,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['close_parentheses_delim']:
             return self.state229(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR CLOSE PARENTHESIS ) ####################
@@ -2653,7 +2653,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['open_curly_bracket_delim']:
             return self.state231(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR OPEN CURLY BRACKET { ####################
@@ -2668,7 +2668,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['close_curly_bracket_delim']:
             return self.state233(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR CLOSE CURLY BRACKET } ####################
@@ -2684,7 +2684,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['open_square_bracket_delim']:
             return self.state235(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR OPEN SQUARE BRACKET [ ####################
     def state235(self, input_str):
@@ -2698,7 +2698,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['close_square_bracket_delim']:
             return self.state237(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR CLOSE SQUARE BRACKET ] ####################
@@ -2713,7 +2713,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['terminator_delim']:
             return self.state239(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
             
     #################### FINAL STATE FOR TERMINATOR ~ ####################
     def state239(self, input_str):
@@ -2728,7 +2728,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['comma_delim']:
             return self.state241(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR COMMA ####################
     def state241(self, input_str):
@@ -2757,7 +2757,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['escape_sequence_delim'] or self.current_char() == '"':
             return self.state259(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
             
     #################### FINAL STATE FOR ESCAPE SEQUENCE \n ####################
 
@@ -2771,7 +2771,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['escape_sequence_delim']:
             return self.state259(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     # #################### FINAL STATE FOR ESCAPE SEQUENCE \t #################### 
@@ -2785,7 +2785,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['escape_sequence_delim']:
             return self.state259(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR ESCAPE SEQUENCE \\ #################### 
@@ -2799,7 +2799,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['escape_sequence_delim']:
             return self.state259(input_str)
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
             
     #################### FINAL STATE FOR ESCAPE SEQUENCE \" ####################
@@ -2979,7 +2979,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['book_delim']:
             return self.state261(input_str)   
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
 
     #################### FINAL STATE FOR SCROLL LITERALS ####################
@@ -3014,7 +3014,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims ['book_delim']:
             return self.state265(input_str)   
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR rose LITERALS ####################
         
@@ -3067,7 +3067,7 @@ class RoyalScriptLexer:
         if self.current_char() in Delims['multi-comment_delim']:
             return self.state271(input_str) 
         else:
-            raise SyntaxError(f"Expected delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     
     #################### FINAL STATE FOR MULTI-LINE COMMENTS ####################
