@@ -6,6 +6,8 @@ from RS_RegDef  import Delims
 from RS_RegDef  import RegDef
 from decimal import Decimal, ROUND_HALF_UP
 
+
+
 # Token class to represent individual tokens
 class Token:
     def __init__(self, value, token_type, position):
@@ -102,13 +104,11 @@ class TokenType:
 allowed_symbols = ['b', 'c', 'd', 'f', 'g', 'm', 'o', 'p', 'r', 's', 't', 'w', '=', 'M', '+', '-', '*', '/', '%', '!', '&', '|', '<', '>', '(', ')', '{', '}', '[', ']', '~', ',', '\\', '"', "'", '?', '.']
 
 class RoyalScriptLexer:
-    
     def __init__(self, code):
         self.code = code
         self.position = 0
         self.line = 1
         self.tokens = []
-        self.deci = 1
 
     def advance(self):
         """Advance to the next character in the input"""
@@ -415,6 +415,16 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens.append(Token(input_str, tokenType, pos_start))
                 
+                
+            # if char == '\\':
+            #     pos_start = self.position
+            #     valid, input_str, tokenType= self.state242()
+
+            #     if valid:
+            #         # Append the recognized token
+            #         self.tokens.append(Token(input_str, tokenType, pos_start))
+                
+
             #IDENTIFIER    
             if char in RegDef['alpha_big']:
                 pos_start = self.position
@@ -489,6 +499,7 @@ class RoyalScriptLexer:
         # Emit EOF token
         self.tokens.append(Token("EOF", TokenType.EOF, self.position))
         return self.tokens
+
 
     #==================================================#
     #            STATES => RESERVED WORDS              #
@@ -603,8 +614,6 @@ class RoyalScriptLexer:
     def state8(self, input_str):
         return True, input_str, TokenType.BELIEVE
 
-    ##################################################################
-
     def state9(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -649,7 +658,6 @@ class RoyalScriptLexer:
     def state13(self, input_str):
         return True, input_str, TokenType.BREAK
     
-    #################################################################
 
     def state14(self):
         input_str = ""
@@ -707,7 +715,6 @@ class RoyalScriptLexer:
     def state18(self, input_str):
         return True, input_str, TokenType.CAST  
 
-    #################################################################
     
     def state19(self, input_str):
         input_str += self.current_char()
@@ -733,8 +740,6 @@ class RoyalScriptLexer:
     def state21(self, input_str):
         return True, input_str, TokenType.CASTLE  
     
-    #################################################################
-
     def state22(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -798,8 +803,6 @@ class RoyalScriptLexer:
 
     def state28(self, input_str):
         return True, input_str, TokenType.CHAMBER
-    
-    #################################################################
 
     def state29(self, input_str):
         input_str += self.current_char()
@@ -875,8 +878,6 @@ class RoyalScriptLexer:
     def state36(self, input_str):
         return True, input_str, TokenType.CONTINUE
     
-    #################################################################
-    
     
     def state37(self, input_str):
         input_str += self.current_char()
@@ -922,8 +923,6 @@ class RoyalScriptLexer:
     def state41(self, input_str):
         return True, input_str, TokenType.CROWN
     
-    #################################################################
-    
     def state42(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -968,8 +967,6 @@ class RoyalScriptLexer:
     def state46(self, input_str):
         return True, input_str, TokenType.CURSE
     
-    #################################################################
-
     def state47(self):
         input_str = ""
         input_str += self.current_char()
@@ -1046,7 +1043,6 @@ class RoyalScriptLexer:
     def state54(self, input_str):
         return True, input_str, TokenType.DYNASTY
     
-    #################################################################
 
     def state55(self):
         input_str = ""
@@ -1105,8 +1101,6 @@ class RoyalScriptLexer:
         
     def state60(self, input_str):
         return True, input_str, TokenType.BOOL_LITERAL
-    
-    #################################################################
             
     def state61(self, input_str):
         input_str += self.current_char()
@@ -1172,8 +1166,6 @@ class RoyalScriptLexer:
 
     def state67(self, input_str):
         return True, input_str, TokenType.FOREVER
-    
-    #################################################################
     
 
     def state68(self):
@@ -1250,8 +1242,6 @@ class RoyalScriptLexer:
 
     def state75(self, input_str):
         return True, input_str, TokenType.GRANTED
-    
-    #################################################################
 
     def state76(self):
         input_str = ""
@@ -1319,8 +1309,6 @@ class RoyalScriptLexer:
     def state82(self, input_str):
         return True, input_str, TokenType.MIRROR
     
-    #################################################################
-    
     def state83(self):
         input_str = ""
         input_str += self.current_char()
@@ -1375,8 +1363,6 @@ class RoyalScriptLexer:
 
     def state88(self, input_str):
         return True, input_str, TokenType.OCEAN
-    
-    #################################################################
     
     def state89(self):
         input_str = ""
@@ -1450,11 +1436,8 @@ class RoyalScriptLexer:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR PHANTOM ####################
-    
     def state96(self, input_str):
         return True, input_str, TokenType.PHANTOM
-    
-    #################################################################
     
     
     def state97(self):
@@ -1517,8 +1500,6 @@ class RoyalScriptLexer:
     def state102(self, input_str):
         return True, input_str, TokenType.REIGN
     
-    #################################################################
-    
     def state103(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -1563,8 +1544,6 @@ class RoyalScriptLexer:
     def state107(self, input_str):
         return True, input_str, TokenType.RETURN    
     
-    #################################################################
-    
     def state108(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -1600,8 +1579,6 @@ class RoyalScriptLexer:
 
     def state111(self, input_str):
         return True, input_str, TokenType.ROSE    
-    
-    #################################################################
 
     def state112(self):
         input_str = ""
@@ -1669,9 +1646,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR SCROLL ####################
 
     def state118(self, input_str):
-        return True, input_str, TokenType.SCROLL  
-
-    ################################################################# 
+        return True, input_str, TokenType.SCROLL   
     
     
     def state119(self, input_str):
@@ -1716,9 +1691,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR SPELL ####################
 
     def state123(self, input_str):
-        return True, input_str, TokenType.SPELL 
-
-    ################################################################# 
+        return True, input_str, TokenType.SPELL  
     
     def state124(self):
         input_str = ""
@@ -1770,8 +1743,6 @@ class RoyalScriptLexer:
 
     def state128(self, input_str):
         return True, input_str, TokenType.TALE
-    
-    #################################################################
     
     def state129(self, input_str):
         input_str += self.current_char()
@@ -1843,8 +1814,6 @@ class RoyalScriptLexer:
     def state135(self, input_str):
         return True, input_str, TokenType.TOOCEAN
     
-    #################################################################
-    
 
     def state136(self, input_str):
         input_str += self.current_char()
@@ -1889,8 +1858,6 @@ class RoyalScriptLexer:
 
     def state140(self, input_str):
         return True, input_str, TokenType.TOROSE
-    
-    #################################################################
     
 
     def state141(self, input_str):
@@ -1956,8 +1923,6 @@ class RoyalScriptLexer:
 
     def state147(self, input_str):
         return True, input_str, TokenType.TOSCROLL
-    
-    #################################################################
     
     def state148(self, input_str):
         input_str += self.current_char()
@@ -2053,8 +2018,6 @@ class RoyalScriptLexer:
     def state157(self, input_str):
         return True, input_str, TokenType.TOTREASURES
     
-    #################################################################
-    
     def state158(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -2141,8 +2104,6 @@ class RoyalScriptLexer:
     def state166(self, input_str):
         return True, input_str, TokenType.TREASURES
     
-    #################################################################
-    
     def state167(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -2166,8 +2127,6 @@ class RoyalScriptLexer:
 
     def state169(self, input_str):
         return True, input_str, TokenType.BOOL_LITERAL
-    
-    #################################################################
     
     def state170(self, input_str):
         input_str += self.current_char()
@@ -2212,8 +2171,6 @@ class RoyalScriptLexer:
 
     def state174(self, input_str):
         return True, input_str, TokenType.TWIST
-    
-    #################################################################
     
     def state175(self):
         input_str = ""
@@ -2260,8 +2217,6 @@ class RoyalScriptLexer:
 
     def state179(self, input_str):
         return True, input_str, TokenType.WISH
-    
-    #################################################################
 
     #==================================================#
     #               STATES => SYMBOLS                  #
@@ -2319,8 +2274,6 @@ class RoyalScriptLexer:
     def state181(self, input_str):
         return True, input_str, TokenType.EQUAL
     
-    #################################################################
-    
     def state182(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -2331,11 +2284,8 @@ class RoyalScriptLexer:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR RELATIONAL (==) ####################
-    
     def state183(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
-    
-    #################################################################
     
 
     def state184(self):
@@ -2358,8 +2308,6 @@ class RoyalScriptLexer:
     def state185(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
     
-    #################################################################
-    
     def state186(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -2371,11 +2319,8 @@ class RoyalScriptLexer:
         
         
     #################### FINAL STATE FOR UNARY OPERATOR (++) ####################
-    
     def state187(self, input_str):
         return True, input_str, TokenType.UNARY_OPERATOR
-    
-    #################################################################
     
     def state188(self, input_str):
         input_str += self.current_char()
@@ -2391,8 +2336,6 @@ class RoyalScriptLexer:
     def state189(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
     
-    #################################################################
-    
     def state190(self):
         input_str = ""
         input_str += self.current_char()
@@ -2405,9 +2348,9 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state194(input_str)
         elif self.current_char() in RegDef ['number']:
-            return self.state245(input_str)
-        elif self.current_char() == ".":
             return self.state249(input_str)
+        elif self.current_char() == ".":
+            return self.state253(input_str)
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
             
@@ -2415,8 +2358,6 @@ class RoyalScriptLexer:
 
     def state191(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
-    
-    #################################################################
     
     def state192(self, input_str):
         input_str += self.current_char()
@@ -2432,8 +2373,6 @@ class RoyalScriptLexer:
     def state193(self, input_str):
         return True, input_str, TokenType.UNARY_OPERATOR
     
-    #################################################################
-    
     def state194(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -2444,11 +2383,8 @@ class RoyalScriptLexer:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (-=) ####################
-    
     def state195(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
-    
-    #################################################################
     
     def state196(self):
         input_str = ""
@@ -2463,11 +2399,8 @@ class RoyalScriptLexer:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (*) ####################
-    
     def state197(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
-    
-    #################################################################
     
     def state198(self, input_str):
         input_str += self.current_char()
@@ -2479,11 +2412,8 @@ class RoyalScriptLexer:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (*=) ####################
-    
     def state199(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
-    
-    #################################################################
     
 
     def state200(self):
@@ -2499,11 +2429,8 @@ class RoyalScriptLexer:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (/) ####################
-    
     def state201(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
-    
-    #################################################################
     
     def state202(self, input_str):
         input_str += self.current_char()
@@ -2518,8 +2445,6 @@ class RoyalScriptLexer:
 
     def state203(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
-    
-    #################################################################
     
     def state204(self):
         input_str = ""
@@ -2538,8 +2463,6 @@ class RoyalScriptLexer:
     def state205(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
     
-    #################################################################
-    
     def state206(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -2554,8 +2477,6 @@ class RoyalScriptLexer:
     def state207(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
     
-    #################################################################
-    
     def state208(self):
         input_str = ""
         input_str += self.current_char()
@@ -2569,11 +2490,8 @@ class RoyalScriptLexer:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR NOT LOGIC (!) ####################
-    
     def state209(self, input_str):
         return True, input_str, TokenType.NOT
-    
-    #################################################################
     
     def state210(self, input_str):
         input_str += self.current_char()
@@ -2589,7 +2507,6 @@ class RoyalScriptLexer:
     def state211(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
     
-    #################################################################
 
     def state212(self):
         input_str = ""
@@ -2616,8 +2533,6 @@ class RoyalScriptLexer:
     def state214(self, input_str):
         return True, input_str, TokenType.LOGICAL_OPERATOR
     
-    #################################################################
-
     def state215(self):
         input_str = ""
         input_str += self.current_char()
@@ -2643,7 +2558,6 @@ class RoyalScriptLexer:
     def state217(self, input_str):
         return True, input_str, TokenType.LOGICAL_OPERATOR
     
-    #################################################################
 
     def state218(self):
         input_str = ""
@@ -2662,8 +2576,6 @@ class RoyalScriptLexer:
     def state219(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
             
-    #################################################################
-
     def state220(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -2674,11 +2586,9 @@ class RoyalScriptLexer:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR RELATIONAL OPERATOR (>=) ####################
-    
     def state221(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
     
-    #################################################################
 
     def state222(self):
         input_str = ""
@@ -2694,12 +2604,9 @@ class RoyalScriptLexer:
 
             
     #################### FINAL STATE FOR RELATIONAL OPERATOR (<) ####################
-    
     def state223(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
-    
-    #################################################################
-
+            
     def state224(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -2710,12 +2617,9 @@ class RoyalScriptLexer:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
     
     #################### FINAL STATE FOR RELATIONAL OPERATOR (<=) ####################
-    
     def state225(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
     
-    #################################################################
-
     def state226(self):
         input_str = ""
         input_str += self.current_char()
@@ -2726,12 +2630,10 @@ class RoyalScriptLexer:
         else:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
             
-    #################### FINAL STATE FOR OPEN PARENTHESIS ( ####################
-    
+   #################### FINAL STATE FOR OPEN PARENTHESIS ( ####################
     def state227(self, input_str):
         return True, input_str, TokenType.OPEN_PAREN
     
-    #################################################################
 
     def state228(self):
         input_str = ""
@@ -2745,11 +2647,8 @@ class RoyalScriptLexer:
 
             
     #################### FINAL STATE FOR CLOSE PARENTHESIS ) ####################
-
     def state229(self, input_str):
         return True, input_str, TokenType.CLOSE_PAREN
-    
-    #################################################################
     
     def state230(self):
         input_str = ""
@@ -2763,12 +2662,9 @@ class RoyalScriptLexer:
 
             
     #################### FINAL STATE FOR OPEN CURLY BRACKET { ####################
-
     def state231(self, input_str):
         return True, input_str, TokenType.OPEN_CURLY
     
-    #################################################################
-
     def state232(self):
         input_str = ""
         input_str += self.current_char()
@@ -2781,11 +2677,9 @@ class RoyalScriptLexer:
 
             
     #################### FINAL STATE FOR CLOSE CURLY BRACKET } ####################
-
     def state233(self, input_str):
         return True, input_str, TokenType.CLOSE_CURLY
     
-    #################################################################
 
     def state234(self):
         input_str = ""
@@ -2798,12 +2692,9 @@ class RoyalScriptLexer:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR OPEN SQUARE BRACKET [ ####################
-
     def state235(self, input_str):
         return True, input_str, TokenType.OPEN_SQUARE
     
-    #################################################################
-
     def state236(self):
         input_str = ""
         input_str += self.current_char()
@@ -2816,12 +2707,9 @@ class RoyalScriptLexer:
 
             
     #################### FINAL STATE FOR CLOSE SQUARE BRACKET ] ####################
-   
     def state237(self, input_str):
         return True, input_str, TokenType.CLOSE_SQUARE
-
-    #################################################################
-
+    
     def state238(self):
         input_str = ""
         input_str += self.current_char()
@@ -2833,11 +2721,9 @@ class RoyalScriptLexer:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
             
     #################### FINAL STATE FOR TERMINATOR ~ ####################
-    
     def state239(self, input_str):
         return True, input_str, TokenType.TERMINATOR
     
-    #################################################################
 
     def state240(self):
         input_str = ""
@@ -2850,12 +2736,9 @@ class RoyalScriptLexer:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR COMMA ####################
-    
     def state241(self, input_str):
         return True, input_str, TokenType.COMMA
     
-    #################################################################
-
     def state242(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -2872,6 +2755,64 @@ class RoyalScriptLexer:
             case _:
                 raise SyntaxError(f"Invalid escape sequence '\\{self.current_char()}' at line {self.line}, position {self.position}")
 
+        
+    
+    # def state243(self, input_str):
+    #     input_str += self.current_char()  # Append the current character
+    #     self.advance()
+
+    #     if self.current_char() in Delims ['escape_sequence_delim']:
+    #         return self.state259(input_str)
+    #     else:
+    #         raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
+            
+    # #################### FINAL STATE FOR ESCAPE SEQUENCE \n ####################
+
+    # # def state244(self, input_str):
+    # #     return True, input_str, TokenType.ESCAPE_NEWLINE
+    
+    # def state244(self, input_str):
+    #     input_str += self.current_char()  # Append the current character
+    #     self.advance()
+
+    #     if self.current_char() in Delims ['escape_sequence_delim']:
+    #         return self.state259(input_str)
+    #     else:
+    #         raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
+
+            
+    # # #################### FINAL STATE FOR ESCAPE SEQUENCE \t #################### 
+    # # def state246(self, input_str):
+    # #     return True, input_str, TokenType.ESCAPE_TAB
+    
+    # def state245(self, input_str):
+    #     input_str += self.current_char()  # Append the current character
+    #     self.advance()
+
+    #     if self.current_char() in Delims ['escape_sequence_delim']:
+    #         return self.state259(input_str)
+    #     else:
+    #         raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
+
+            
+    # #################### FINAL STATE FOR ESCAPE SEQUENCE \\ #################### 
+    # # def state248(self, input_str):
+    # #     return True, input_str, TokenType.ESCAPE_BACKSLASH
+    
+    # def state246(self, input_str):
+    #     input_str += self.current_char()  # Append the current character
+    #     self.advance()
+
+    #     if self.current_char() in Delims ['escape_sequence_delim']:
+    #         return self.state259(input_str)
+    #     else:
+    #         raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
+
+            
+    #################### FINAL STATE FOR ESCAPE SEQUENCE \" ####################
+    # def state250(self, input_str):
+    #     return True, input_str, TokenType.ESCAPE_QUOTE
+    
     #=====================================================#
     #        STATES => IDENTIFIER, COMMENT                #
     #=====================================================#
@@ -2892,9 +2833,9 @@ class RoyalScriptLexer:
         self.advance()
 
         if self.current_char() in RegDef['alphanum'] | {'_'} and self.current_char() not in Delims['id_delim']:
-            return self.state243(input_str) 
+            return self.state247(input_str) 
         elif self.current_char() in Delims['id_delim']:
-            return self.state244(input_str)  
+            return self.state248(input_str)  
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
@@ -2903,7 +2844,6 @@ class RoyalScriptLexer:
     def state244(self, input_str):
         return True, input_str, TokenType.IDENTIFIER
 
-    #################################################################
 
     def state245(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -2924,8 +2864,6 @@ class RoyalScriptLexer:
         normalized = self.normalize_integer(input_str)
         return True, normalized, TokenType.NEG_TREASURES_INT
     
-    #################################################################
-    
     def state247(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
@@ -2944,8 +2882,6 @@ class RoyalScriptLexer:
     def state248(self, input_str):
         normalized = self.normalize_integer(input_str)
         return True, normalized, TokenType.POS_TREASURES_INT
-    
-    #################################################################
 
     def state249(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -2955,18 +2891,30 @@ class RoyalScriptLexer:
             return self.state250(input_str) 
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+    
 
     def state250(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
+ 
+        # if self.current_char() in RegDef['number']:
+        #     deci=1
+        #     while deci<=14:
+        #         deci+=1
+        #         return self.state254(input_str) 
+        # elif self.current_char() in Delims['number_delim']:
+        #     return self.state256(input_str)
+        # else:
+        #     raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
         if self.current_char() in RegDef['number']:
-            while self.deci <= 14:  # Allow up to 14 decimals
-                self.deci += 1
-                return self.state250(input_str)
+            deci = 1  # Start counting decimals
+            while deci <= 14:  # Allow up to 14 decimals
+                deci += 1
+                return self.state251(input_str)
             raise SyntaxError(f"Too many decimals: max 15 allowed, found more at line {self.line}, position {self.position}")
         elif self.current_char() in Delims['number_delim']:
-            return self.state251(input_str)
+            return self.state255(input_str)
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
@@ -2974,10 +2922,7 @@ class RoyalScriptLexer:
     
     def state251(self, input_str):
         normalized = self.normalize_float(input_str)
-        dself.deci = 1 
         return True, normalized, TokenType.NEG_FLOAT_LITERAL
-    
-    #################################################################
     
 
     def state252(self, input_str):
@@ -2993,14 +2938,22 @@ class RoyalScriptLexer:
     def state253(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
+ 
+        # if self.current_char() in RegDef['number']:
+        #     return self.state257(input_str) 
+        # elif self.current_char() in Delims['number_delim']:
+        #     return self.state258(input_str)
+        # else:
+        #     raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 
         if self.current_char() in RegDef['number']:
-            while self.deci <= 14:  # Allow up to 14 decimals
-                self.deci += 1
-                return self.state253(input_str)
+            deci = 1  # Start counting decimals
+            while deci <= 14:  # Allow up to 14 decimals
+                deci += 1
+                return self.state254(input_str)
             raise SyntaxError(f"Too many decimals: max 15 allowed, found more at line {self.line}, position {self.position}")
         elif self.current_char() in Delims['number_delim']:
-            return self.state254(input_str)
+            return self.state258(input_str)
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
         
@@ -3008,10 +2961,7 @@ class RoyalScriptLexer:
     
     def state254(self, input_str):
         normalized = self.normalize_float(input_str)
-        self.deci = 1 
         return True, normalized, TokenType.POS_FLOAT_LITERAL
-    
-    #################################################################
     
 
     def state255(self, input_str):
@@ -3042,8 +2992,6 @@ class RoyalScriptLexer:
         
     def state257(self, input_str):
         return True, input_str, TokenType.STRING_LITERAL
-    
-    #################################################################
 
     def state258(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -3079,8 +3027,6 @@ class RoyalScriptLexer:
     def state261(self, input_str):
         return True, input_str, TokenType.CHAR_LITERAL
     
-    #################################################################
-    
     #COMMENT
     def state262(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -3099,8 +3045,6 @@ class RoyalScriptLexer:
 
     def state263(self, input_str):
         return True, input_str, TokenType.SINGLE_COMMENT
-    
-    #################################################################
     
     def state264(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -3136,8 +3080,8 @@ class RoyalScriptLexer:
         
     def state267(self, input_str):
         return True, input_str, TokenType.MULTI_COMMENT
+
     
-    #################################################################
 
     def normalize_integer(self, input_str):
         """

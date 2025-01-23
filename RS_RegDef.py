@@ -100,7 +100,7 @@ Delims = {
     
     'arithmetic_operator_delim':{'(', ' ', *RegDef['number'], *RegDef['alpha_big']},  
 
-    'escape_sequence_delim': { '"', *RegDef['ascii'], *RegDef['escape_seq'], ' '},
+    'escape_sequence_delim': { '"', *RegDef['ascii'], *RegDef['escape_seq'], ' ', '"'},
     
     'plus_delim' : {'(', *RegDef['alphanum'], '"', "'", ' '},   
 
