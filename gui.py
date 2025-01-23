@@ -1376,7 +1376,7 @@ class RoyalScriptLexer:
     def state88(self, input_str):
         return True, input_str, TokenType.OCEAN
     
-    #################################################################
+    ###############################################################
     
     def state89(self):
         input_str = ""
@@ -1517,7 +1517,7 @@ class RoyalScriptLexer:
     def state102(self, input_str):
         return True, input_str, TokenType.REIGN
     
-    #################################################################
+    ###############################################################
     
     def state103(self, input_str):
         input_str += self.current_char()
@@ -1563,7 +1563,7 @@ class RoyalScriptLexer:
     def state107(self, input_str):
         return True, input_str, TokenType.RETURN    
     
-    #################################################################
+    ################################################################
     
     def state108(self, input_str):
         input_str += self.current_char()
@@ -1601,7 +1601,7 @@ class RoyalScriptLexer:
     def state111(self, input_str):
         return True, input_str, TokenType.ROSE    
     
-    #################################################################
+    ##############################################################
 
     def state112(self):
         input_str = ""
@@ -1671,7 +1671,7 @@ class RoyalScriptLexer:
     def state118(self, input_str):
         return True, input_str, TokenType.SCROLL  
 
-    ################################################################# 
+    ################################################################
     
     
     def state119(self, input_str):
@@ -1718,7 +1718,7 @@ class RoyalScriptLexer:
     def state123(self, input_str):
         return True, input_str, TokenType.SPELL 
 
-    ################################################################# 
+    ###############################################################
     
     def state124(self):
         input_str = ""
@@ -1771,7 +1771,7 @@ class RoyalScriptLexer:
     def state128(self, input_str):
         return True, input_str, TokenType.TALE
     
-    #################################################################
+    ##############################################################
     
     def state129(self, input_str):
         input_str += self.current_char()
@@ -2896,7 +2896,7 @@ class RoyalScriptLexer:
         elif self.current_char() in Delims['id_delim']:
             return self.state244(input_str)  
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimeter '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR IDENTIFIER ####################
 
@@ -2916,7 +2916,7 @@ class RoyalScriptLexer:
         elif self.current_char() == ".":
             return self.state249(input_str)  
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimeter '{self.current_char()}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR NEGATIVE TREASURES LITERALS ####################
 
@@ -2937,7 +2937,7 @@ class RoyalScriptLexer:
         elif self.current_char() == ".":
             return self.state252(input_str)  
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimeter '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR POSITIVE TREASURES LITERALS ####################
 
@@ -2968,13 +2968,13 @@ class RoyalScriptLexer:
         elif self.current_char() in Delims['number_delim']:
             return self.state251(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimeter '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR NEGATIVE OCEAN LITERALS ####################
     
     def state251(self, input_str):
         normalized = self.normalize_float(input_str)
-        dself.deci = 1 
+        self.deci = 1 
         return True, normalized, TokenType.NEG_FLOAT_LITERAL
     
     #################################################################
@@ -3002,7 +3002,7 @@ class RoyalScriptLexer:
         elif self.current_char() in Delims['number_delim']:
             return self.state254(input_str)
         else:
-            raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimeter '{self.current_char()}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR POSITIVE OCEAN LITERALS ####################
     
@@ -3144,12 +3144,6 @@ class RoyalScriptLexer:
         Removes leading zeros from an integer literal.
         If the number is negative, removes zeros after the '-'.
         Ensures that '0' and '-0' are preserved.
-
-        Args:
-            input_str (str): The integer literal as a string.
-
-        Returns:
-            str: The normalized integer literal.
         """
         if not input_str:
             return '0'  # Default to '0' if input is empty
@@ -3175,15 +3169,6 @@ class RoyalScriptLexer:
         - Limiting the fractional part to a maximum of 15 decimal places, rounding if necessary.
         - Ensuring that if the fractional part is empty after the decimal point, an error is raised.
         - Preserving '0' and '-0' appropriately.
-
-        Args:
-            input_str (str): The float literal as a string.
-
-        Returns:
-            str: The normalized float literal.
-
-        Raises:
-            ValueError: If the input format is invalid or fractional part is missing.
         """
         if not input_str:
             raise ValueError("Empty input for float normalization.")
