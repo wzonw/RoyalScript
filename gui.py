@@ -3498,12 +3498,9 @@ class RoyalScriptLexerGUI(tk.Tk):
             # Tokenize the input code
             tokens = lexer.get_tokens()
             
-            # Show tokens with optional color-coding (currently plain in the Listbox)
+            # Show tokens with optional
             for token in tokens:
                 self.output_listbox.insert(tk.END, f"{token.value}\n")
-                
-                # Decide color if implementing advanced text-based color, etc.
-                # color = "black"  # Just an example
 
                 # Insert token type into the token_listbox
                 if token.token_type in TokenType.__dict__.values():
