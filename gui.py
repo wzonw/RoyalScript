@@ -603,7 +603,7 @@ class RoyalScriptLexer:
     def state8(self, input_str):
         return True, input_str, TokenType.BELIEVE
 
-    ##################################################################
+    #################################################################
 
     def state9(self, input_str):
         input_str += self.current_char()
@@ -649,7 +649,7 @@ class RoyalScriptLexer:
     def state13(self, input_str):
         return True, input_str, TokenType.BREAK
     
-    #################################################################
+    ###############################################################
 
     def state14(self):
         input_str = ""
@@ -707,7 +707,7 @@ class RoyalScriptLexer:
     def state18(self, input_str):
         return True, input_str, TokenType.CAST  
 
-    #################################################################
+    ##############################################################
     
     def state19(self, input_str):
         input_str += self.current_char()
@@ -733,7 +733,7 @@ class RoyalScriptLexer:
     def state21(self, input_str):
         return True, input_str, TokenType.CASTLE  
     
-    #################################################################
+    ################################################################
 
     def state22(self, input_str):
         input_str += self.current_char()
@@ -875,7 +875,7 @@ class RoyalScriptLexer:
     def state36(self, input_str):
         return True, input_str, TokenType.CONTINUE
     
-    #################################################################
+    ##################################################################
     
     
     def state37(self, input_str):
@@ -968,7 +968,7 @@ class RoyalScriptLexer:
     def state46(self, input_str):
         return True, input_str, TokenType.CURSE
     
-    #################################################################
+    ###############################################################
 
     def state47(self):
         input_str = ""
@@ -1106,7 +1106,7 @@ class RoyalScriptLexer:
     def state60(self, input_str):
         return True, input_str, TokenType.BOOL_LITERAL
     
-    #################################################################
+    ###############################################################
             
     def state61(self, input_str):
         input_str += self.current_char()
@@ -1319,7 +1319,7 @@ class RoyalScriptLexer:
     def state82(self, input_str):
         return True, input_str, TokenType.MIRROR
     
-    #################################################################
+    ################################################################
     
     def state83(self):
         input_str = ""
@@ -1890,7 +1890,7 @@ class RoyalScriptLexer:
     def state140(self, input_str):
         return True, input_str, TokenType.TOROSE
     
-    #################################################################
+    ################################################################
     
 
     def state141(self, input_str):
@@ -1952,7 +1952,7 @@ class RoyalScriptLexer:
         else:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
-    #################### FINAL STATE FOR TOSCROLL ####################
+    #################### FINAL STATE FOR TOSCROLL ###################
 
     def state147(self, input_str):
         return True, input_str, TokenType.TOSCROLL
@@ -2048,7 +2048,7 @@ class RoyalScriptLexer:
         else:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
-    #################### FINAL STATE FOR TOTREASURES ####################
+    #################### FINAL STATE FOR TOTREASURES ################
 
     def state157(self, input_str):
         return True, input_str, TokenType.TOTREASURES
@@ -2136,7 +2136,7 @@ class RoyalScriptLexer:
         else:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
         
-    #################### FINAL STATE FOR TREASURES ####################
+    #################### FINAL STATE FOR TREASURES ##################
 
     def state166(self, input_str):
         return True, input_str, TokenType.TREASURES
@@ -2167,7 +2167,7 @@ class RoyalScriptLexer:
     def state169(self, input_str):
         return True, input_str, TokenType.BOOL_LITERAL
     
-    #################################################################
+    ##############################################################
     
     def state170(self, input_str):
         input_str += self.current_char()
@@ -2213,7 +2213,7 @@ class RoyalScriptLexer:
     def state174(self, input_str):
         return True, input_str, TokenType.TWIST
     
-    #################################################################
+    ###############################################################
     
     def state175(self):
         input_str = ""
@@ -2261,7 +2261,7 @@ class RoyalScriptLexer:
     def state179(self, input_str):
         return True, input_str, TokenType.WISH
     
-    #################################################################
+    ##############################################################
 
     #==================================================#
     #               STATES => SYMBOLS                  #
@@ -2319,7 +2319,7 @@ class RoyalScriptLexer:
     def state181(self, input_str):
         return True, input_str, TokenType.EQUAL
     
-    #################################################################
+    ##################################################################
     
     def state182(self, input_str):
         input_str += self.current_char()
@@ -2335,7 +2335,7 @@ class RoyalScriptLexer:
     def state183(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
     
-    #################################################################
+    #########################################################################
     
 
     def state184(self):
@@ -2358,7 +2358,7 @@ class RoyalScriptLexer:
     def state185(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
     
-    #################################################################
+    #################################################################################
     
     def state186(self, input_str):
         input_str += self.current_char()
@@ -2375,7 +2375,7 @@ class RoyalScriptLexer:
     def state187(self, input_str):
         return True, input_str, TokenType.UNARY_OPERATOR
     
-    #################################################################
+    #############################################################################
     
     def state188(self, input_str):
         input_str += self.current_char()
@@ -2391,7 +2391,7 @@ class RoyalScriptLexer:
     def state189(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
     
-    #################################################################
+    ##################################################################################
     
     def state190(self):
         input_str = ""
@@ -2416,7 +2416,7 @@ class RoyalScriptLexer:
     def state191(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
     
-    #################################################################
+    #################################################################################
     
     def state192(self, input_str):
         input_str += self.current_char()
@@ -2432,7 +2432,7 @@ class RoyalScriptLexer:
     def state193(self, input_str):
         return True, input_str, TokenType.UNARY_OPERATOR
     
-    #################################################################
+    #############################################################################
     
     def state194(self, input_str):
         input_str += self.current_char()
@@ -2448,7 +2448,7 @@ class RoyalScriptLexer:
     def state195(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
     
-    #################################################################
+    ##################################################################################
     
     def state196(self):
         input_str = ""
@@ -2467,7 +2467,7 @@ class RoyalScriptLexer:
     def state197(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
     
-    #################################################################
+    #################################################################################
     
     def state198(self, input_str):
         input_str += self.current_char()
@@ -2483,7 +2483,7 @@ class RoyalScriptLexer:
     def state199(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
     
-    #################################################################
+    ##################################################################################
     
 
     def state200(self):
@@ -2503,7 +2503,7 @@ class RoyalScriptLexer:
     def state201(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
     
-    #################################################################
+    #################################################################################
     
     def state202(self, input_str):
         input_str += self.current_char()
@@ -2519,7 +2519,7 @@ class RoyalScriptLexer:
     def state203(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
     
-    #################################################################
+    ##################################################################################
     
     def state204(self):
         input_str = ""
@@ -2538,7 +2538,7 @@ class RoyalScriptLexer:
     def state205(self, input_str):
         return True, input_str, TokenType.ARITHMETIC_OPERATOR
     
-    #################################################################
+    #################################################################################
     
     def state206(self, input_str):
         input_str += self.current_char()
@@ -2554,7 +2554,7 @@ class RoyalScriptLexer:
     def state207(self, input_str):
         return True, input_str, TokenType.ASSIGNMENT_OPERATOR
     
-    #################################################################
+    ##################################################################################
     
     def state208(self):
         input_str = ""
@@ -2573,7 +2573,7 @@ class RoyalScriptLexer:
     def state209(self, input_str):
         return True, input_str, TokenType.NOT
     
-    #################################################################
+    #######################################################################
     
     def state210(self, input_str):
         input_str += self.current_char()
@@ -2589,7 +2589,7 @@ class RoyalScriptLexer:
     def state211(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
     
-    #################################################################
+    ##################################################################################
 
     def state212(self):
         input_str = ""
@@ -2616,7 +2616,7 @@ class RoyalScriptLexer:
     def state214(self, input_str):
         return True, input_str, TokenType.LOGICAL_OPERATOR
     
-    #################################################################
+    ###############################################################################
 
     def state215(self):
         input_str = ""
@@ -2643,7 +2643,7 @@ class RoyalScriptLexer:
     def state217(self, input_str):
         return True, input_str, TokenType.LOGICAL_OPERATOR
     
-    #################################################################
+    ###############################################################################
 
     def state218(self):
         input_str = ""
@@ -2662,7 +2662,7 @@ class RoyalScriptLexer:
     def state219(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
             
-    #################################################################
+    ##################################################################################
 
     def state220(self, input_str):
         input_str += self.current_char()
@@ -2678,7 +2678,7 @@ class RoyalScriptLexer:
     def state221(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
     
-    #################################################################
+    ##################################################################################
 
     def state222(self):
         input_str = ""
@@ -2698,7 +2698,7 @@ class RoyalScriptLexer:
     def state223(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
     
-    #################################################################
+    #################################################################################
 
     def state224(self, input_str):
         input_str += self.current_char()
@@ -2714,7 +2714,7 @@ class RoyalScriptLexer:
     def state225(self, input_str):
         return True, input_str, TokenType.RELATIONAL_OPERATOR
     
-    #################################################################
+    ##################################################################################
 
     def state226(self):
         input_str = ""
@@ -2731,7 +2731,7 @@ class RoyalScriptLexer:
     def state227(self, input_str):
         return True, input_str, TokenType.OPEN_PAREN
     
-    #################################################################
+    #############################################################################
 
     def state228(self):
         input_str = ""
@@ -2749,7 +2749,7 @@ class RoyalScriptLexer:
     def state229(self, input_str):
         return True, input_str, TokenType.CLOSE_PAREN
     
-    #################################################################
+    #############################################################################
     
     def state230(self):
         input_str = ""
@@ -2767,7 +2767,7 @@ class RoyalScriptLexer:
     def state231(self, input_str):
         return True, input_str, TokenType.OPEN_CURLY
     
-    #################################################################
+    ##############################################################################
 
     def state232(self):
         input_str = ""
@@ -2785,7 +2785,7 @@ class RoyalScriptLexer:
     def state233(self, input_str):
         return True, input_str, TokenType.CLOSE_CURLY
     
-    #################################################################
+    ###############################################################################
 
     def state234(self):
         input_str = ""
@@ -2802,7 +2802,7 @@ class RoyalScriptLexer:
     def state235(self, input_str):
         return True, input_str, TokenType.OPEN_SQUARE
     
-    #################################################################
+    ###############################################################################
 
     def state236(self):
         input_str = ""
@@ -2820,7 +2820,7 @@ class RoyalScriptLexer:
     def state237(self, input_str):
         return True, input_str, TokenType.CLOSE_SQUARE
 
-    #################################################################
+    ################################################################################
 
     def state238(self):
         input_str = ""
@@ -2837,7 +2837,7 @@ class RoyalScriptLexer:
     def state239(self, input_str):
         return True, input_str, TokenType.TERMINATOR
     
-    #################################################################
+    ######################################################################
 
     def state240(self):
         input_str = ""
@@ -2854,7 +2854,7 @@ class RoyalScriptLexer:
     def state241(self, input_str):
         return True, input_str, TokenType.COMMA
     
-    #################################################################
+    ###############################################################
 
     def state242(self, input_str):
         input_str += self.current_char()
@@ -2903,7 +2903,7 @@ class RoyalScriptLexer:
     def state244(self, input_str):
         return True, input_str, TokenType.IDENTIFIER
 
-    #################################################################
+    ####################################################################
 
     def state245(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -2924,7 +2924,7 @@ class RoyalScriptLexer:
         normalized = self.normalize_integer(input_str)
         return True, normalized, TokenType.NEG_TREASURES_INT
     
-    #################################################################
+    #####################################################################################
     
     def state247(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -2945,7 +2945,7 @@ class RoyalScriptLexer:
         normalized = self.normalize_integer(input_str)
         return True, normalized, TokenType.POS_TREASURES_INT
     
-    #################################################################
+    ####################################################################################
 
     def state249(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -2977,7 +2977,7 @@ class RoyalScriptLexer:
         self.deci = 1 
         return True, normalized, TokenType.NEG_FLOAT_LITERAL
     
-    #################################################################
+    #################################################################################
     
 
     def state252(self, input_str):
@@ -3011,7 +3011,7 @@ class RoyalScriptLexer:
         self.deci = 1 
         return True, normalized, TokenType.POS_FLOAT_LITERAL
     
-    #################################################################
+    #################################################################################
     
 
     def state255(self, input_str):
@@ -3043,7 +3043,7 @@ class RoyalScriptLexer:
     def state257(self, input_str):
         return True, input_str, TokenType.STRING_LITERAL
     
-    #################################################################
+    #########################################################################
 
     def state258(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -3079,7 +3079,7 @@ class RoyalScriptLexer:
     def state261(self, input_str):
         return True, input_str, TokenType.CHAR_LITERAL
     
-    #################################################################
+    #######################################################################
     
     #COMMENT
     def state262(self, input_str):
@@ -3100,7 +3100,7 @@ class RoyalScriptLexer:
     def state263(self, input_str):
         return True, input_str, TokenType.SINGLE_COMMENT
     
-    #################################################################
+    #############################################################################
     
     def state264(self, input_str):
         input_str += self.current_char()  # Append the current character
@@ -3137,7 +3137,7 @@ class RoyalScriptLexer:
     def state267(self, input_str):
         return True, input_str, TokenType.MULTI_COMMENT
     
-    #################################################################
+    #############################################################################
 
     def normalize_integer(self, input_str):
         """
