@@ -1833,7 +1833,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['genie_delim']:
+        if self.current_char() == '(':
             return self.state135(input_str)
         else:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
@@ -1880,7 +1880,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['genie_delim']:
+        if self.current_char() == '(':
             return self.state140(input_str)
         else:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
@@ -1947,7 +1947,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['genie_delim']:
+        if self.current_char() == '(':
             return self.state147(input_str)
         else:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
@@ -2043,7 +2043,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['genie_delim']:
+        if self.current_char() == '(':
             return self.state157(input_str)
         else:
             raise SyntaxError(f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}")
@@ -2398,7 +2398,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['arithmetic_operator_delim'] and self.current_char() not in RegDef ['number']:
+        if self.current_char() in Delims ['minus_delim']:
             return self.state191(input_str)
         elif self.current_char() == "-":
             return self.state192(input_str)
