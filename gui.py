@@ -3226,75 +3226,82 @@ class RoyalScriptLexer:
             return normalized_integer
 
 
-
 class RoyalScriptLexerGUI(tk.Tk):
     def __init__(self):
         super().__init__()
 
         self.title("RoyalScript Lexer")
-        self.geometry("1030x700")
+        self.geometry("1040x700")
         self.resizable(False, False)
 
-
-        # Load the image and set it as the background
-        self.bg_image = Image.open("3.jpg")  # Replace with your image path
-        self.bg_image = self.bg_image.resize((1030, 700), Image.Resampling.LANCZOS)  # Resize to fit window size
+        # Load and set background image
+        self.bg_image = Image.open("4.png")
+        self.bg_image = self.bg_image.resize((1040, 700), Image.Resampling.LANCZOS)
         self.bg_photo = ImageTk.PhotoImage(self.bg_image)
-
-        # Create a label to place the image as background
+        
         self.bg_label = tk.Label(self, image=self.bg_photo)
-        self.bg_label.place(relwidth=1, relheight=1)  # Cover the entire window
+        self.bg_label.place(relwidth=1, relheight=1)
 
-        # Create frames for each section without background color
-        self.left_frame = tk.Frame(self, bg="#ff87d1", padx=5) 
+        # Setup GUI components
+        self.setup_frames()
+        self.setup_input_section()
+        self.setup_lexer_tokens_section()
+        self.setup_errors_section()
+        self.setup_analyze_button()
+
+    def setup_frames(self):
+
+        # Main frames with consistent padding
+        self.left_frame = tk.Frame(self, bg="#f99dbc")
         self.left_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
 
-        self.middle_frame = tk.Frame(self, bg="#ff87d1")
-        self.middle_frame.grid(row=0, column=1, padx=0, pady=20, sticky="nsew")
+        # Combined frame for Lexer and Tokens
+        self.lr_frame = tk.Frame(self, bg="#f99dbc")
+        self.lr_frame.grid(row=0, column=1, columnspan=2, padx=(0, 20), pady=20, sticky="nsew")
 
-        self.right_frame = tk.Frame(self, bg="#ff87d1")
-        self.right_frame.grid(row=0, column=2, padx=0, pady=20, sticky="nsew")
+        # Errors frame
+        self.bottom_frame = tk.Frame(self, bg="#f99dbc")
+        self.bottom_frame.grid(row=1, column=0, columnspan=3, padx=20, pady=5, sticky="nsew")
 
-        # Errors and Program Frame (combined)
-        self.bottom_frame = tk.Frame(self, bg="#ff87d1")
-        self.bottom_frame.grid(row=1, column=0, columnspan=3, padx=21, pady=5, sticky="nsew")
-
-        # Program Frame: Below the errors frame
-        self.program_frame = tk.Frame(self, bg="#ff87d1")
+        # Program frame
+        self.program_frame = tk.Frame(self, bg="#f99dbc")
         self.program_frame.grid(row=2, column=0, columnspan=3, padx=10, pady=10)
 
-        # -- Left Section: Input Code (with line numbers) --
-
-        # Label
+    def setup_input_section(self):
+        # Input Code label
         self.input_label = tk.Label(
             self.left_frame, text="Input Code", fg="white",
-            font=("Arial", 14, "bold"), bg="#ff87d1"
+            font=("Arial", 14, "bold"), bg="#f99dbc"
         )
         self.input_label.grid(row=0, column=0, columnspan=3)
 
-        # Line Numbers Text
+        # Line numbers
         self.line_numbers = tk.Text(
             self.left_frame, width=4, height=20, wrap=tk.NONE,
-            fg="#d60083", bg="#f3f3f3", state="disabled"
+            fg="#d60083", bg="white", state="disabled"
         )
-        self.line_numbers.grid(row=1, column=0, padx=0, pady=5, sticky="nsew")
+        self.line_numbers.grid(row=1, column=0, sticky="nsew")
 
-        # Main Text widget
+        # Main text widget
         self.input_text = tk.Text(
-            self.left_frame, width=60, height=20,
+            self.left_frame, width=65, height=20,
             wrap=tk.WORD, fg="#d60083"
         )
-        self.input_text.grid(row=1, column=1, padx=0, pady=5, sticky="nsew")
+        self.input_text.grid(row=1, column=1, sticky="nsew")
 
-        # Create a shared scrollbar
-        self.shared_scrollbar = tk.Scrollbar(self.left_frame, orient="vertical")
-        self.shared_scrollbar.grid(row=1, column=2, padx=0, pady=5, sticky="nsew")
+        # Input section scrollbar
+        self.input_scrollbar = tk.Scrollbar(self.left_frame, orient="vertical")
+        self.input_scrollbar.grid(row=1, column=2, sticky="ns")
 
-        # Prevent scrolling for both widgets
+        # Configure scrollbar connections
+        self.input_scrollbar.config(command=self.on_input_scroll)
+        self.input_text.config(yscrollcommand=self.input_scrollbar.set)
+        self.line_numbers.config(yscrollcommand=self.input_scrollbar.set)
+
+        # Prevent individual scrolling
         def prevent_scroll(event):
             return "break"
 
-        # Apply scroll prevention to both widgets
         for widget in (self.input_text, self.line_numbers):
             widget.bind("<MouseWheel>", prevent_scroll)
             widget.bind("<Button-4>", prevent_scroll)
@@ -3304,145 +3311,88 @@ class RoyalScriptLexerGUI(tk.Tk):
             widget.bind("<Key-Prior>", prevent_scroll)
             widget.bind("<Key-Next>", prevent_scroll)
 
-        # Configure scrollbar and synced scrolling
-        def on_scrollbar_move(*args):
-            """Called when scrollbar moves"""
-            self.input_text.yview(*args)
-            self.line_numbers.yview(*args)
-            
-        def update_scrollbar(*args):
-            """Update scrollbar and sync text widgets"""
-            self.shared_scrollbar.set(*args)
-            self.line_numbers.yview_moveto(args[0])
-            self.input_text.yview_moveto(args[0])
+        # Bind text changes for line numbers
+        self.input_text.bind('<<Modified>>', self.update_line_numbers)
 
-        # Connect everything together
-        self.shared_scrollbar.config(command=on_scrollbar_move)
-        self.input_text.config(yscrollcommand=update_scrollbar)
-        self.line_numbers.config(yscrollcommand=update_scrollbar)
-
-        # Update line numbers
-        def update_line_numbers(event=None):
-            # Reset modified flag
-            if event:
-                self.input_text.edit_modified(False)
-            
-            # Get current text and count lines
-            text_content = self.input_text.get("1.0", "end-1c")
-            num_lines = text_content.count('\n') + 1
-            
-            # Create line numbers text
-            line_numbers_text = '\n'.join(str(i).rjust(3) for i in range(1, num_lines + 1))
-            
-            # Update line numbers
-            self.line_numbers.config(state='normal')
-            self.line_numbers.delete("1.0", "end")
-            self.line_numbers.insert("1.0", line_numbers_text)
-            self.line_numbers.config(state='disabled')
-            
-            # Get current cursor line
-            try:
-                cursor_pos = self.input_text.index("insert")
-                line_num = int(cursor_pos.split('.')[0])
-                
-                # Ensure current line is visible
-                self.input_text.see(f"{line_num}.0")
-                self.line_numbers.see(f"{line_num}.0")
-            except:
-                pass
-
-        # Bind text changes
-        self.input_text.bind('<<Modified>>', update_line_numbers)
-
-        # Initialize line numbers
-        update_line_numbers()
-
-       # ---- Combined Frame for Lexer + Tokens ----
-        self.lr_frame = tk.Frame(self, bg="#ff87d1")
-        self.lr_frame.grid(row=0, column=1, columnspan=2, padx=0, pady=20, sticky="nsew")
-
-        # Create a scrollbar that will be shared by both listboxes
-        self.shared_scrollbar = tk.Scrollbar(self.lr_frame, orient="vertical")
-
-        def sync_scroll(*args):
-            """
-            A custom command function to tie both Listboxes' yview together.
-            Ensures they scroll together with one scrollbar.
-            """
-            self.output_listbox.yview(*args)
-            self.token_listbox.yview(*args)
-
-        self.shared_scrollbar.config(command=sync_scroll)
-        self.shared_scrollbar.grid(row=1, column=2, sticky="ns")
-
-        # ---- Middle Section: Lexer Output ----
+    def setup_lexer_tokens_section(self):
+        # Lexer label
         self.output_label = tk.Label(
             self.lr_frame, text="Lexer", fg="white",
-            font=("Arial", 14, "bold"), bg="#ff87d1"
+            font=("Arial", 14, "bold"), bg="#f99dbc"
         )
-        self.output_label.grid(row=0, column=0, padx=5, pady=0)
+        self.output_label.grid(row=0, column=0, padx=5)
 
-        self.output_listbox = tk.Listbox(
-            self.lr_frame, width=30, height=20, justify="center", fg="#d60083"
-        )
-        self.output_listbox.grid(row=1, column=0, padx=5, pady=5)
-
-        # ---- Right Section: Tokens ----
+        # Tokens label
         self.tokens_label = tk.Label(
             self.lr_frame, text="Tokens", fg="white",
-            font=("Arial", 14, "bold"), bg="#ff87d1"
+            font=("Arial", 14, "bold"), bg="#f99dbc"
         )
-        self.tokens_label.grid(row=0, column=1, padx=5, pady=0)
+        self.tokens_label.grid(row=0, column=1, padx=5)
 
+        # Create frame for listboxes and scrollbar
+        list_frame = tk.Frame(self.lr_frame, bg="#f99dbc")
+        list_frame.grid(row=1, column=0, columnspan=2, sticky="nsew")
+
+        # Lexer listbox
+        self.output_listbox = tk.Listbox(
+            list_frame, width=30, height=20, justify="center", fg="#d60083"
+        )
+        self.output_listbox.grid(row=0, column=0, padx=5, pady=5)
+
+        # Tokens listbox
         self.token_listbox = tk.Listbox(
-            self.lr_frame, width=30, height=20, justify="center", fg="#d60083"
+            list_frame, width=30, height=20, justify="center", fg="#d60083"
         )
-        self.token_listbox.grid(row=1, column=1, padx=5, pady=5)
+        self.token_listbox.grid(row=0, column=1, padx=5, pady=5)
 
-        # Tie both listboxes to the same scrollbar
-        self.output_listbox.config(yscrollcommand=self.shared_scrollbar.set)
-        self.token_listbox.config(yscrollcommand=self.shared_scrollbar.set)
+        # Shared scrollbar for both listboxes
+        self.lr_scrollbar = tk.Scrollbar(list_frame, orient="vertical")
+        self.lr_scrollbar.grid(row=0, column=2, sticky="ns")
 
-        # ---- Disable individual mouse-wheel AND keyboard arrow/page scrolling ----
+        # Configure scrollbar connections
+        self.lr_scrollbar.config(command=self.on_lr_scroll)
+        self.output_listbox.config(yscrollcommand=self.sync_lr_scroll)
+        self.token_listbox.config(yscrollcommand=self.sync_lr_scroll)
+
+        # Prevent individual scrolling
         def ignore_events(event):
-            """
-            Returning 'break' stops the default behavior for these events,
-            preventing individual scrolling in the focused listbox.
-            """
             return "break"
 
-        # Disable mouse wheel events (Windows/Mac + Linux)
         for listbox in (self.output_listbox, self.token_listbox):
-            listbox.bind("<MouseWheel>", ignore_events)       # Windows/Mac
-            listbox.bind("<Button-4>", ignore_events)         # Linux (up)
-            listbox.bind("<Button-5>", ignore_events)         # Linux (down)
-
-            # Disable arrow key scrolling
+            listbox.bind("<MouseWheel>", ignore_events)
+            listbox.bind("<Button-4>", ignore_events)
+            listbox.bind("<Button-5>", ignore_events)
             listbox.bind("<Up>", ignore_events)
             listbox.bind("<Down>", ignore_events)
-            # Optionally disable Page Up / Page Down keys, too
-            listbox.bind("<Next>", ignore_events)   # Page Down
-            listbox.bind("<Prior>", ignore_events)  # Page Up
+            listbox.bind("<Next>", ignore_events)
+            listbox.bind("<Prior>", ignore_events)
 
-
-        # ---- Bottom Section: Errors ----
+    def setup_errors_section(self):
+        # Errors label
         self.errors_label = tk.Label(
             self.bottom_frame, text="Errors", fg="white",
-            font=("Arial", 14, "bold"), bg="#ff87d1"
+            font=("Arial", 14, "bold"), bg="#f99dbc"
         )
-        self.errors_label.grid(row=0, column=0, padx=5)
-        self.errors_listbox = tk.Listbox(
-            self.bottom_frame, width=160, height=10, fg="red"
-        )
-        self.errors_listbox.grid(row=1, column=0, padx=5, pady=5)
+        self.errors_label.grid(row=0, column=0)
 
-        # ---- "Analyze" Button (Canvas trick) ----
+        # Errors listbox
+        self.errors_listbox = tk.Listbox(
+            self.bottom_frame, width=162, height=10, fg="red"
+        )
+        self.errors_listbox.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
+
+        # Configure errors frame to expand properly
+        self.bottom_frame.grid_columnconfigure(0, weight=1)
+
+    def setup_analyze_button(self):
+        # Create analyze button using Canvas
         self.analyze_button = tk.Canvas(
             self, height=50, width=200, highlightthickness=0,
-            relief="raised", bg="#f7e1d3"
+            relief="raised", bg="#fdd9e5"
         )
         self.analyze_button.grid(row=3, column=0, columnspan=3, pady=0)
 
+        # Add button text and sparkles
         self.analyze_button.create_text(
             20, 25, text="✨", font=("Arial", 14, "bold"), fill="#efbf04"
         )
@@ -3453,40 +3403,44 @@ class RoyalScriptLexerGUI(tk.Tk):
             180, 25, text="✨", font=("Arial", 14, "bold"), fill="#efbf04"
         )
 
-        # Bind the Canvas click event to the analyze_code function
+        # Bind button events
         self.analyze_button.bind("<Button-1>", self.analyze_code)
-        # Add hover effect (when mouse enters)
         self.analyze_button.bind("<Enter>", self.on_hover)
         self.analyze_button.bind("<Leave>", self.on_leave)
 
-        # Initialize line numbers once
-        self.update_line_numbers()
+    def on_input_scroll(self, *args):
+        """Synchronize input text and line numbers scrolling"""
+        self.input_text.yview(*args)
+        self.line_numbers.yview(*args)
+
+    def on_lr_scroll(self, *args):
+        """Synchronize lexer and tokens scrolling"""
+        self.output_listbox.yview(*args)
+        self.token_listbox.yview(*args)
+
+    def sync_lr_scroll(self, *args):
+        """Update scrollbar position for lexer/tokens sections"""
+        self.lr_scrollbar.set(*args)
+        self.output_listbox.yview_moveto(args[0])
+        self.token_listbox.yview_moveto(args[0])
 
     def update_line_numbers(self, event=None):
-        """
-        Update the line_numbers widget to reflect the current number of lines
-        in the input_text widget.
-        """
-        # Enable the line_numbers widget to update it
+        """Update line numbers and reset modified flag"""
+        if event:
+            self.input_text.edit_modified(False)
+        
+        content = self.input_text.get("1.0", "end-1c")
+        num_lines = content.count('\n') + 1
+        numbers = '\n'.join(str(i).rjust(3) for i in range(1, num_lines + 1))
+        
         self.line_numbers.config(state='normal')
-        self.line_numbers.delete('1.0', tk.END)
-
-        # Count how many lines are in the ScrolledText
-        line_count = int(self.input_text.index('end-1c').split('.')[0])
-
-        # Insert line numbers
-        for i in range(1, line_count + 1):
-            self.line_numbers.insert(tk.END, f"{i}\n")
-
-        # Disable editing of the line_numbers text
+        self.line_numbers.delete("1.0", "end")
+        self.line_numbers.insert("1.0", numbers)
         self.line_numbers.config(state='disabled')
 
     def analyze_code(self, event=None):
-        """Method to analyze the code provided in the input_text area."""
-        # Getting the code from the text widget
+        """Analyze the code and display results"""
         code = self.input_text.get("1.0", tk.END)
-        
-        # Create the lexer object
         lexer = RoyalScriptLexer(code)
         
         # Clear previous output
@@ -3495,33 +3449,27 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.errors_listbox.delete(0, tk.END)
 
         try:
-            # Tokenize the input code
             tokens = lexer.get_tokens()
             
-            # Show tokens with optional
             for token in tokens:
                 self.output_listbox.insert(tk.END, f"{token.value}\n")
 
-                # Insert token type into the token_listbox
                 if token.token_type in TokenType.__dict__.values():
                     definition = token.token_type.replace("_", "")
                     self.token_listbox.insert(tk.END, f"{definition}")
 
         except SyntaxError as e:
-            # Display error messages in the Errors Box
             self.errors_listbox.insert(tk.END, f"{str(e)}\n")
         except Exception as e:
-            # Handle any unexpected errors
             self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}\n")
 
     def on_hover(self, event):
-        """Change the button's appearance when hovered."""
+        """Change button appearance on hover"""
         self.analyze_button.config(bg="#f0a6ca")
 
     def on_leave(self, event):
-        """Reset the button's appearance when the mouse leaves."""
-        self.analyze_button.config(bg="#f7e1d3")
-
+        """Reset button appearance when mouse leaves"""
+        self.analyze_button.config(bg="#fdd9e5")
 
 if __name__ == "__main__":
     app = RoyalScriptLexerGUI()
