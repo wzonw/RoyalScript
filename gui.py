@@ -220,7 +220,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         """Analyze the code and display results"""
         code = self.input_text.get("1.0", tk.END)
         lexer = RoyalScriptLexer(code)
-        lexer.print_tokens()
+        
         
         # Clear previous output
         self.output_listbox.delete(0, tk.END)
