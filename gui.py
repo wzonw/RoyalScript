@@ -230,19 +230,19 @@ class RoyalScriptLexerGUI(tk.Tk):
         code = self.input_text.get("1.0", tk.END)
         lexer = RoyalScriptLexer(code)
         
-        
         # Clear previous output
         self.output_listbox.delete(0, tk.END)
         self.token_listbox.delete(0, tk.END)
         self.errors_listbox.delete(0, tk.END)
 
         try:
-            token_lines = lexer.get_tokens()  # This now returns a 2D array
+            # Ensure get_tokens() returns a valid iterable, defaulting to empty list if None
+            token_lines = lexer.get_tokens() or []  # Defaults to empty list if None
             
             # Process each line of tokens
             for line_num, line_tokens in enumerate(token_lines, 1):
                 # Add a line separator in the listboxes
-                if line_num > 1:
+                if line_num >= 1:
                     self.output_listbox.insert(tk.END, "──────────────")
                     self.token_listbox.insert(tk.END, "──────────────")
                 
@@ -260,6 +260,11 @@ class RoyalScriptLexerGUI(tk.Tk):
                         if hasattr(token, 'token_type'):
                             definition = token.token_type.replace("_", " ")
                             self.token_listbox.insert(tk.END, f"{definition}")
+            
+            # If there are errors, display them
+            if lexer.errors:
+                for error in lexer.errors:
+                    self.errors_listbox.insert(tk.END, error)
 
         except SyntaxError as e:
             self.errors_listbox.insert(tk.END, f"Lexical Error: {str(e)}")
