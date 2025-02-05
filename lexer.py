@@ -3699,7 +3699,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() not in ['\n', '*'] and self.current_char() in RegDef['ascii'] or self.current_char() in [' ', '\t']:
+        if self.current_char() not in ['\n', '*'] and self.current_char() in RegDef['ascii'] or self.current_char() in [' ', '\t', '~']:
             return self.state262(input_str)   
         elif self.current_char() == '\n':
             return self.state263(input_str)  
@@ -3722,7 +3722,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() != '*' and self.current_char() in RegDef['ascii'] or self.current_char() in ['\t', ' ', '\n']:
+        if self.current_char() != '*' and self.current_char() in RegDef['ascii'] or self.current_char() in ['\t', ' ', '\n', '~']:
             return self.state264(input_str) 
         elif self.current_char() == '*':
             return self.state265(input_str) 
