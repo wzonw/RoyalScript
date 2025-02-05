@@ -107,6 +107,13 @@ class RoyalScriptLexer:
         self.tokens = [[]]  # Initialize with first line's empty token list
         self.deci = 1
 
+    def print_tokens(self):
+        """Print all tokens in the list."""
+        for line_tokens in self.tokens:
+            for token in line_tokens:
+                print(token)  # This will use the __repr__ method of Token class
+
+
     def advance(self):
         """Advance to the next character in the input"""
         if self.position < len(self.code):
@@ -447,7 +454,7 @@ class RoyalScriptLexer:
             #ROSE LITERALS    
             if char == "'":
                 pos_start = self.position
-                valid, input_str, tokenType = self.state262("")
+                valid, input_str, tokenType = self.state258("")
 
                 if valid:
                     # Append the recognized token
@@ -2898,7 +2905,7 @@ class RoyalScriptLexer:
         elif self.current_char() in Delims['id_delim']:
             return self.state244(input_str)  
         else:
-            raise SyntaxError(f"Invalid delimeter '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR IDENTIFIER ####################
 
@@ -2918,7 +2925,7 @@ class RoyalScriptLexer:
         elif self.current_char() == ".":
             return self.state249(input_str)  
         else:
-            raise SyntaxError(f"Invalid delimeter '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter '{self.current_char()}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR NEGATIVE TREASURES LITERALS ####################
 
@@ -2939,7 +2946,7 @@ class RoyalScriptLexer:
         elif self.current_char() == ".":
             return self.state252(input_str)  
         else:
-            raise SyntaxError(f"Invalid delimeter '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR POSITIVE TREASURES LITERALS ####################
 
@@ -2970,7 +2977,7 @@ class RoyalScriptLexer:
         elif self.current_char() in Delims['number_delim']:
             return self.state251(input_str)
         else:
-            raise SyntaxError(f"Invalid delimeter '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter '{self.current_char()}' at line {self.line}, position {self.position}")
 
     #################### FINAL STATE FOR NEGATIVE OCEAN LITERALS ####################
     
@@ -3004,7 +3011,7 @@ class RoyalScriptLexer:
         elif self.current_char() in Delims['number_delim']:
             return self.state254(input_str)
         else:
-            raise SyntaxError(f"Invalid delimeter '{self.current_char()}' at line {self.line}, position {self.position}")
+            raise SyntaxError(f"Invalid delimiter '{self.current_char()}' at line {self.line}, position {self.position}")
         
     #################### FINAL STATE FOR POSITIVE OCEAN LITERALS ####################
     
@@ -3063,7 +3070,7 @@ class RoyalScriptLexer:
         self.advance()
  
         if self.current_char() == "'":
-            return self.state261(input_str) 
+            return self.state260(input_str) 
         else:
             raise SyntaxError(f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}")
 

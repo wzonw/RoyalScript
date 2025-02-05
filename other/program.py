@@ -620,7 +620,7 @@ productions = {
     ],
     
     '<var_dec>': [
-        ['<data_type>', 'id_lit', '<vardec_def>'],
+        ['<const>','<data_type>', 'id_lit', '<vardec_def>'],
         ['λ']
     ],
     
@@ -636,6 +636,11 @@ productions = {
     
     '<vardec_more>': [
         [',', 'id_lit', '<initialization>', '<vardec_more>'],
+        ['λ']
+    ],
+
+    '<const>': [
+        ['dynasty'],
         ['λ']
     ],
     
@@ -703,7 +708,7 @@ productions = {
         ['treasures_lit'],
         ['ocean_lit'],
         ['<array_element>'],
-        ['<aritmethic_exp>'],
+        ['<arithmetic_exp>'],
         ['<func_call>']
     ],
     
@@ -769,7 +774,11 @@ productions = {
         ['0']
     ],
     
-    '<arithmetic_exp>': [
+    '<arithmetic_exp>' : [
+        ['<arithmetic_operand>', '<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>']
+    ],
+
+    '<arithmetic_operator>': [
         ['<arithmetic_operand>', '<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>']
     ],
     
@@ -863,12 +872,12 @@ productions = {
     ],
     
     '<param>': [
-        ['<datatype>', 'id_lit', '<param_more>'],
+        ['<data_type>', 'id_lit', '<param_more>'],
         ['λ']
     ],
     
     '<param_more>': [
-        [',', '<datatype>', 'id_lit', '<param_more>'],
+        [',', '<data_type>', 'id_lit', '<param_more>'],
         ['λ']
     ],
     
@@ -905,8 +914,7 @@ productions = {
     ],
     
     '<coronation>': [
-        ['id_lit', '=', '<val>', '~'],
-        ['λ']
+        ['id_lit', '=', '<val>', '~']
     ],
     
     '<condi_statement>': [

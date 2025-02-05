@@ -57,9 +57,10 @@ RegDef = {
     'multiline_open': {
         '?*'
     },
-    'num': {
-        '1', '2', '3', '4', '5', '6', '7', '8', '9'
-    },
+    # 'num': {
+    #     '1', '2', '3', '4', '5', '6', '7', '8', '9'
+    # },
+    'num': ('1', '2', '3', '4', '5', '6', '7', '8', '9'),
     'number': {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
     },
@@ -159,11 +160,11 @@ Delims = {
 
     'close_square_bracket_delim': {' ', ',', '=', '[', '~', ')'},
 
-    'comma_delim': {'-', '‘', '“', *RegDef['alphanum'], *RegDef['whitespace']},
+    'comma_delim': {'-', '‘', '“', *RegDef['alphanum'], *RegDef['whitespace'], '{'},
 
     'escape_sequence_delim': {' ', '"', '"', *RegDef['ascii'], *RegDef['escape_seq']},
 
-    'equal_delim': {' ', '(', '[', '‘', '“', *RegDef['alphanum']},
+    'equal_delim': {' ', '(', '[', '‘', '“', *RegDef['alphanum'], '{'},
 
     'gate_delim': {' ', '~'},
 

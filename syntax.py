@@ -1,65 +1,225 @@
-from lexer import RoyalScriptLexer
-from lexer import Token
-from RS_RegDef  import Delims
-from RS_RegDef  import RegDef
+from lexer import RoyalScriptLexer, Token
+from RS_RegDef import Delims, RegDef
 
 class RoyalScriptParser:
     def __init__(self, tokens):
-        self.tokens = tokens  # Tokens from the lexer, stored as a 2D list
-        self.line_num = 0  # Line number for parsing
-
-        # Define the predict sets for different non-terminals
-        self.predict_sets = {
-            'Expression': {'ID', 'NUMBER'},  # Example tokens that can start an expression
-            'Term': {'ID', 'NUMBER'},
-            'Factor': {'ID', 'NUMBER'}
-        }
+        """Initialize with tokens (list of token types) and syntax rules."""
+        self.tokens = tokens  # List of token types for each line
+        self.syntax = self.syntax  # Grammar rules
+        self.current_line = 0  # Index for current line of tokens
+        self.current_index = 0  # Index for the token in the current line
+        self.parsing_result = ""  # Variable to store the result of parsing
 
     def current_token(self):
-        """Get the current token in the current line"""
-        if self.line_num < len(self.tokens):
-            return self.tokens[self.line_num]  # Return all tokens in the current line
+        """Return the current token type in the current line."""
+        if self.current_line < len(self.tokens):
+            if self.current_index < len(self.tokens[self.current_line]):
+                return self.tokens[self.current_line][self.current_index]
+        return None
+    
+    def previous_token(self):
+        """Return the previous token type in the current line."""
+        if self.current_index > 0:
+            return self.tokens[self.current_line][self.current_index - 1]
+        # If there is no previous token in the current line, check the previous line
+        if self.current_line > 0 and len(self.tokens[self.current_line - 1]) > 0:
+            return self.tokens[self.current_line - 1][-1]  # Last token of the previous line
         return None
 
-    def match(self, token_type, token_list):
-        """Check if the current token matches the expected token type"""
-        if token_list:
-            current_token = token_list[0]  # Check the first token in the line
-            if current_token[0] == token_type:  # Token format is (type, value)
-                return True
-        return False
+    def advance(self):
+        """Advance to the next token. If at the end of a line, move to the next line."""
+        if self.current_index + 1 < len(self.tokens[self.current_line]):
+            self.current_index += 1
+        elif self.current_line + 1 < len(self.tokens):
+            self.current_line += 1
+            self.current_index = 0
+        else:
+            return None  # End of tokens
 
-    def advance(self, token_list):
-        """Advance the token list by removing the first token"""
-        if token_list:
-            return token_list[1:]  # Remove the first token
-        return token_list
+    def match(self):
+        """Check if current and previous tokens match any syntax rule."""
+        token = self.current_token()  # Just token types as strings
+        prev_token = self.previous_token()  # Previous token type
 
-    def parse_expression(self, token_list):
-        """Parse an expression (example: ID PLUS NUMBER)"""
-        if self.match('ID', token_list):
-            token_list = self.advance(token_list)
-            if self.match('PLUS', token_list):
-                token_list = self.advance(token_list)
-                if self.match('NUMBER', token_list):
-                    return True  # Expression is valid
-        return False  # Expression is not valid
+        if token is None:
+            return False
+
+        # Direct match with token type in syntax rules
+        if token in self.syntax:
+            expected_tokens = self.syntax[token]
+            return expected_tokens
+
+        # Other matching logic for previous tokens or pairs
+        if prev_token is not None:
+            for key, value in self.syntax.items():
+                if isinstance(key, tuple) and key[0] == prev_token and key[1] == token:
+                    return value
+
+        # Handle other syntax cases
+        for key, value in self.syntax.items():
+            if isinstance(key, tuple) and key[0] == token:
+                return value
+
+        return None
 
     def parse(self):
-        """Parse the entire code, line by line"""
-        while self.line_num < len(self.tokens):
-            token_list = self.tokens[self.line_num]  # Get tokens for the current line
+        """Parse the tokens according to the syntax."""
+        while self.current_token() is not None:
+            token = self.current_token()
+            print(f"Current token: {token}, Previous token: {self.previous_token()}")
+            
+            # Check if we encounter EOF and stop parsing
+            if token == 'EOF':
+                self.parsing_result = "Parsing complete: EOF reached."
+                print(self.parsing_result)
+                break
 
-            print(f"Parsing Line {self.line_num + 1}: {token_list}")
-
-            # Try to parse the expression in the current line
-            if self.parse_expression(token_list):
-                print(f"Line {self.line_num + 1}: Expression is valid.")
+            # Check if the token type matches any rule
+            result = self.match()  # Just pass token directly here
+            if result:
+                print(f"Matching rule: {token} -> {result}")
+                self.advance()
             else:
-                print(f"Line {self.line_num + 1}: Syntax Error!")
+                self.parsing_result = f"No matching rule for token: {token}"
+                print(self.parsing_result)
+                break
 
-            # Move to the next line
-            self.line_num += 1
+    def get_parsing_result(self):
+        """Return the result of the parsing."""
+        return self.parsing_result
+
+
+    
+    #syntax:
+    syntax = {
+
+    #start 
+        'program': ['crown'],
+        'crown' : ['~'],
+        ('~', 'crown'): ['treasures', 'ocean', 'scroll', 'rose', 'mirror', 'const', 'spell', 'castle','EOF'],
+    #variable declaration
+        #<const> <data_type> id_lit
+        'const': ['treasures', 'ocean', 'scroll', 'rose', 'mirror'],
+        ('treasures', 'const'): ['identifier'],
+        ('ocean', 'const'): ['identifier'],
+        ('scroll', 'const'): ['identifier'],
+        ('rose', 'const'): ['identifier'],
+        ('mirror', 'const'): ['identifier'],
+
+        #<data_type> id_lit
+        'treasures': ['identifier'],
+        'ocean': ['identifier'],
+        'scroll': ['identifier'],
+        'rose': ['identifier'],
+        'mirror': ['identifier'],
+
+        # <vardec_def>
+        ('identifier', 'treasures') : ['=', ',', '~', '[', ')'],
+        ('identifier', 'ocean') : ['=', ',', '~', '[', ')'],
+        ('identifier', 'scroll') : ['=', ',', '~', '[', ')'],
+        ('identifier', 'rose') : ['=', ',', '~', '[', ')'],
+        ('identifier', 'mirror') : ['=', ',', '~', '[', ')'],
+
+        #<intialization> -> = <val>
+
+        ('=', 'identifier'): ['scroll-lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'mirror-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'rose-lit', 'id_lit', 'phantom', 
+                            'toscroll', 'wish', 'torose', 'totreasures', 'toocean', '!', 1, 0, '(', 'wish'],
+
+        ('scroll-lit', '='): [',', '~'],
+        ('rose-lit', '='): [',', '~'],
+        ('neg-treasures-lit', '='): [',', '~'],
+        ('pos-treasures-lit', '='): [',', '~'],
+        ('mirror-lit', '='): [',', '~'],
+        ('neg-ocean-lit', '='): [',', '~'],
+        ('pos-ocean-lit', '='): [',', '~'],
+        ('id-lit', '='): [',', '~'],
+        ('phantom', '='): [',', '~'],
+
+
+        # array declaration (single) -> [num] 
+        ('[', 'identifier'): [RegDef['num']],
+        (RegDef['num'], '['): [']'],
+        # array declaration -> [num] -> <column>
+        (']', RegDef['num']): ['[', '=', ',', '~'],
+        ('[', ']'): [RegDef['num']],
+        (RegDef['num'], '['): [']'],
+        (']', RegDef['num']): ['=', ',' , '~'],
+
+        #array with initialization 
+        ('=', ']'): ['{'],
+        ('{', '='): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit', '{'],
+        ('scroll-lit', '{'): [',', '}'],
+        ('rose_lit', '{'): [',', '}'],
+        ('neg-treasures-lit', '{'): [',', '}'],
+        ('pos-treasures-lit', '{'): [',', '}'],
+        ('neg-ocean-lit' , '{'): [',', '}'],
+        ('pos-ocean-lit', '{'): [',', '}'],
+        ('mirror-lit', '{'): [',', '}'],   
+
+        #multiple element
+        (',', 'scroll-lit'): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+        (',', 'rose_lit'): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+        (',', 'neg-treasures-lit'): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+        (',', 'pos-treasures-lit'): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+        (',', 'neg-ocean-lit'): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+        (',', 'pos-ocean-lit'): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+        (',', 'mirror-lit'): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+
+        #single array
+        ('}', 'scroll-lit'): ['~', '}', ','], 
+        ('}', 'rose_lit'): ['~', '}', ','],
+        ('}', 'neg-treasures-lit'): ['~', '}', ','],
+        ('}', 'pos-treasures-lit'): ['~', '}', ','],
+        ('}', 'neg-ocean-lit'): ['~', '}', ','],
+        ('}', 'pos-ocean-lit'): ['~', '}', ','],
+        ('}', 'mirror-lit'): ['~', '}', ','],
+        
+        #single array end 
+        (',', '}'): ['{'],
+        ('{', ','): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+
+        ('~', '}'): [], #add tokens
+
+        #more array
+        (', ', '}'): ['{'],
+        ('{', ','): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+
+        #2d array start
+        ('{', '{'): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+
+        #2d array end 
+        ('}', '}'): ['~'],
+
+
+        #<vardec_more> -> , id_lit 
+        (',', 'identifier'): ['identifier'],
+
+        #<initialization> and <vardec_more> == null
+        ('~', 'identifier'): ['EOF'], #add tokens
+        
+        #user-defined function -> spell <return_type> id_lit(<param>){<body><ret_statement>}<user-defined-func>
+        ('spell', '~'): ['chamber', 'treasures', 'ocean', 'scroll', 'rose', 'mirror'],
+        ('chamber', 'spell'): ['id_lit'],
+        ('treasures', 'spell'): ['id_lit'],
+        ('ocean', 'spell'): ['id_lit'],
+        ('scroll', 'spell'): ['id_lit'],
+        ('rose', 'spell'): ['id_lit'],
+        ('mirro', 'spell'): ['id_lit'],
+        ('id_lit', 'chamber'): ['('],
+        ('id_lit', 'treasures'): ['('],
+        ('id_lit', 'ocean'): ['('],
+        ('id_lit', 'scroll'): ['('],
+        ('id_lit', 'rose'): ['('],
+        ('id_lit', 'mirro'): ['('],
+        ('(', 'id_lit'): ['treasures', 'ocean', 'scroll', 'rose', 'mirror'],
+        ('treasures', '('): ['identifier'],
+        ('ocean', '('): ['identifier'],
+        ('scroll', '('): ['identifier'],
+        ('rose', '('): ['identifier'],
+        ('mirror', '('): ['identifier'],
 
 
 
+        #main function
+
+    }
