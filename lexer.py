@@ -3487,10 +3487,16 @@ class RoyalScriptLexer:
 
         if self.current_char() in RegDef['alphanum'] | {'_'} and self.current_char() not in Delims['id_delim']:
             return self.state243(input_str) 
+        elif self.current_char() in RegDef['special_char'] and self.current_char() not in Delims['id_delim']:
+            error_message = f"Invalid character '{self.current_char()}' for Identifier at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
         elif self.current_char() in Delims['id_delim']:
             return self.state244(input_str)  
         else:
-            raise SyntaxError(f"Invalid delimiter '{self.current_char()}' at line {self.line}, position {self.position}")
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
 
     #################### FINAL STATE FOR IDENTIFIER ####################
 
@@ -3510,7 +3516,9 @@ class RoyalScriptLexer:
         elif self.current_char() == ".":
             return self.state249(input_str)  
         else:
-            raise SyntaxError(f"Invalid delimiter '{self.current_char()}' at line {self.line}, position {self.position}")
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
         
     #################### FINAL STATE FOR NEGATIVE TREASURES LITERALS ####################
 
@@ -3531,7 +3539,9 @@ class RoyalScriptLexer:
         elif self.current_char() == ".":
             return self.state252(input_str)  
         else:
-            raise SyntaxError(f"Invalid delimiter '{self.current_char()}' at line {self.line}, position {self.position}")
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
 
     #################### FINAL STATE FOR POSITIVE TREASURES LITERALS ####################
 
@@ -3547,6 +3557,10 @@ class RoyalScriptLexer:
  
         if self.current_char() in RegDef['number']:
             return self.state250(input_str) 
+        elif self.current_char is None or self.current_char() == '' or self.current_char() in RegDef['whitespace']:
+            error_message = f"Invalid float format: fractional part is missing after decimal point at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
         else:
             error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3565,7 +3579,9 @@ class RoyalScriptLexer:
         elif self.current_char() in Delims['number_delim']:
             return self.state251(input_str)
         else:
-            raise SyntaxError(f"Invalid delimiter '{self.current_char()}' at line {self.line}, position {self.position}")
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
 
     #################### FINAL STATE FOR NEGATIVE OCEAN LITERALS ####################
     
@@ -3583,6 +3599,10 @@ class RoyalScriptLexer:
  
         if self.current_char() in RegDef['number']:
             return self.state253(input_str) 
+        elif self.current_char is None or self.current_char() == '' or self.current_char() in RegDef['whitespace']:
+            error_message = f"Invalid float format: fractional part is missing after decimal point at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
         else:
             error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3602,7 +3622,9 @@ class RoyalScriptLexer:
         elif self.current_char() in Delims['number_delim']:
             return self.state254(input_str)
         else:
-            raise SyntaxError(f"Invalid delimiter '{self.current_char()}' at line {self.line}, position {self.position}")
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
         
     #################### FINAL STATE FOR POSITIVE OCEAN LITERALS ####################
     
@@ -3625,7 +3647,7 @@ class RoyalScriptLexer:
         elif self.current_char() == '"':
             return self.state256(input_str)  # Handle double-quote
         else:
-            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            error_message = f"Unclosed scroll literal detected at line {self.line}, position {self.position}.'"
             self.errors.append(error_message)
             return False, input_str, None
 			
@@ -3671,7 +3693,7 @@ class RoyalScriptLexer:
         if self.current_char() == "'":
             return self.state260(input_str) 
         else:
-            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            error_message = f"Unclosed rose literal detected at line {self.line}, position {self.position}.'"
             self.errors.append(error_message)
             return False, input_str, None
 			
@@ -3706,7 +3728,7 @@ class RoyalScriptLexer:
         elif self.current_char() == '*':
             return self.state264(input_str) 
         else:
-            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
 			
@@ -3727,7 +3749,7 @@ class RoyalScriptLexer:
         elif self.current_char() == '*':
             return self.state265(input_str) 
         else:
-            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            error_message = f"Unclosed multi-line comment detected at line {self.line}, position {self.position}.'"
             self.errors.append(error_message)
             return False, input_str, None
 			
@@ -3739,7 +3761,7 @@ class RoyalScriptLexer:
         if self.current_char() == '?':
             return self.state266(input_str) 
         else:
-            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            error_message = f"Unclosed multi-line comment detected at line {self.line}, position {self.position}.'"
             self.errors.append(error_message)
             return False, input_str, None
 			
@@ -3808,7 +3830,10 @@ class RoyalScriptLexer:
 
             # **Error Check:** Ensure that there is at least one digit after the decimal point
             if not fractional_part:
-                raise ValueError("Invalid float format: fractional part is missing after decimal point.")
+                error_message = f"Invalid float format: fractional part is missing after decimal point at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+                # raise ValueError("Invalid float format: fractional part is missing after decimal point.")
 
             # Normalize integer part by removing leading zeros
             normalized_integer = integer_part.lstrip('0') or '0'
