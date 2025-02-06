@@ -14,7 +14,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         super().__init__()
         def intro_music():
             mixer.music.load("fairytale_intro.mp3")
-            mixer.music.play(loops=1)
+            mixer.music.play(-1) 
         intro_music()
             
         self.title("RoyalScript Lexer")
