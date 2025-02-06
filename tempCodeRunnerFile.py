@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 from lexer import RoyalScriptLexer
 from lexer import Token
 from pygame import mixer
+from syntax import RoyalScriptParser
 
 
 class RoyalScriptLexerGUI(tk.Tk):
@@ -13,7 +14,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         super().__init__()
         def intro_music():
             mixer.music.load("fairytale_intro.mp3")
-            mixer.music.play(loops=1)
+            mixer.music.play(-1) 
         intro_music()
             
         self.title("RoyalScript Lexer")
@@ -229,19 +230,19 @@ class RoyalScriptLexerGUI(tk.Tk):
         code = self.input_text.get("1.0", tk.END)
         lexer = RoyalScriptLexer(code)
         
-        
         # Clear previous output
         self.output_listbox.delete(0, tk.END)
         self.token_listbox.delete(0, tk.END)
         self.errors_listbox.delete(0, tk.END)
 
         try:
-            token_lines = lexer.get_tokens()  # This now returns a 2D array
+            # Ensure get_tokens() returns a valid iterable, defaulting to empty list if None
+            token_lines = lexer.get_tokens() or []  # Defaults to empty list if None
             
             # Process each line of tokens
             for line_num, line_tokens in enumerate(token_lines, 1):
                 # Add a line separator in the listboxes
-                if line_num > 1:
+                if line_num >= 1:
                     self.output_listbox.insert(tk.END, "──────────────")
                     self.token_listbox.insert(tk.END, "──────────────")
                 
@@ -259,18 +260,23 @@ class RoyalScriptLexerGUI(tk.Tk):
                         if hasattr(token, 'token_type'):
                             definition = token.token_type.replace("_", " ")
                             self.token_listbox.insert(tk.END, f"{definition}")
+            
+            # If there are errors, display them
+            if lexer.errors:
+                for error in lexer.errors:
+                    self.errors_listbox.insert(tk.END, error)
 
         except SyntaxError as e:
-            self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
+            self.errors_listbox.insert(tk.END, f"Lexical Error: {str(e)}")
         except Exception as e:
             self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
             # For debugging purposes
             import traceback
             self.errors_listbox.insert(tk.END, f"Details: {traceback.format_exc()}")
 
-    #lexer with syntax
+    # #lexer with syntax
     # def analyze_code(self, event=None):
-    #     """Analyze the code and display results"""
+    #     """Analyze the code and display results."""
     #     code = self.input_text.get("1.0", tk.END)
     #     lexer = RoyalScriptLexer(code)
 
@@ -283,7 +289,7 @@ class RoyalScriptLexerGUI(tk.Tk):
     #         token_lines = lexer.get_tokens()  # Lexer generates tokens (2D array)
     #         all_tokens = []  # Store tokens for syntax analysis
     #         lexer_error = False  # Flag for lexer errors
-            
+
     #         # Process each line of tokens
     #         for line_num, line_tokens in enumerate(token_lines, 1):
     #             # Add a line separator in the listboxes
@@ -296,45 +302,50 @@ class RoyalScriptLexerGUI(tk.Tk):
     #             self.token_listbox.insert(tk.END, f"Line {line_num}:")
 
     #             # Process tokens in the current line
+    #             token_types = []  # Only token types to pass to syntax analyzer
     #             for token in line_tokens:
     #                 if isinstance(token, Token):  # Ensure it's a Token object
+    #                     # Extract token type (the 'token_type' attribute)
+    #                     token_type = token.token_type
     #                     self.output_listbox.insert(tk.END, f"{token.value}")
                         
-    #                     # Display token type
-    #                     if hasattr(token, 'token_type'):
-    #                         definition = token.token_type.replace("_", " ")
-    #                         self.token_listbox.insert(tk.END, f"{definition}")
-                        
-    #                     # Store tokens for syntax analysis
-    #                     all_tokens.append((token.token_type, token.value))
+    #                     # Display token type (replace underscores for readability)
+    #                     definition = token_type.replace("_", " ")
+    #                     self.token_listbox.insert(tk.END, f"{definition}")
+
+    #                     # Add token type to the list of token types
+    #                     token_types.append(token_type)
     #                 else:
     #                     # If the lexer returns anything invalid, flag an error
     #                     lexer_error = True
 
+    #             # Store the token types for each line
+    #             all_tokens.append(token_types)  
+
     #         # ✅ **Run Syntax Analyzer only if Lexer has no errors**
     #         if not lexer_error:
-    #             self.run_syntax_analyzer(all_tokens)  # Pass tokens to syntax analyzer
+    #             self.run_syntax_analyzer(all_tokens)  # Pass only token types (2D array)
 
-    #     except SyntaxError as e:
-    #         self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
     #     except Exception as e:
-    #         self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
-    #         import traceback
-    #         self.errors_listbox.insert(tk.END, f"Details: {traceback.format_exc()}")
-        # def run_syntax_analyzer(self, tokens):
-        #     """Run the syntax analyzer with tokens"""
-        #     parser = RoyalScriptParser(tokens)  # Assuming you have a parser class
+    #         # Handle any errors that might occur
+    #         self.errors_listbox.insert(tk.END, f"Error: {str(e)}")
 
-        #     try:
-        #         parser.parse()  # Run the syntax analysis
-        #         self.output_listbox.insert(tk.END, "✅ Syntax Analysis Successful!")
+    
 
-        #     except SyntaxError as e:
-        #         self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
-        #     except Exception as e:
-        #         self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
-        #         import traceback
-        #         self.errors_listbox.insert(tk.END, f"Details: {traceback.format_exc()}")
+    # def run_syntax_analyzer(self, tokens):
+    #         """Run the syntax analyzer with tokens"""
+    #         parser = RoyalScriptParser(tokens)  # Assuming you have a parser class
+
+    #         try:
+    #             parser.parse()  # Run the syntax analysis
+    #             # self.output_listbox.insert(tk.END, "✅ Syntax Analysis Successful!")
+
+    #         except SyntaxError as e:
+    #             self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
+    #         except Exception as e:
+    #             self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
+    #             import traceback
+    #             self.errors_listbox.insert(tk.END, f"Details: {traceback.format_exc()}")
 
 
 
