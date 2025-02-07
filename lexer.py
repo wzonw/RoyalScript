@@ -429,7 +429,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in Delims['relational_operator_delim']:
                         self.advance()
                     continue
                 
@@ -442,7 +442,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in Delims['relational_operator_delim']:
                         self.advance()
                     continue
 
@@ -455,7 +455,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in Delims['open_parentheses_delim']:
                         self.advance()
                     continue
                 
@@ -467,7 +467,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in Delims['close_parentheses_delim']:
                         self.advance()
                     continue
             
@@ -480,7 +480,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in Delims['open_curly_bracket_delim']:
                         self.advance()
                     continue
                 
@@ -493,7 +493,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in RegDef['whitespace'] or self.current_char() not in RegDef['alpha_small']:
                         self.advance()
                     continue
                 
@@ -505,7 +505,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in Delims['open_square_bracket_delim']:
                         self.advance()
                     continue
                 
@@ -517,7 +517,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in Delims['close_square_bracket_delim']:
                         self.advance()
                     continue
             
@@ -530,7 +530,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() != '?' or self.current_char() != '}' or self.current_char() not in RegDef['whitespace'] or self.current_char() not in RegDef['alpha_small']:
                         self.advance()
                     continue
                 
@@ -543,7 +543,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in Delims['comma_delim']:
                         self.advance()
                     continue
                 
@@ -556,7 +556,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in Delims['id_delim']:
                         self.advance()
                     continue
                 
@@ -570,7 +570,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in Delims['multi-comment_delim'] or self.current_char() != '\n':
                         self.advance()
                     continue
                 
@@ -584,7 +584,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in Delims['book_delim']:
                         self.advance()
                     continue
                 
@@ -599,7 +599,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in Delims['book_delim']:
                         self.advance()
                     continue
                 
@@ -613,7 +613,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in all_delims and self.current_char.isalpha():
+                    while self.current_char() not in Delims['number_delim']:
                         self.advance()
                     continue
                 
@@ -628,8 +628,8 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                    self.errors.append(error_message)
+                    while self.current_char() not in Delims['number_delim']:
+                        self.advance()
                     continue
 
             # After all the if-block checks for known states, handle invalid character:
