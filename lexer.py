@@ -570,7 +570,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    while self.current_char() not in Delims['multi-comment_delim'] or self.current_char() != '\n':
+                    while self.current_char() not in Delims['multi-comment_delim']:
                         self.advance()
                     continue
                 
@@ -640,6 +640,7 @@ class RoyalScriptLexer:
                 # you might want to raise an error with more info
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
+                self.advance() 
                 continue
 
 
