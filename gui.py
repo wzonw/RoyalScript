@@ -26,7 +26,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.bg_image = self.bg_image.resize((1040, 700), Image.Resampling.LANCZOS)
         self.bg_photo = ImageTk.PhotoImage(self.bg_image)
         
-        self.bg_label = tk.Label(self, image=self.bg_photo)
+        self.bg_label = tk.Label(self, image=self.bg_photo, )
         self.bg_label.place(relwidth=1, relheight=1)
 
         # Setup GUI components
