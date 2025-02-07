@@ -204,3 +204,5 @@ Delims = {
 
 }
 
+
+all_delims = set().union(*Delims.values())
