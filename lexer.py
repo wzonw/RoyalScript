@@ -159,7 +159,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
 
             #RESERVED WORDS
             if char == 'c':
@@ -170,7 +172,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
             if char == 'd':
                 pos_start = self.position
@@ -180,7 +184,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
             if char == 'f':
                 pos_start = self.position
@@ -190,7 +196,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
                 
             if char == 'g':
@@ -201,7 +209,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
                 
             if char == 'm':
@@ -212,7 +222,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
 
             if char == 'o':
@@ -223,7 +235,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
                 
             if char == 'p':
@@ -234,7 +248,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
             if char == 'r':
                 pos_start = self.position
@@ -244,7 +260,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
 
             if char == 's':
@@ -255,7 +273,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                   
 
             if char == 't':
@@ -266,7 +286,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
 
             if char == 'w':
@@ -277,7 +299,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
 
 
             #RESERVED SYMBOL
@@ -289,7 +313,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break  
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue  
             
             if char == '+':
                 pos_start = self.position
@@ -299,7 +325,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
     
 
             if char == '-':
@@ -310,7 +338,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
                 
             if char == '*':
@@ -321,7 +351,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
             if char == '/':
                 pos_start = self.position
@@ -331,7 +363,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
                 
             if char == '%':
@@ -342,7 +376,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
 
             if char == '!':
@@ -353,7 +389,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
                 
             if char == '&':
@@ -364,7 +402,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
                 
             if char == '|':
@@ -375,7 +415,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
 
             if char == '>':
@@ -386,7 +428,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
             
             if char == '<':
@@ -397,7 +441,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
 
 
             if char == '(':
@@ -408,7 +454,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
             if char == ')':
                 pos_start = self.position
@@ -418,7 +466,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
             
             
             if char == '{':
@@ -429,7 +479,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
                 
             if char == '}':
@@ -440,7 +492,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
             if char == '[':
                 pos_start = self.position
@@ -450,7 +504,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
             if char == ']':
                 pos_start = self.position
@@ -460,7 +516,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
             
                 
             if char == '~':
@@ -471,7 +529,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
             
             if char == ',':
@@ -482,7 +542,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
             #IDENTIFIER    
             if char in RegDef['alpha_big']:
@@ -493,7 +555,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
                 
             #COMMENTS
@@ -505,7 +569,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
 
             #SCROLL LITERALS 
@@ -517,7 +583,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
 
 
@@ -530,7 +598,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
 
             #TREASURES & FLOAT LITERALS
@@ -542,7 +612,9 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
                 else:
-                    break
+                    while self.current_char() and self.current_char().isalpha():
+                        self.advance()
+                    continue
                 
             
             
@@ -557,7 +629,7 @@ class RoyalScriptLexer:
                 else:
                     error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                     self.errors.append(error_message)
-                    break
+                    continue
 
             # After all the if-block checks for known states, handle invalid character:
             if (char not in allowed_symbols 
@@ -567,7 +639,7 @@ class RoyalScriptLexer:
                 # you might want to raise an error with more info
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
-                break
+                continue
 
 
             
@@ -592,7 +664,7 @@ class RoyalScriptLexer:
     #            STATES => RESERVED WORDS              #
     #==================================================#
     #   STATE 1 - STATE 8 => BELIEVE                   #
-    #   STATE 1 & STATE 9-13 => BREAK                  #
+    #   STATE 1 & STATE 9-13 => continue                  #
     #   STATE 14 - STATE 18 => CAST                    #
     #   STATE 17 & STATE 19-21 => CASTLE               #
     #   STATE 14 & STATE 22-28 => CHAMBER              #
@@ -773,7 +845,7 @@ class RoyalScriptLexer:
             self.errors.append(error_message)
             return False, input_str, None
     
-    #################### FINAL STATE FOR BREAK ####################
+    #################### FINAL STATE FOR continue ####################
             
     def state13(self, input_str):
         return True, input_str, TokenType.BREAK
