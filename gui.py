@@ -290,8 +290,8 @@ class RoyalScriptLexerGUI(tk.Tk):
             
             for line_num, line_tokens in enumerate(token_lines, 1):
                 if not line_tokens:  # If the line has no tokens
-                    self.output_listbox.insert(tk.END, f"(empty)")
-                    self.token_listbox.insert(tk.END, "(empty)")
+                    self.output_listbox.insert(tk.END, f" ")
+                    self.token_listbox.insert(tk.END, " ")
                 else:
                     for token in line_tokens:
                         if isinstance(token, Token):
