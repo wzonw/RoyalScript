@@ -19,12 +19,12 @@ class RoyalScriptLexerGUI(tk.Tk):
         intro_music()
             
         self.title("RoyalScript Lexer")
-        self.geometry("1040x700")
+        self.geometry("1050x700")
         self.resizable(False, False)
 
         # Load and set background image
         self.bg_image = Image.open("4.png")
-        self.bg_image = self.bg_image.resize((1040, 700), Image.Resampling.LANCZOS)
+        self.bg_image = self.bg_image.resize((1050, 700), Image.Resampling.LANCZOS)
         self.bg_photo = ImageTk.PhotoImage(self.bg_image)
         
         self.bg_label = tk.Label(self, image=self.bg_photo, )
