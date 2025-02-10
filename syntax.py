@@ -96,15 +96,16 @@ class RoyalScriptParser:
     #start 
         'program': ['crown'],
         'crown' : ['~'],
-        ('~', 'crown'): ['treasures', 'ocean', 'scroll', 'rose', 'mirror', 'const', 'spell', 'castle','EOF'],
+        ('~', 'crown'): ['treasures', 'ocean', 'scroll', 'rose', 'mirror', 'dynasty', 'spell', 'castle','EOF' ],#remove EOF if final
+                         
     #variable declaration
         #<const> <data_type> id_lit
-        'const': ['treasures', 'ocean', 'scroll', 'rose', 'mirror'],
-        ('treasures', 'const'): ['identifier'],
-        ('ocean', 'const'): ['identifier'],
-        ('scroll', 'const'): ['identifier'],
-        ('rose', 'const'): ['identifier'],
-        ('mirror', 'const'): ['identifier'],
+        'dynasty': ['treasures', 'ocean', 'scroll', 'rose', 'mirror'],
+        ('treasures', 'dynasty'): ['identifier'],
+        ('ocean', 'dynasty'): ['identifier'],
+        ('scroll', 'dynasty'): ['identifier'],
+        ('rose', 'dynasty'): ['identifier'],
+        ('mirror', 'dynasty'): ['identifier'],
 
         #<data_type> id_lit
         'treasures': ['identifier'],
@@ -114,15 +115,15 @@ class RoyalScriptParser:
         'mirror': ['identifier'],
 
         # <vardec_def>
-        ('identifier', 'treasures') : ['=', ',', '~', '[', ')'],
-        ('identifier', 'ocean') : ['=', ',', '~', '[', ')'],
-        ('identifier', 'scroll') : ['=', ',', '~', '[', ')'],
-        ('identifier', 'rose') : ['=', ',', '~', '[', ')'],
-        ('identifier', 'mirror') : ['=', ',', '~', '[', ')'],
+        ('identifier', 'treasures') : ['=', ',', '~', '['],
+        ('identifier', 'ocean') : ['=', ',', '~', '['],
+        ('identifier', 'scroll') : ['=', ',', '~', '['],
+        ('identifier', 'rose') : ['=', ',', '~', '['],
+        ('identifier', 'mirror') : ['=', ',', '~', '['],
 
         #<intialization> -> = <val>
 
-        ('=', 'identifier'): ['scroll-lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'mirror-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'rose-lit', 'id_lit', 'phantom', 
+        ('=', 'identifier'): ['scroll-lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'mirror-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'rose-lit', 'identifier', 'phantom', 
                             'toscroll', 'wish', 'torose', 'totreasures', 'toocean', '!', 1, 0, '(', 'wish'],
 
         ('scroll-lit', '='): [',', '~'],
@@ -132,15 +133,15 @@ class RoyalScriptParser:
         ('mirror-lit', '='): [',', '~'],
         ('neg-ocean-lit', '='): [',', '~'],
         ('pos-ocean-lit', '='): [',', '~'],
-        ('id-lit', '='): [',', '~'],
+        ('identifier', '='): [',', '~'],
         ('phantom', '='): [',', '~'],
 
 
         # array declaration (single) -> [num] 
         ('[', 'identifier'): [RegDef['num']],
         (RegDef['num'], '['): [']'],
-        # array declaration -> [num] -> <column>
         (']', RegDef['num']): ['[', '=', ',', '~'],
+        # array declaration -> [num] -> <column>
         ('[', ']'): [RegDef['num']],
         (RegDef['num'], '['): [']'],
         (']', RegDef['num']): ['=', ',' , '~'],
@@ -164,6 +165,14 @@ class RoyalScriptParser:
         (',', 'neg-ocean-lit'): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
         (',', 'pos-ocean-lit'): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
         (',', 'mirror-lit'): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+        
+        ('scroll-lit', ','): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+        ('rose_lit', ','): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+        ('neg-treasures-lit', ','): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+        ('pos-treasures-lit', ','): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+        ('neg-ocean-lit', ','): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+        ('pos-ocean-lit', ','): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
+        ('mirror-lit', ','): ['scroll-lit', 'rose_lit', 'neg-treasures-lit' , 'pos-treasures-lit', 'neg-ocean-lit' , 'pos-ocean-lit', 'mirror-lit'],
 
         #single array
         ('}', 'scroll-lit'): ['~', '}', ','], 
