@@ -502,8 +502,19 @@ class RoyalScriptParser:
 
         token = self.current_token()
 
-        if self.match('identifier'):
-            return True
+        if token == 'identifier':
+            next_token = self.peek_next_token()
+            if next_token == '(':  # If it's a function call
+                if not self.func_call():  # Parse the function call
+                    return False
+                return True  # Successfully parsed function call as operand
+            elif next_token == '[':
+                self.advance()
+                if not self.index():
+                    return False
+                return True
+            else:
+                return self.match('identifier')
 
         elif self.match('treasures_lit'):
             return True
