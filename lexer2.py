@@ -18,30 +18,13 @@ class Token:
 # Define token types for RoyalScript
 class TokenType:
     # Reserved words for RoyalScript
-    CROWN = "START"
-    REIGN = "END"
-    SPELL = "USER DEFINED FUNCTION"  # For function declarations
-    CASTLE = "MAIN FUNCTION"  # Main function
-    WISH = "INPUT"  # Input
-    GRANTED = "OUTPUT"  # Output
-    CAST = "IF"  # If statement
-    TWIST = "ELSEIF"  # Else if statement
-    CURSE = "ELSE"  # Else statement
-    TOROSE = "CONVERSION FUNC"
-    TOSCROLL = "CONVERSION FUNC"
-    TOOCEAN = "CONVERSION FUNC"
-    TOTREASURES = "CONVERSION FUNC"  
-    ESCAPE = "ESCAPE"
-    TALE = "FOR LOOP"
-    EOF = "EOF"
-
-    # Flow control
-    BELIEVE = "CONDITIONAL - DO"
-    FOREVER = "CONDITIONAL - WHILE"
-    BREAK = "FLOW CONTROL"
-    CONTINUE = "FLOW CONTROL"
-    RETURN = "RETURN"
-
+    
+    #start and end
+    CROWN = "crown"
+    REIGN = "reign"
+    #input and outpt
+    WISH = "wish" 
+    GRANTED = "granted"
     # Data types
     TREASURES = "treasures"  # int
     OCEAN = "ocean"  # float
@@ -49,51 +32,91 @@ class TokenType:
     ROSE = "rose"  # char
     MIRROR = "mirror"  # boolean
     CHAMBER = "chamber"  # void
-    DYNASTY = "dynasty"  # constant
+    # null value
     PHANTOM = "phantom"
+    # constant declaration
+    DYNASTY = "dynasty"  # constant
+    #declaration statement
+    SPELL = "spell"  # For function declarations
+    CASTLE = "castle"  # Main function
+    #conditional statement
+    CAST = "cast"  # If statement
+    TWIST = "twist"  # Else if statement
+    CURSE = "curse"  # Else statement
+    #looping statement
+    TALE = "tale" # for
+    BELIEVE = "believe" # do
+    FOREVER = "forever" # while
+    #looping control system
+    BREAK = "break"
+    CONTINUE = "continue"
+    #other statements
+    TOROSE = "torose"
+    TOSCROLL = "toscroll"
+    TOOCEAN = "toocean"
+    TOTREASURES = "totreasures"
+    RETURN = "return"
+
 
     # Literals
-    NEG_TREASURES_INT = "neg-treasures-lit"
-    POS_TREASURES_INT = "pos-treasures-lit"
-    NEG_FLOAT_LITERAL = "neg-ocean-lit"
-    POS_FLOAT_LITERAL = "pos-ocean-lit"
-    STRING_LITERAL = "scroll-lit"
-    CHAR_LITERAL = "rose-lit"
-    BOOL_LITERAL = "mirror-lit"
-    NULL_LITERAL = "phantom"
+    NEG_TREASURES_INT = "treasures_lit"
+    POS_TREASURES_INT = "treasures_lit"
+    NEG_FLOAT_LITERAL = "ocean_lit"
+    POS_FLOAT_LITERAL = "ocean_lit"
+    STRING_LITERAL = "scroll_lit"
+    CHAR_LITERAL = "rose_lit"
+    BOOL_LITERAL = "mirror_lit"
+    ZERO = "0"
 
-    # Operatorsi 
-    ASSIGNMENT_OPERATOR = "ASSIGNMENT OPERATOR"
-    ARITHMETIC_OPERATOR = "ARITHMETIC OPERATOR"
-    RELATIONAL_OPERATOR = "RELATIONAL OPERATOR"
-    LOGICAL_OPERATOR = "LOGICAL OPERATOR"
-    UNARY_OPERATOR = "unary_operator"
+    # Operators
+    # Arithmetic Operators
+    ADDITION_OPERATOR = "+"
+    SUBTRACTION_OPERATOR = "-"
+    MULTIPLICATION_OPERATOR = "*"
+    DIVISION_OPERATOR = "/"
+    MODULUS_OPERATOR = "%"
+    # Logical Operators
+    NOT_OPERATOR = "!"
+    AND_OPERATOR = "&&"
+    OR_OPERATOR = "||"
+    # Assignment Operator
+    EQUAL = "="
+    PLUS_EQUAL = "+="
+    MINUS_EQUAL = "-="
+    MULTI_EQUAL = "*="
+    DIV_EQUAL = "*/"
+    MODULO_EQUAL = "%="
+    # Unary Operators
+    INCREMENT = "++"
+    DECRCEMENT = "--"
+    # Relational Operator
+    EQUAL_EQUAL = "=="
+    NOT_EQUAL = "!="
+    LESS_THAN = "<"
+    GREATER_THAN = ">"
+    GREATER_EQUAL = ">="
+    LESS_EQUAL = "<="
 
-    # Symbols
-    COMMA = ","
-    DOT = "."
+    
+
+    # Other Symbols
     OPEN_PAREN = "("
     CLOSE_PAREN = ")"
+    OPEN_CURLY = "{"
+    CLOSE_CURLY = "}"
     OPEN_SQUARE = "["
     CLOSE_SQUARE = "]"
     TERMINATOR = "~"
-    OPEN_CURLY = "{"
-    CLOSE_CURLY = "}"
+    COMMA = ","
+    DOT = "."
 
     # Other token types
     IDENTIFIER = "identifier"
-    WHITESPACE = "WHITESPACE"
-    SINGLE_COMMENT = "single-line_comment"
-    MULTI_COMMENT = "multi-line_comment"
+    SINGLE_COMMENT = "single_comment"
+    MULTI_COMMENT = "multi_comment"
 
-    ESCAPE_NEWLINE = "ESCAPE-NEWLINE"
-    ESCAPE_TAB = "ESCAPE-TAB"
-    ESCAPE_BACKSLASH = "ESCAPE-BACKSLASH"
-    ESCAPE_QUOTE = "ESCAPE-QUOTE"
+    EOF = "EOF"
 
-    EQUAL = '='
-    NOT = '!'
-    ALPHANUM = 'ALPHANUM'
 
 allowed_symbols = ['b', 'c', 'd', 'f', 'g', 'm', 'o', 'p', 'r', 's', 't', 'w', '=', 'M', '+', '-', '*', '/', '%', '!', '&', '|', '<', '>', '(', ')', '{', '}', '[', ']', '~', ',', '\\', '"', "'", '?', '.']
 
@@ -646,11 +669,8 @@ class RoyalScriptLexer:
                     self.advance()
                 
                 continue
-
-
-
-            
-        # Assume lexer.errors stores the encountered errors
+        
+              # Assume lexer.errors stores the encountered errors
         if not self.errors:  # Proceed only if no errors occurred during lexing
             # Add EOF token to the last line        
             if self.tokens[-1]:  # If last line has tokens
@@ -662,6 +682,7 @@ class RoyalScriptLexer:
                 else:
                     # Handle the case where self.tokens has only one line or is empty
                     self.tokens.append([Token("EOF", TokenType.EOF, self.position)])
+
 
 
             
@@ -2936,7 +2957,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR RELATIONAL (==) ####################
     
     def state183(self, input_str):
-        return True, input_str, TokenType.RELATIONAL_OPERATOR
+        return True, input_str, TokenType.EQUAL_EQUAL
     
     #########################################################################
     
@@ -2962,7 +2983,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (+) ####################
 
     def state185(self, input_str):
-        return True, input_str, TokenType.ARITHMETIC_OPERATOR
+        return True, input_str, TokenType.ADDITION_OPERATOR
     
     #################################################################################
     
@@ -2981,7 +3002,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR UNARY OPERATOR (++) ####################
     
     def state187(self, input_str):
-        return True, input_str, TokenType.UNARY_OPERATOR
+        return True, input_str, TokenType.INCREMENT
     
     #############################################################################
     
@@ -2999,7 +3020,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (+=) ####################
 
     def state189(self, input_str):
-        return True, input_str, TokenType.ASSIGNMENT_OPERATOR
+        return True, input_str, TokenType.PLUS_EQUAL
     
     ##################################################################################
     
@@ -3027,7 +3048,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (-) ####################
 
     def state191(self, input_str):
-        return True, input_str, TokenType.ARITHMETIC_OPERATOR
+        return True, input_str, TokenType.SUBTRACTION_OPERATOR
     
     #################################################################################
     
@@ -3045,7 +3066,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR UNARY OPERATOR (--) ####################
 
     def state193(self, input_str):
-        return True, input_str, TokenType.UNARY_OPERATOR
+        return True, input_str, TokenType.DECRCEMENT
     
     #############################################################################
     
@@ -3063,7 +3084,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (-=) ####################
     
     def state195(self, input_str):
-        return True, input_str, TokenType.ASSIGNMENT_OPERATOR
+        return True, input_str, TokenType.MINUS_EQUAL
     
     ##################################################################################
     
@@ -3085,7 +3106,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (*) ####################
     
     def state197(self, input_str):
-        return True, input_str, TokenType.ARITHMETIC_OPERATOR
+        return True, input_str, TokenType.MULTIPLICATION_OPERATOR
     
     #################################################################################
     
@@ -3103,7 +3124,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (*=) ####################
     
     def state199(self, input_str):
-        return True, input_str, TokenType.ASSIGNMENT_OPERATOR
+        return True, input_str, TokenType.MULTI_EQUAL
     
     ##################################################################################
     
@@ -3126,7 +3147,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (/) ####################
     
     def state201(self, input_str):
-        return True, input_str, TokenType.ARITHMETIC_OPERATOR
+        return True, input_str, TokenType.DIVISION_OPERATOR
     
     #################################################################################
     
@@ -3144,7 +3165,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (/=) ####################
 
     def state203(self, input_str):
-        return True, input_str, TokenType.ASSIGNMENT_OPERATOR
+        return True, input_str, TokenType.DIV_EQUAL
     
     ##################################################################################
     
@@ -3166,7 +3187,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (%) ####################
 
     def state205(self, input_str):
-        return True, input_str, TokenType.ARITHMETIC_OPERATOR
+        return True, input_str, TokenType.MODULUS_OPERATOR
     
     #################################################################################
     
@@ -3184,7 +3205,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (%=) ####################
 
     def state207(self, input_str):
-        return True, input_str, TokenType.ASSIGNMENT_OPERATOR
+        return True, input_str, TokenType.MODULO_EQUAL
     
     ##################################################################################
     
@@ -3206,7 +3227,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR NOT LOGIC (!) ####################
     
     def state209(self, input_str):
-        return True, input_str, TokenType.NOT
+        return True, input_str, TokenType.NOT_OPERATOR
     
     #######################################################################
     
@@ -3224,7 +3245,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR REALTIONAL OPERATOR (!=) ####################
 
     def state211(self, input_str):
-        return True, input_str, TokenType.RELATIONAL_OPERATOR
+        return True, input_str, TokenType.NOT_EQUAL
     
     ##################################################################################
 
@@ -3256,7 +3277,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR LOGICAL OPERATOR (&&) ####################
 
     def state214(self, input_str):
-        return True, input_str, TokenType.LOGICAL_OPERATOR
+        return True, input_str, TokenType.AND_OPERATOR
     
     ###############################################################################
 
@@ -3288,7 +3309,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR LOGICAL OPERATOR (||) ####################
 
     def state217(self, input_str):
-        return True, input_str, TokenType.LOGICAL_OPERATOR
+        return True, input_str, TokenType.OR_OPERATOR
     
     ###############################################################################
 
@@ -3307,10 +3328,10 @@ class RoyalScriptLexer:
             return False, input_str, None
 			
 
-    #################### FINAL STATE FOR RELATIONAL OPERATOR (||) ####################
+    #################### FINAL STATE FOR RELATIONAL OPERATOR (>) ####################
 
     def state219(self, input_str):
-        return True, input_str, TokenType.RELATIONAL_OPERATOR
+        return True, input_str, TokenType.GREATER_THAN
             
     ##################################################################################
 
@@ -3328,7 +3349,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR RELATIONAL OPERATOR (>=) ####################
     
     def state221(self, input_str):
-        return True, input_str, TokenType.RELATIONAL_OPERATOR
+        return True, input_str, TokenType.GREATER_EQUAL
     
     ##################################################################################
 
@@ -3351,7 +3372,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR RELATIONAL OPERATOR (<) ####################
     
     def state223(self, input_str):
-        return True, input_str, TokenType.RELATIONAL_OPERATOR
+        return True, input_str, TokenType.LESS_THAN
     
     #################################################################################
 
@@ -3369,7 +3390,7 @@ class RoyalScriptLexer:
     #################### FINAL STATE FOR RELATIONAL OPERATOR (<=) ####################
     
     def state225(self, input_str):
-        return True, input_str, TokenType.RELATIONAL_OPERATOR
+        return True, input_str, TokenType.LESS_EQUAL
     
     ##################################################################################
 
@@ -3588,6 +3609,9 @@ class RoyalScriptLexer:
         input_str += self.current_char()  # Append the current character
         self.advance()
 
+        if input_str == "0" and self.current_char() in Delims['number_delim']:
+            return self.stateZero(input_str)  # Handle zero separately
+
         if self.current_char() in RegDef['number']  and self.current_char() not in ["."]:
             return self.state245(input_str) 
         elif self.current_char() in Delims['number_delim']:
@@ -3610,6 +3634,10 @@ class RoyalScriptLexer:
     def state247(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
+
+        if input_str == "0" and self.current_char() in Delims['number_delim']:
+            return self.stateZero(input_str)  # Handle zero separately
+
 
         if self.current_char() in RegDef['number']  and self.current_char() not in ["."]:
             return self.state247(input_str) 
@@ -3863,6 +3891,9 @@ class RoyalScriptLexer:
         return True, input_str, TokenType.MULTI_COMMENT
     
     #############################################################################
+
+    def stateZero(self, input_str):
+        return True, input_str, TokenType.ZERO
 
     def normalize_integer(self, input_str):
         """

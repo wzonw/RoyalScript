@@ -1,4 +1,4 @@
-from lexer import RoyalScriptLexer, Token
+from lexer2 import RoyalScriptLexer, Token
 from RS_RegDef import Delims, RegDef
 
 class RoyalScriptParser:
@@ -9,13 +9,21 @@ class RoyalScriptParser:
         self.current_line = 0  # Index for current line of tokens
         self.current_index = 0  # Index for the token in the current line
         self.parsing_result = ""  # Variable to store the result of parsing
+        self.errors = []
 
     def current_token(self):
-        """Return the current token type in the current line."""
-        if self.current_line < len(self.tokens):
+        """Return the current token type in the current line, skipping empty tokens."""
+        while self.current_line < len(self.tokens):
             if self.current_index < len(self.tokens[self.current_line]):
-                return self.tokens[self.current_line][self.current_index]
-        return None
+                token = self.tokens[self.current_line][self.current_index]
+                if token is not None:  # Ensure token is valid
+                    return token
+                self.current_index += 1  # Move to next token in the same line
+            else:
+                self.current_line += 1  # Move to next line
+                self.current_index = 0  # Reset index for new line
+        return None  # No more tokens
+
     
     def previous_token(self):
         """Return the previous token type in the current line."""
@@ -76,13 +84,16 @@ class RoyalScriptParser:
 
             # Check if the token type matches any rule
             result = self.match()  # Just pass token directly here
-            if result:
-                print(f"Matching rule: {token} -> {result}")
-                self.advance()
-            else:
-                self.parsing_result = f"No matching rule for token: {token}"
-                print(self.parsing_result)
-                break
+            # if result:
+            #     print(f"Matching rule: {token} -> {result}")
+            #     self.advance()
+            # else:
+            #     self.parsing_result = f"No matching rule for token: {token}"
+            #     print(self.parsing_result)
+            #     break
+            if not result :
+                error_message = f"Syntax Error at {self.current_line}."
+
 
     def get_parsing_result(self):
         """Return the result of the parsing."""

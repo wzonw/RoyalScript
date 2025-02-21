@@ -158,7 +158,7 @@ Delims = {
 
     'close_parentheses_delim': {' ', '\n', ')', '{', '~', *RegDef['arithmetic_op'], *RegDef['logical_op'], *RegDef['relational_op']},
 
-    'close_square_bracket_delim': {' ', ',', '=', '[', '~', ')'},
+    'close_square_bracket_delim': {' ', ',', '=', '[', '~', ')', *RegDef['arithmetic_op']},
 
     'comma_delim': {'-', '‘', '“', *RegDef['alphanum'], *RegDef['whitespace'], '{'},
 
@@ -174,7 +174,7 @@ Delims = {
 
     'logical_operator_delim': {' ', '(', *RegDef['alphanum']},
 
-    'mirror-lit_delim': {' ', ')', '~'},
+    'mirror-lit_delim': {' ', ')', '~', ','},
 
     'minus_delim': {' ', '(', *RegDef['alpha_big']},
 
