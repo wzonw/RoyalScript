@@ -156,9 +156,9 @@ Delims = {
 
     'close_curly_bracket_delim': {'}', *RegDef['alphanum'], *RegDef['whitespace'], ',', '~'},
 
-    'close_parentheses_delim': {' ', '\n', ')', '{', '~', *RegDef['arithmetic_op'], *RegDef['logical_op'], *RegDef['relational_op']},
+    'close_parentheses_delim': {' ', '\n', ')', '{', '~', *RegDef['arithmetic_op'], *RegDef['logical_op'], *RegDef['relational_op'], '&', '|'},
 
-    'close_square_bracket_delim': {' ', ',', '=', '[', '~', ')', *RegDef['arithmetic_op']},
+    'close_square_bracket_delim': {' ', ',', '=', '[', '~', ')', *RegDef['arithmetic_op'], '&', '|', *RegDef['relational_op']},
 
     'comma_delim': {'-', '‘', '“', *RegDef['alphanum'], *RegDef['whitespace'], '{'},
 
@@ -170,7 +170,7 @@ Delims = {
 
     'genie_delim': {' ', '('},
 
-    'id_delim': {' ', '(', ')', ',', '[', ']', '=', '~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op'], *RegDef['unary_op'], '&', '|'},
+    'id_delim': {' ', '(', ')', ',', '[', ']', '=', '~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op'], *RegDef['unary_op'], '&', '|', '}'},
 
     'logical_operator_delim': {' ', '(', *RegDef['alphanum']},
 
@@ -182,7 +182,7 @@ Delims = {
 
     'not_logical_delim': {' ', '"', "'", '(', *RegDef['alphanum']},
 
-    'number_delim': {' ', ')', ',', '=', ']', '}', '~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['logical_op'], *RegDef['relational_op'], *RegDef['unary_op']},
+    'number_delim': {' ', ')', ',', '=', ']', '}', '~', '&', '|', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['logical_op'], *RegDef['relational_op'], *RegDef['unary_op']},
 
     'open_curly_bracket_delim': {'{', *RegDef['alphanum'], *RegDef['whitespace'], '-', '('},
 
@@ -194,7 +194,7 @@ Delims = {
 
     'plus_delim': {' ', '"', "'", '(', *RegDef['alphanum']},
 
-    'relational_operator_delim': {' ', '(', '‘', '“', *RegDef['alphanum']},
+    'relational_operator_delim': {' ', '(', '‘', '“', *RegDef['alphanum'], '"'},
 
     'terminator_delim': {' ', '?', '}', *RegDef['alpha'], *RegDef['whitespace']},
 
