@@ -1868,7 +1868,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['gate_delim']:
+        if self.current_char() in Delims ['phantom_delim']:
             return self.state96(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"

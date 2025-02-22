@@ -78,6 +78,11 @@ class RoyalScriptParser:
             return False
         if not self.match("{"):
             return False
+        
+        if not self.body():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+
         if not self.match("return") or not self.match("0") or not self.match("~") or not self.match("}"):
             return False
 
@@ -334,7 +339,7 @@ class RoyalScriptParser:
             if not self.match('['):
                 self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
                 return False
-            if not self.match('pos_treasures_lit'):
+            if not self.match('treasures_lit'):
                 self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
                 return False
             if not self.match(']'):
@@ -415,6 +420,22 @@ class RoyalScriptParser:
 
         elif self.match('%='):
             return True
+        
+        # if naging assignment operand ang arithmetic exp
+        elif self.match('+'):
+            return True
+
+        elif self.match('-'):
+            return True
+
+        elif self.match('/'):
+            return True
+
+        elif self.match('*'):
+            return True
+
+        elif self.match('%'):
+            return True
 
         else:
             self.error_message = f"Syntax Error: Invalid input // {repr(token)} at Line {self.current_line + 1}"
@@ -423,14 +444,90 @@ class RoyalScriptParser:
 
     def assignment_operand(self):
         print("Entering assignment_operand")  # Debugging line
+        next_token = self.peek_next_token()
+        token = self.current_token()
+        start_pos = self.current_index
         
-        if self.match('identifier'):
-            return True
+        if token == 'identifier':
+            next_token = self.peek_next_token()
+            if next_token == '(':  # If it's a function call
+                while self.current_token() and self.current_token() != ')':
+                    self.advance()
+                # self.advance()
+                token = self.current_token()
+                print(f" Token: {token}")
+                next_paren_token = self.peek_next_token()
+                if next_paren_token in ['+', '-', '/', '*', '%']:
+                    self.current_index = start_pos
+                    if not self.arithmetic_exp():
+                        return False
+                    return True
+                elif not self.func_call():  # Parse the function call
+                    return False
+                print(f" Token: {token}")
+                return True  # Successfully parsed function call as operand
+            elif next_token == '[':
+                brackets = 1  # Track nested brackets
+                self.advance()
+                token = self.current_token()
+                print(f" Token: {token}")
+                while self.current_token() == '[' or self.current_token() == ']' or self.current_token() == 'treasures_lit' or self.current_token() == '0':
+                    self.advance()
+                    # If we reach the end of tokens, prevent infinite loop
+                    if self.current_token() is None:
+                        print("Error: Unexpected end of tokens while parsing array indexing")
+                        return False
+                    
+                    if self.current_token in ['[', ']']:
+                        brackets += 1
 
-        elif self.match('treasures_lit'):
-            return True
+                if brackets > 4:
+                    print("Error: Only 2d array is allowed")
+                    return False
+
+                
+                token = self.current_token()
+                print(f"Token after ]: {token}")  # Debugging line
+
+                # Check for arithmetic operators after the array indexing
+                next_paren_token = self.current_token()
+                print(f"Next token after array indexing: {next_paren_token}")  # Debugging line
+
+                if next_paren_token in ['+', '-', '/', '*', '%']:
+                    self.current_index = start_pos
+                    if not self.arithmetic_exp():
+                        self.advance()
+                        return False
+                    return True
+                
+                elif not self.index():  # Parse the function call
+                    return False
+                print(f" Token: {token}")
+                return True  # Successfully parsed function call as operand
+
+        elif token == 'treasures_lit':
+            if next_token in ['+', '-', '/', '*', '%']:
+                if not self.arithmetic_exp():
+                    return False
+                return True
+            else:
+                return self.match('treasures_lit')
 
         elif self.match('ocean_lit'):
+            return True
+        
+        elif self.match('('):  # Only call arithmetic_exp() if inside parentheses
+            if not self.arithmetic_operand():
+                return False
+            if not (self.match('+') or self.match('-') or self.match('/') or self.match('*') or self.match('%')):
+                print("Invalid operand")
+                return False
+            if not self.arithmetic_operand():
+                return False
+            if not self.more_arith():
+                return False
+            if not self.match(')'):
+                return False
             return True
 
         elif self.array_element():
@@ -1084,9 +1181,9 @@ class RoyalScriptParser:
             if not self.match('{'):
                 self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
                 return False
-            # if not self.body():
-            #     self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
-            #     return False
+            if not self.body():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
             if not self.ret_statement():
                 self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
                 return False
@@ -1172,6 +1269,62 @@ class RoyalScriptParser:
             self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False
         
+    def body(self):
+        token = self.current_token()
+        next_token = self.peek_next_token()
+
+        # Base Case: Stop recursion when we reach 'return' or '}'
+        if token in ['return', '}']:
+            return True  # Successfully ended parsing
+
+        elif token == 'identifier':
+            if next_token == '=':
+                if not self.var_reassign():
+                    return False
+                return self.body()
+            elif next_token in ['++', '--']:
+                if not self.unary():
+                    return False
+                if not self.match('~'):
+                    return False
+                return self.body()
+            elif next_token in ['+=', '-=', '*=', '/=', '%=']:
+                if not self.assignment_exp():
+                    return False
+                if not self.match('~'):
+                    return False
+                return self.body()
+            elif next_token == '(':
+                if not self.func_call():
+                    return False
+                if not self.match('~'):
+                    return False
+                return self.body()
+        
+        elif token in ['dynasty', 'scroll', 'treasures', 'mirror', 'rose', 'ocean']:
+            if not self.var_dec():
+                return False
+            return self.body()
+        
+        elif token == 'granted':
+            if not self.output():
+                return False
+            return self.body()
+        
+        elif token == 'spell':
+            if not self.user_defined_func():
+                return False
+            return self.body()
+            
+        elif token in ["single_comment", "multi_comment"]:
+            return self.body()
+        
+        
+        else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        
+        
     
     def ret_statement(self):
         token = self.current_token()
@@ -1192,6 +1345,293 @@ class RoyalScriptParser:
         elif token == '}':
             return True
         
+        else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+
+    def var_reassign(self):
+        #<var_reassign>: identifier = <val> ~
+        if not self.match('identifier'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('='):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.val():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('~'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        return True
+    
+    def output(self):
+        #<output>: granted(<granted_content> <more_granted>) ~
+        if not self.match('granted'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('('):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.granted_content():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.more_granted():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match(')'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('~'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        return True
+    
+
+    def granted_content(self):
+        token = self.current_token()
+        next_token = self.peek_next_token()
+        if token == 'identifier':
+            if next_token == '(':  # Function call
+                start_pos = self.current_index  # Save starting position
+                if self.func_call():  # Parse initial function call
+                    next_after_func = self.current_token()
+                    if next_after_func in ['+', '-', '*', '/', '%']:  # If followed by arithmetic operator
+                        self.current_index = start_pos  # Reset back to identifier
+                        return self.arithmetic_exp()  # Let arithmetic_exp handle from identifier onwards
+                    elif next_after_func in ['>', '<', '>=', '<=', '==', '!=']:
+                        self.current_index = start_pos
+                        return self.relational_exp()
+                    elif next_after_func in ['&&', '||']:
+                        self.current_index = start_pos
+                        return self.logical_exp()
+                    return True  
+                return False
+            elif next_token == '[':
+                start_pos = self.current_index 
+                self.advance()
+                if self.index():
+                    next_after_func = self.current_token()
+                    if next_after_func in ['+', '-', '*', '/', '%']:  # If followed by arithmetic operator
+                        self.current_index = start_pos  # Reset back to identifier
+                        return self.arithmetic_exp()  # Let arithmetic_exp handle from identifier onwards
+                    elif next_after_func in ['>', '<', '>=', '<=', '==', '!=']:
+                        self.current_index = start_pos
+                        return self.relational_exp()
+                    elif next_after_func in ['&&', '||']:
+                        self.current_index = start_pos
+                        return self.logical_exp()
+                    return True  
+                return False
+            elif next_token in ['+', '-', '*', '/', '%']:
+                return self.arithmetic_exp()
+            elif next_token in ['>', '<', '>=', '<=', '==', '!=']:
+                return self.relational_exp()
+            elif next_token in ['&&', '||']:
+                return self.logical_exp()
+            else:
+                return self.match(token)
+            
+        elif token == 'rose_lit':
+            if next_token == '+':
+                return self.concat()
+            return self.match(token)
+        
+        elif token == 'phantom':
+            return self.match(token)
+        
+        elif token == '!':
+            return self.logical_exp()
+    
+        elif token == 'scroll_lit':
+            next_token = self.peek_next_token()
+
+            if next_token == '+':
+                return self.concat()
+            elif next_token in ['>', '<', '>=', '<=', '==', '!=']:
+                return self.relational_exp()
+            else:
+                return self.match(token)
+            
+        elif token == 'treasures_lit':
+            next_token = self.peek_next_token()
+            if next_token in ['+', '-', '*', '/', '%']:
+                return self.arithmetic_exp()
+            elif next_token in ['&&', '||']:
+                return self.logical_exp()
+            elif next_token in ['>', '<', '>=', '<=', '==', '!=']:
+                return self.relational_exp()
+            else:
+                return self.match(token)
+            
+        elif token == 'ocean_lit':
+            next_token = self.peek_next_token()
+            if next_token in ['+', '-', '*', '/', '%']:
+                return self.arithmetic_exp()
+            elif next_token in ['>', '<', '>=', '<=', '==', '!=']:
+                return self.relational_exp()
+            else:
+                return self.match(token)
+        
+        elif token == 'mirror_lit':
+            next_token = self.peek_next_token()
+            if next_token in ['&&', '||']:
+                return self.logical_exp()
+            else:
+                return self.match(token)
+            
+        elif token == '(':
+            print(f"This is {token}")
+            start_pos = self.current_index
+            # Skip until we find the matching closing parenthesis
+            paren_count = 1
+            content = []
+            
+            while paren_count > 0:
+                self.advance()
+                cur_token = self.current_token()
+                if cur_token is None:  # End of tokens before closing parenthesis
+                    self.error_message = ("Syntax Error: Missing closing parenthesis")
+                    return False  # Or raise an exception
+
+                content.append(cur_token)
+                if cur_token == '(':
+                    paren_count += 1
+                elif cur_token == ')':
+                    paren_count -= 1
+            
+            # Now we're at the closing parenthesis, check what follows
+            next_after_paren = self.peek_next_token()
+            operator_in_paren = self.determine_operation_type(content)
+
+            if next_after_paren == '~':
+                # Advance past both the closing parenthesis and the tilde
+                self.advance()  # Move past ')'
+                self.advance()  # Move past '~'
+                if operator_in_paren == 'arithmetic':
+                    return self.arithmetic_exp()
+                elif operator_in_paren == 'relational':
+                    return self.relational_exp()
+                elif operator_in_paren == 'logical':
+                    return self.logical_exp()
+                elif operator_in_paren == 'Not Valid':
+                    return False
+            else:
+                # Reset position and parse according to the operator
+                self.current_index = start_pos
+                
+                if next_after_paren in ['+', '-', '*', '/', '%']:
+                    if operator_in_paren == 'arithmetic':
+                        return self.arithmetic_exp()
+                    print("Error invalid operand")
+                    return False
+                elif next_after_paren in ['>', '<', '>=', '<=', '==', '!=']:
+                    if operator_in_paren == 'arithmetic':
+                        return self.relational_exp()
+                    print("Error invalid operand")
+                    return False
+                elif next_after_paren in ['&&', '||']:
+                    if operator_in_paren == 'relational':
+                        return self.logical_exp()
+                    print("Error invalid operand")
+                    return False
+                else:
+                    print(f"This is == {token}")
+                    return False
+                
+        elif token in ['toscroll', 'toocean', 'totreasures', 'torose']:
+            start_pos = self.current_index  # Store initial position
+            self.advance()  # Move past the current token
+            
+            paren_count = 1  # Assuming '(' has already been encountered
+
+            while paren_count > 0 and self.current_index < len(self.tokens):
+                self.advance()  # Move to the next token
+                cur_token = self.current_token()
+                
+                if cur_token == '(':
+                    paren_count += 1
+                elif cur_token == ')':
+                    paren_count -= 1
+
+            # If loop exited without closing parenthesis, there's a syntax error
+            if paren_count > 0:
+                print("Syntax Error: Unmatched parenthesis")
+                return False
+
+            # Now we're at the closing parenthesis, check what follows
+            next_after_paren = self.peek_next_token()
+            self.current_index = start_pos
+
+            if next_after_paren == '+':
+                return self.concat()
+            elif next_after_paren == ')' :
+                return self.type_conversion()
+            else:
+                print("Invalid string operations")
+                return False
+            
+        # elif self.set_precision():
+        #     return True
+        # elif self.concat():
+        #     return True
+        # elif self.relational_exp():
+        #     return True
+        # elif self.logical_exp():
+        #     return True
+        # elif self.unary():
+        #     return True
+        # elif self.arithmetic_exp():
+        #     return True
+        # elif self.array_element():
+        #     return True
+        # elif self.func_call():
+        #     return True
+        else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        
+    def set_precision(self):
+        #<set_precision>: %.[treasures_lit]f
+        if not self.match('%'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('.'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('['):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('treasures_lit'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match(']'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('f'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        return True
+        
+
+
+    def more_granted(self):
+        token = self.current_token()
+
+        #<more_granted>: , <granted_content> <more_granted>
+        if self.match(','):
+            if not self.granted_content():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.more_granted():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            return True
+
+        #<more_granted>: λ
+        elif token == ')':
+            return True
+
         else:
             self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False

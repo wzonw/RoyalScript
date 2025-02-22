@@ -168,6 +168,8 @@ Delims = {
 
     'gate_delim': {' ', '~'},
 
+    'phantom_delim': {' ', '~', ')'},
+
     'genie_delim': {' ', '('},
 
     'id_delim': {' ', '(', ')', ',', '[', ']', '=', '~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op'], *RegDef['unary_op'], '&', '|', '}'},
@@ -186,11 +188,11 @@ Delims = {
 
     'open_curly_bracket_delim': {'{', *RegDef['alphanum'], *RegDef['whitespace'], '-', '('},
 
-    'open_parentheses_delim': {' ', '!', '"', ')', *RegDef['alphanum']},
+    'open_parentheses_delim': {' ', '!', '"', ')', *RegDef['alphanum'], "'"},
 
     'open_square_bracket_delim': {' ', '‘', '”', *RegDef['alpha_big'], *RegDef['number']},
 
-    'other_assignment_operator_delim': {' ', '(', *RegDef['alpha_big'], *RegDef['number']},
+    'other_assignment_operator_delim': {' ', '(', *RegDef['alpha_big'], *RegDef['number'], '-'},
 
     'plus_delim': {' ', '"', "'", '(', *RegDef['alphanum']},
 
