@@ -172,7 +172,7 @@ Delims = {
 
     'genie_delim': {' ', '('},
 
-    'id_delim': {' ', '(', ')', ',', '[', ']', '=', '~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op'], *RegDef['unary_op'], '&', '|', '}'},
+    'id_delim': {' ', '(', ')', ',', '[', ']', '=', '~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op'], *RegDef['unary_op'], '&', '|', '}', '!'},
 
     'logical_operator_delim': {' ', '(', *RegDef['alphanum']},
 

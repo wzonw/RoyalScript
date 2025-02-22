@@ -14,11 +14,13 @@ class RoyalScriptParser:
     def current_token(self):
         """Return the current token type in the current line, skipping empty tokens."""
         while self.current_line < len(self.tokens):
-            if self.current_index < len(self.tokens[self.current_line]):
-                return self.tokens[self.current_line][self.current_index]
+            if self.tokens[self.current_line]:  # Ensure line is not empty
+                if self.current_index < len(self.tokens[self.current_line]):
+                    return self.tokens[self.current_line][self.current_index]
             self.current_line += 1
             self.current_index = 0
         return None  # End of tokens
+
 
     def advance(self):
         """Move to the next token."""
@@ -27,19 +29,24 @@ class RoyalScriptParser:
         elif self.current_line + 1 < len(self.tokens):
             self.current_line += 1
             self.current_index = 0
+            while self.current_line < len(self.tokens) and not self.tokens[self.current_line]:  # Skip empty lines
+                self.current_line += 1
         else:
             return None  # End of tokens
 
+
     def peek_next_token(self):
         """Peek at the next token without advancing the position."""
-        temp_line, temp_index = self.current_line, self.current_index  
+        if self.current_line < len(self.tokens):
+            temp_line, temp_index = self.current_line, self.current_index
 
-        if temp_index + 1 < len(self.tokens[temp_line]):
-            return self.tokens[temp_line][temp_index + 1]  # Next token in the same row
-        elif temp_line + 1 < len(self.tokens):
-            return self.tokens[temp_line + 1][0]  # First token of the next row
+            if temp_index + 1 < len(self.tokens[temp_line]):  # Ensure next token exists in the same row
+                return self.tokens[temp_line][temp_index + 1]
+            elif temp_line + 1 < len(self.tokens) and self.tokens[temp_line + 1]:  # Ensure next line has tokens
+                return self.tokens[temp_line + 1][0]
 
         return None  # No more tokens
+
 
     def match(self, expected):
         """Match the current token against the expected value."""
@@ -1274,7 +1281,7 @@ class RoyalScriptParser:
         next_token = self.peek_next_token()
 
         # Base Case: Stop recursion when we reach 'return' or '}'
-        if token in ['return', '}']:
+        if token in ['return', '}', 'break', 'continue']:
             return True  # Successfully ended parsing
 
         elif token == 'identifier':
@@ -1306,6 +1313,11 @@ class RoyalScriptParser:
                 return False
             return self.body()
         
+        elif token in ['believe', 'forever', 'cast']:
+            if not self.condi_statement():
+                return False
+            return self.body()
+        
         elif token == 'granted':
             if not self.output():
                 return False
@@ -1313,6 +1325,11 @@ class RoyalScriptParser:
         
         elif token == 'spell':
             if not self.user_defined_func():
+                return False
+            return self.body()
+        
+        elif token == 'tale':
+            if not self.for_loop():
                 return False
             return self.body()
             
@@ -1365,6 +1382,565 @@ class RoyalScriptParser:
             return False
         return True
     
+    def condi_statement(self):
+        token = self.current_token()
+        #<condi_statement>: <if>
+        if token == 'cast':
+            return self.if_statement()
+
+        #<condi_statement>: <while>
+        elif token == 'forever':
+            return self.while_statement()
+
+        #<condi_statement>: <do_while>
+        elif token == 'believe':
+            return self.do_while_statement()
+        
+        else:
+            return False
+    
+    def for_loop(self):
+        #<for_loop>: tale (<loop_var> ~ <relational_exp> ~ <unary>) {<loop_body>}
+        if not self.match('tale'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('('):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.loop_var():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('~'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.relational_exp():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('~'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.unary():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match(')'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('{'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.loop_body():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('}'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        return True
+
+    def loop_var(self):
+        #<loop_var>: treasures identifier = <loop_val>
+        if self.match('treasures'):
+            if not self.match('identifier'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.match('='):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.loop_val():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            return True
+
+        # <loop_var>: identifier <loop_init>
+        elif self.match('identifier'):
+            if not self.loop_init():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            return True
+    
+    def loop_init(self):
+        token = self.current_token()
+
+        #<loop_init>: =  <loop_val>
+        if self.match('='):
+            if not self.loop_val():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            return True
+
+        # <loop_init>: λ
+        elif token == '~':
+            return True
+        
+        else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        
+    def loop_val(self):
+
+        if self.match('identifier'):
+            return True
+
+        elif self.match('treasures_lit'):
+            return True
+
+        else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+
+        
+    def loop_body(self):
+        token = self.current_token()
+        next_token = self.peek_next_token()
+
+        # ✅ Debugging print statement
+        print(f"DEBUG: Current Token: {token}, Next Token: {next_token}")
+
+        # ✅ Prevent processing if token is None (avoid index error)
+        if token is None:
+            return True  # No more tokens, end successfully
+
+        if token in ['return', '}', 'break', 'continue']:
+            return True
+
+        elif token == 'identifier':
+            if next_token is None:
+                return False  # Prevent index errors
+
+            if next_token == '=':
+                if not self.var_reassign():
+                    return False
+                return self.loop_body()
+            elif next_token in ['++', '--']:
+                if not self.unary():
+                    return False
+                if not self.match('~'):
+                    return False
+                return self.loop_body()
+            elif next_token in ['+=', '-=', '*=', '/=', '%=']:
+                if not self.assignment_exp():
+                    return False
+                if not self.match('~'):
+                    return False
+                return self.loop_body()
+            elif next_token == '(':
+                if not self.func_call():
+                    return False
+                if not self.match('~'):
+                    return False
+                return self.loop_body()
+
+        elif token in ['dynasty', 'scroll', 'treasures', 'mirror', 'rose', 'ocean']:
+            if not self.var_dec():
+                return False
+            return self.loop_body()
+
+        elif token in ['believe', 'forever']:
+            if not self.condi_statement():
+                return False
+            return self.loop_body()
+
+        elif token == 'cast':
+            if not self.if_break():
+                return False
+            return self.loop_body()
+
+        elif token == 'granted':
+            if not self.output():
+                return False
+            return self.loop_body()
+
+        elif token == 'spell':
+            if not self.user_defined_func():
+                return False
+            return self.loop_body()
+
+        elif token == 'tale':
+            if not self.for_loop():
+                return False
+            return self.loop_body()
+
+        elif token in ["single_comment", "multi_comment"]:
+            return self.loop_body()
+
+        else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+
+    
+    def if_break(self):
+        #<if_break>: cast (<condition>) {<body><flow_control>} <elif_break> <else_break>
+        if not self.match('cast'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('('):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.condition():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match(')'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('{'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.body():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.flow_control():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('}'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.elif_break():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.else_break():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        return True
+    
+    def elif_break(self):
+        token = self.current_token()
+
+        #<elif_break>: twist(<condition>) {<body><flow_control>}<elif_break>
+        if self.match('twist'):
+            if not self.match('('):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.condition():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.match(')'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.match('{'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.body():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.flow_control():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.match('}'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.elif_break():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            return True
+
+        #<elif_break>: λ
+        elif token in ['curse', '}']:
+            return True
+
+        else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        
+    
+    def else_break(self):
+        token = self.current_token()
+
+        #<else_break>: curse {<body><flow_control>}
+        if self.match('curse'):
+            if not self.match('{'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.body():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.flow_control():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.match('}'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            return True
+
+        #<else_break>: λ
+        elif token == '}':
+            return True
+
+        else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+    
+    def flow_control(self):
+        token = self.current_token()
+
+        #<flow_control>: break~
+        if self.match('break'):
+            if not self.match('~'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            return True
+        
+        #<flow_control>: continue~
+        elif self.match('continue'):
+            if not self.match('~'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            return True
+        
+        #<flow_control>: λ
+        elif token == '}':
+            return True
+
+        else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+    
+    def do_while_statement(self):
+        #<do_while>: believe {<loop_body>} forever(<condition>)~
+        if not self.match('believe'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('{'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.loop_body():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('}'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('forever'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('('):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.condition():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match(')'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('~'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        return True
+    
+    def condition(self):
+
+        # if self.treasures_mirror():
+        #     return True
+        token = self.current_token()
+        next_token = self.peek_next_token()
+
+        if token == 'identifier':
+            if next_token == '(':  # Function call
+                start_pos = self.current_index  # Save starting position
+                if self.func_call():  # Parse initial function call
+                    next_after_func = self.current_token()
+                    if next_after_func in ['>', '<', '>=', '<=', '==', '!=']:
+                        self.current_index = start_pos
+                        return self.relational_exp()
+                    elif next_after_func in ['&&', '||']:
+                        self.current_index = start_pos
+                        return self.logical_exp()
+                    return True  
+                return False
+            elif next_token == '[':
+                start_pos = self.current_index 
+                self.advance()
+                if self.index():
+                    next_after_func = self.current_token()
+                    if next_after_func in ['>', '<', '>=', '<=', '==', '!=']:
+                        self.current_index = start_pos
+                        return self.relational_exp()
+                    elif next_after_func in ['&&', '||']:
+                        self.current_index = start_pos
+                        return self.logical_exp()
+                    return True  
+                return False
+            elif next_token in ['>', '<', '>=', '<=', '==', '!=']:
+                return self.relational_exp()
+            elif next_token in ['&&', '||']:
+                return self.logical_exp()
+            else:
+                return self.match(token)
+            
+        elif self.match('mirror_lit'):
+            return True
+        elif self.relational_exp():
+            return True
+        elif self.logical_exp():
+            return True
+        elif self.match('!'):
+            print(f"Current Token: {self.current_token()}, Next Token: {self.peek_next_token()}")
+            if not self.match('('):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.condition():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.match(')'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            return True
+        elif self.func_call():
+            return True
+        else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+    
+    def mirror_init(self):
+        token = self.current_token()
+
+        #<mirror_init>: == mirror_lit
+        if self.match('=='):
+            if not(self.match('mirror_lit') or self.match('0'), self.match('treasures_lit')):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            return True
+
+        #<mirror_init>: != mirror_lit
+        elif self.match('!='):
+            if not(self.match('mirror_lit') or self.match('0'), self.match('treasures_lit')):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            return True
+        
+        #<mirror_init>: λ
+        elif token == ')':
+            return True
+        
+        else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+    
+    def while_statement(self):
+        # <while>: forever (<condition>) {<loop_body>}
+        token = self.current_token()
+        # Exactly like your if_statement structure, which works
+        if not self.match('forever'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        print(f"passed forever {token}")
+        if not self.match('('):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        print(f"passed ( {token}")
+        # Don't set position or do any special handling - just parse condition like if_statement does
+        if not self.condition():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        print(f"passed condition {token}")
+        if not self.match(')'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        print(f"passed ) {token}")
+        if not self.match('{'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        print(f"passed open curly {token}")
+        if not self.loop_body():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        print(f"passed loop body {token}")
+            
+        if not self.match('}'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        print(f"passed close curly {token}")
+        return True
+        
+    
+    def if_statement(self):
+        #<if>: cast (<condition>) {<body>} <elif> <else>
+        if not self.match('cast'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('('):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.condition():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match(')'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('{'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.body():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.match('}'):
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.elif_statement():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        if not self.else_statement():
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+        return True
+    
+    def elif_statement(self):
+        token = self.current_token()
+
+        #<elif>: twist(<condition>) {<body>}<elif>
+        if self.match('twist'):
+            if not self.match('('):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.condition():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.match(')'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.match('{'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.body():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.match('}'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.elif_statement():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            return True
+
+        #<elif>: λ
+        elif token in ['curse', 'scroll', 'treasures', 'mirror', 'ocean', 'rose', 'dynasty', 'granted', 'identifier', 'spell', 'cast', 'forever', 'believe', 'tale', '?']:
+            return True
+
+        else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+
+    def else_statement(self):
+        token = self.current_token()
+
+        #<else>: curse {<body>}
+        if self.match('curse'):
+            if not self.match('{'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.body():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            if not self.match('}'):
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                return False
+            return True
+        
+        #<else>: λ
+        elif token in ['scroll', 'treasures', 'mirror', 'ocean', 'rose', 'dynasty', 'granted', 'identifier', 'spell', 'cast', 'forever', 'believe', 'tale', 'comment', 'return', 'break', 'continue']:
+            return True
+
+        else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            return False
+
     def output(self):
         #<output>: granted(<granted_content> <more_granted>) ~
         if not self.match('granted'):
