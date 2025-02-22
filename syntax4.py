@@ -88,7 +88,6 @@ class RoyalScriptParser:
             return False
         
         if not self.body():
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False
 
         if not self.match("return") or not self.match("0") or not self.match("~") or not self.match("}"):
@@ -1847,32 +1846,30 @@ class RoyalScriptParser:
         # 174	<while>	→	forever (<condition>) {<loop_body>}
         token = self.current_token()
         if not self.match('forever'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected forever, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         print(f"passed forever {token}")
         if not self.match('('):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected ((, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         print(f"passed ( {token}")
         if not self.condition():
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False
         print(f"passed condition {token}")
         if not self.match(')'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected )), but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         print(f"passed ) {token}")
         if not self.match('{'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         print(f"passed open curly {token}")
         if not self.loop_body():
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False
         print(f"passed loop body {token}")
             
         if not self.match('}'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected }}, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         print(f"passed close curly {token}")
         return True
@@ -1881,31 +1878,27 @@ class RoyalScriptParser:
     def if_statement(self):
         # 175	<if>	→	cast (<condition>) {<body>} <elif> <else>
         if not self.match('cast'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected cast, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         if not self.match('('):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         if not self.condition():
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False
         if not self.match(')'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected ), but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         if not self.match('{'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         if not self.body():
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False
         if not self.match('}'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected }}, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         if not self.elif_statement():
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False
         if not self.else_statement():
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False
         return True
     
@@ -1915,25 +1908,22 @@ class RoyalScriptParser:
         # 176	<elif>	→	twist(<condition>) {<body>}<elif>
         if self.match('twist'):
             if not self.match('('):
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
                 return False
             if not self.condition():
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
                 return False
             if not self.match(')'):
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                self.error_message = f"Syntax Error: Expected ), but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
                 return False
             if not self.match('{'):
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
                 return False
             if not self.body():
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
                 return False
             if not self.match('}'):
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                self.error_message = f"Syntax Error: Expected }}, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
                 return False
             if not self.elif_statement():
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
                 return False
             return True
 
@@ -1951,13 +1941,12 @@ class RoyalScriptParser:
         # 178	<else>	→	curse {<body>}
         if self.match('curse'):
             if not self.match('{'):
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
                 return False
             if not self.body():
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
                 return False
             if not self.match('}'):
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                self.error_message = f"Syntax Error: Expected }}, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
                 return False
             return True
         
@@ -1972,22 +1961,20 @@ class RoyalScriptParser:
     def output(self):
         # 180	<output>	→	granted(<granted_content> <more_granted>) ~
         if not self.match('granted'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected granted, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         if not self.match('('):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         if not self.granted_content():
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False
         if not self.more_granted():
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False
         if not self.match(')'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected ), but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         if not self.match('~'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected ~, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         return True
     
@@ -2264,7 +2251,7 @@ class RoyalScriptParser:
         if token in {'scroll', 'treasures', 'mirror', 'ocean', 'rose'}:
             # self.advance()  # Consume the data_type token
             return True
-        self.error_message = f"Syntax Error: Invalid data type {repr(token)} at Line {self.current_line}"
+        self.error_message = f"Syntax Error: Expected wish, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
         return False
 
 
@@ -2696,16 +2683,14 @@ class RoyalScriptParser:
     def type_conversion(self):
         # 224	<type_conversion>	→	<conversion_func> (<conversion_value>)
         if not self.conversion_func():
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False
         if not self.match('('):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         if not self.conversion_value():
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False
         if not self.match(')'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected ), but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         return True
     
@@ -2747,7 +2732,6 @@ class RoyalScriptParser:
         # 234	<conversion_value>	→	id_lit <index>
         elif self.match('identifier'):
             if not self.index():
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
                 return False
             return True
         # 235	<conversion_value>	→	<func_call>
@@ -2763,14 +2747,13 @@ class RoyalScriptParser:
         # 236	<index>	→	[treasures_lit] <column1>
         if self.match('['):
             if not self.match('treasures_lit'):
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                self.error_message = f"Syntax Error: Expected treasures literals, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
                 return False
             if not self.match(']'):
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                self.error_message = f"Syntax Error: Expected ], but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
                 return False
             print("index-done")
             if not self.column1():
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
                 return False
             print("column1")
             return True
@@ -2790,10 +2773,10 @@ class RoyalScriptParser:
         # 238	<column1>	→	[treasures_lit]
         if self.match('['):
             if not self.match('treasures_lit'):
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                self.error_message = f"Syntax Error: Expected treasures literals, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
                 return False
             if not self.match(']'):
-                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+                self.error_message = f"Syntax Error: Expected ], but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
                 return False
             return True
 
@@ -2809,16 +2792,16 @@ class RoyalScriptParser:
     def input(self):
         # 240	<input>	→	wish (scroll_lit)
         if not self.match('wish'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected wish, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         if not self.match('('):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         if not self.match('scroll_lit'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected scroll literals, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         if not self.match(')'):
-            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Expected ), but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index}"
             return False
         return True
     
