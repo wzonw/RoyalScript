@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import scrolledtext
 from PIL import Image, ImageTk 
-from lexer import RoyalScriptLexer
-from lexer import Token
+from lexer2 import RoyalScriptLexer
+from lexer2 import Token
 from pygame import mixer
-from syntax import RoyalScriptParser
+from syntax4 import RoyalScriptParser
 
 
 class RoyalScriptLexerGUI(tk.Tk):
@@ -12,18 +12,19 @@ class RoyalScriptLexerGUI(tk.Tk):
     mixer.init()
     def __init__(self):
         super().__init__()
+        self.tokens = [] 
         def intro_music():
             mixer.music.load("fairytale_intro.mp3")
             mixer.music.play(-1) 
         intro_music()
             
         self.title("RoyalScript Lexer")
-        self.geometry("1040x700")
+        self.geometry("1050x700")
         self.resizable(False, False)
 
         # Load and set background image
         self.bg_image = Image.open("4.png")
-        self.bg_image = self.bg_image.resize((1040, 700), Image.Resampling.LANCZOS)
+        self.bg_image = self.bg_image.resize((1050, 700), Image.Resampling.LANCZOS)
         self.bg_photo = ImageTk.PhotoImage(self.bg_image)
         
         self.bg_label = tk.Label(self, image=self.bg_photo, )
@@ -104,7 +105,7 @@ class RoyalScriptLexerGUI(tk.Tk):
     def setup_lexer_tokens_section(self):
         # Lexer label
         self.output_label = tk.Label(
-            self.lr_frame, text="Lexer", fg="white",
+            self.lr_frame, text="Lexeme", fg="white",
             font=("Arial", 14, "bold"), bg="#f99dbc"
         )
         self.output_label.grid(row=0, column=0, padx=5)
@@ -120,17 +121,32 @@ class RoyalScriptLexerGUI(tk.Tk):
         list_frame = tk.Frame(self.lr_frame, bg="#f99dbc")
         list_frame.grid(row=1, column=0, columnspan=2, sticky="nsew")
 
+        # Create line numbers frame for lexer
+        lexer_frame = tk.Frame(list_frame, bg="#f99dbc")
+        lexer_frame.grid(row=0, column=0, padx=5, pady=5, sticky="ns")
+
+        # Line numbers for lexer only
+        self.lexer_line_numbers = tk.Text(
+            lexer_frame, width=3, height=20, wrap=tk.NONE,
+            fg="#d60083", bg="white", state="disabled"
+        )
+        self.lexer_line_numbers.grid(row=0, column=0, sticky="ns")
+
         # Lexer listbox
         self.output_listbox = tk.Listbox(
-            list_frame, width=30, height=20, justify="center", fg="#d60083"
+            lexer_frame, width=27, height=20, justify="center", fg="#d60083"
         )
-        self.output_listbox.grid(row=0, column=0, padx=5, pady=5)
+        self.output_listbox.grid(row=0, column=1, sticky="ns")
 
-        # Tokens listbox
+        # Create frame for tokens (without line numbers)
+        token_frame = tk.Frame(list_frame, bg="#f99dbc")
+        token_frame.grid(row=0, column=1, padx=5, pady=5, sticky="ns")
+
+        # Tokens listbox only (no line numbers)
         self.token_listbox = tk.Listbox(
-            list_frame, width=30, height=20, justify="center", fg="#d60083"
+            token_frame, width=30, height=20, justify="center", fg="#d60083"
         )
-        self.token_listbox.grid(row=0, column=1, padx=5, pady=5)
+        self.token_listbox.grid(row=0, column=0, sticky="ns")
 
         # Shared scrollbar for both listboxes
         self.lr_scrollbar = tk.Scrollbar(list_frame, orient="vertical")
@@ -140,24 +156,25 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.lr_scrollbar.config(command=self.on_lr_scroll)
         self.output_listbox.config(yscrollcommand=self.sync_lr_scroll)
         self.token_listbox.config(yscrollcommand=self.sync_lr_scroll)
+        self.lexer_line_numbers.config(yscrollcommand=self.sync_lr_scroll)
 
         # Prevent individual scrolling
         def ignore_events(event):
             return "break"
 
-        for listbox in (self.output_listbox, self.token_listbox):
-            listbox.bind("<MouseWheel>", ignore_events)
-            listbox.bind("<Button-4>", ignore_events)
-            listbox.bind("<Button-5>", ignore_events)
-            listbox.bind("<Up>", ignore_events)
-            listbox.bind("<Down>", ignore_events)
-            listbox.bind("<Next>", ignore_events)
-            listbox.bind("<Prior>", ignore_events)
+        for widget in (self.output_listbox, self.token_listbox, self.lexer_line_numbers):
+            widget.bind("<MouseWheel>", ignore_events)
+            widget.bind("<Button-4>", ignore_events)
+            widget.bind("<Button-5>", ignore_events)
+            widget.bind("<Up>", ignore_events)
+            widget.bind("<Down>", ignore_events)
+            widget.bind("<Next>", ignore_events)
+            widget.bind("<Prior>", ignore_events)
 
     def setup_errors_section(self):
         # Errors label
         self.errors_label = tk.Label(
-            self.bottom_frame, text="Errors", fg="white",
+            self.bottom_frame, text="Output", fg="white",
             font=("Arial", 14, "bold"), bg="#f99dbc"
         )
         self.errors_label.grid(row=0, column=0)
@@ -194,6 +211,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.analyze_button.bind("<Button-1>", self.analyze_code)
         self.analyze_button.bind("<Enter>", self.on_hover)
         self.analyze_button.bind("<Leave>", self.on_leave)
+        
 
     def on_input_scroll(self, *args):
         """Synchronize input text and line numbers scrolling"""
@@ -201,15 +219,23 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.line_numbers.yview(*args)
 
     def on_lr_scroll(self, *args):
-        """Synchronize lexer and tokens scrolling"""
+        """Synchronize lexer and tokens scrolling including line numbers"""
+        # Update all components
         self.output_listbox.yview(*args)
         self.token_listbox.yview(*args)
+        self.lexer_line_numbers.yview(*args)
 
     def sync_lr_scroll(self, *args):
-        """Update scrollbar position for lexer/tokens sections"""
+        """Update scrollbar position and sync all components"""
         self.lr_scrollbar.set(*args)
-        self.output_listbox.yview_moveto(args[0])
-        self.token_listbox.yview_moveto(args[0])
+        
+        # Get the fraction of scrolling
+        fraction = float(args[0])
+        
+        # Apply the same scroll fraction to all components
+        self.output_listbox.yview_moveto(fraction)
+        self.token_listbox.yview_moveto(fraction)
+        self.lexer_line_numbers.yview_moveto(fraction)
 
     def update_line_numbers(self, event=None):
         """Update line numbers and reset modified flag"""
@@ -225,56 +251,71 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.line_numbers.insert("1.0", numbers)
         self.line_numbers.config(state='disabled')
 
-    def analyze_code(self, event=None):
-        """Analyze the code and display results"""
-        code = self.input_text.get("1.0", tk.END)
-        lexer = RoyalScriptLexer(code)
+    def update_lexer_token_line_numbers(self):
+        """Update line numbers for lexer section only"""
+        numbers = []
+
+        # Ensure each line is accounted for, even if it has no tokens
+        for line_idx, line_tokens in enumerate(self.tokens):
+            if not line_tokens:
+                numbers.append(str(line_idx + 1))  # Line number for empty token line
+            else:
+                numbers.extend([str(line_idx + 1)] * len(line_tokens))  # Line number for each token
+
+        # Convert numbers to string with newlines
+        numbers_str = "\n".join(numbers)
+
+        # Update lexer line numbers only
+        self.lexer_line_numbers.config(state='normal')
+        self.lexer_line_numbers.delete("1.0", "end")
+        self.lexer_line_numbers.insert("1.0", numbers_str)
+        self.lexer_line_numbers.tag_configure("right", justify="right")
+        self.lexer_line_numbers.tag_add("right", "1.0", "end")
+        self.lexer_line_numbers.config(state='disabled')
+
+    # def analyze_code(self, event=None):
+    #     """Analyze the code and display results"""
+    #     code = self.input_text.get("1.0", tk.END)
+    #     lexer = RoyalScriptLexer(code)
         
-        # Clear previous output
-        self.output_listbox.delete(0, tk.END)
-        self.token_listbox.delete(0, tk.END)
-        self.errors_listbox.delete(0, tk.END)
+    #     # Clear previous output
+    #     self.output_listbox.delete(0, tk.END)
+    #     self.token_listbox.delete(0, tk.END)
+    #     self.errors_listbox.delete(0, tk.END)
+    #     self.tokens = []  # Reset tokens list
 
-        try:
-            # Ensure get_tokens() returns a valid iterable, defaulting to empty list if None
-            token_lines = lexer.get_tokens() or []  # Defaults to empty list if None
+    #     try:
+    #         token_lines = lexer.get_tokens() or []
+    #         self.tokens = token_lines  # Store the token lines
             
-            # Process each line of tokens
-            for line_num, line_tokens in enumerate(token_lines, 1):
-                # Add a line separator in the listboxes
-                if line_num >= 1:
-                    self.output_listbox.insert(tk.END, "──────────────")
-                    self.token_listbox.insert(tk.END, "──────────────")
-                
-                # Add line number
-                self.output_listbox.insert(tk.END, f"Line {line_num}:")
-                self.token_listbox.insert(tk.END, f"Line {line_num}:")
-                
-                # Process tokens in the current line
-                for token in line_tokens:
-                    # Display token value
-                    if isinstance(token, Token):  # Ensure it's a Token object
-                        self.output_listbox.insert(tk.END, f"{token.value}")
-                        
-                        # Display token type
-                        if hasattr(token, 'token_type'):
-                            definition = token.token_type.replace("_", " ")
-                            self.token_listbox.insert(tk.END, f"{definition}")
+    #         for line_num, line_tokens in enumerate(token_lines, 1):
+    #             if not line_tokens:  # If the line has no tokens
+    #                 self.output_listbox.insert(tk.END, f" ")
+    #                 self.token_listbox.insert(tk.END, " ")
+    #             else:
+    #                 for token in line_tokens:
+    #                     if isinstance(token, Token):
+    #                         self.output_listbox.insert(tk.END, f"{token.value}")
+                            
+    #                         if hasattr(token, 'token_type'):
+    #                             definition = token.token_type.replace("_", " ")
+    #                             self.token_listbox.insert(tk.END, f"{definition}")
             
-            # If there are errors, display them
-            if lexer.errors:
-                for error in lexer.errors:
-                    self.errors_listbox.insert(tk.END, error)
+    #         # Update line numbers after adding all tokens
+    #         self.update_lexer_token_line_numbers()
+            
+    #         if lexer.errors:
+    #             for error in lexer.errors:
+    #                 self.errors_listbox.insert(tk.END, error)
 
-        except SyntaxError as e:
-            self.errors_listbox.insert(tk.END, f"Lexical Error: {str(e)}")
-        except Exception as e:
-            self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
-            # For debugging purposes
-            import traceback
-            self.errors_listbox.insert(tk.END, f"Details: {traceback.format_exc()}")
+    #     except SyntaxError as e:
+    #         self.errors_listbox.insert(tk.END, f"Lexical Error: {str(e)}")
+    #     except Exception as e:
+    #         self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
+    #         import traceback
+    #         self.errors_listbox.insert(tk.END, f"Details: {traceback.format_exc()}")
 
-    # #lexer with syntax
+    #lexer with syntax
     # def analyze_code(self, event=None):
     #     """Analyze the code and display results."""
     #     code = self.input_text.get("1.0", tk.END)
@@ -285,68 +326,129 @@ class RoyalScriptLexerGUI(tk.Tk):
     #     self.token_listbox.delete(0, tk.END)
     #     self.errors_listbox.delete(0, tk.END)
 
+    #     lexer_error = False  # Flag to track lexer errors
+    #     all_tokens = []  # Store tokens for syntax analysis
+
     #     try:
     #         token_lines = lexer.get_tokens()  # Lexer generates tokens (2D array)
-    #         all_tokens = []  # Store tokens for syntax analysis
-    #         lexer_error = False  # Flag for lexer errors
-
-    #         # Process each line of tokens
+            
+    #         # 🚨 Check if lexer returned empty or invalid tokens
+    #         if not token_lines or any(not isinstance(line, list) for line in token_lines):
+    #             lexer_error = True
+    #             self.errors_listbox.insert(tk.END, "Lexer Error: No valid tokens detected!")
+            
     #         for line_num, line_tokens in enumerate(token_lines, 1):
-    #             # Add a line separator in the listboxes
     #             if line_num > 1:
     #                 self.output_listbox.insert(tk.END, "──────────────")
     #                 self.token_listbox.insert(tk.END, "──────────────")
 
-    #             # Add line number
     #             self.output_listbox.insert(tk.END, f"Line {line_num}:")
     #             self.token_listbox.insert(tk.END, f"Line {line_num}:")
 
-    #             # Process tokens in the current line
-    #             token_types = []  # Only token types to pass to syntax analyzer
+    #             token_types = []  # Store token types for syntax analysis
     #             for token in line_tokens:
-    #                 if isinstance(token, Token):  # Ensure it's a Token object
-    #                     # Extract token type (the 'token_type' attribute)
+    #                 if isinstance(token, Token):  # Ensure it's a valid Token object
     #                     token_type = token.token_type
     #                     self.output_listbox.insert(tk.END, f"{token.value}")
-                        
-    #                     # Display token type (replace underscores for readability)
-    #                     definition = token_type.replace("_", " ")
-    #                     self.token_listbox.insert(tk.END, f"{definition}")
-
-    #                     # Add token type to the list of token types
+    #                     self.token_listbox.insert(tk.END, token_type.replace("_", " "))
     #                     token_types.append(token_type)
     #                 else:
-    #                     # If the lexer returns anything invalid, flag an error
-    #                     lexer_error = True
+    #                     lexer_error = True  # Invalid token detected
+    #                     self.errors_listbox.insert(tk.END, f"Lexer Error: Invalid token in line {line_num}")
 
-    #             # Store the token types for each line
-    #             all_tokens.append(token_types)  
+    #             if not token_types:  # 🚨 Empty token list detected (likely a lexer issue)
+    #                 lexer_error = True
+    #                 self.errors_listbox.insert(tk.END, f"Lexer Error: No valid tokens found in line {line_num}")
 
-    #         # ✅ **Run Syntax Analyzer only if Lexer has no errors**
-    #         if not lexer_error:
-    #             self.run_syntax_analyzer(all_tokens)  # Pass only token types (2D array)
+    #             all_tokens.append(token_types)  # Store for syntax analysis
 
     #     except Exception as e:
-    #         # Handle any errors that might occur
-    #         self.errors_listbox.insert(tk.END, f"Error: {str(e)}")
+    #         lexer_error = True  # Ensure lexer errors prevent syntax analysis
+    #         self.errors_listbox.insert(tk.END, f"Lexer Error: {str(e)}")
 
-    
+    #     #**Ensure syntax analyzer only runs if lexer succeeds**
+    #     if lexer_error:
+    #         self.errors_listbox.insert(tk.END, "Syntax analysis skipped due to lexer errors.")
+    #     else:
+    #         self.run_syntax_analyzer(all_tokens)
 
-    # def run_syntax_analyzer(self, tokens):
-    #         """Run the syntax analyzer with tokens"""
-    #         parser = RoyalScriptParser(tokens)  # Assuming you have a parser class
 
-    #         try:
-    #             parser.parse()  # Run the syntax analysis
-    #             # self.output_listbox.insert(tk.END, "✅ Syntax Analysis Successful!")
+    def analyze_code(self, event=None):
+        """Analyze the code and display results"""
+        code = self.input_text.get("1.0", tk.END)
+        lexer = RoyalScriptLexer(code)
+        
+        # Clear previous output
+        self.output_listbox.delete(0, tk.END)
+        self.token_listbox.delete(0, tk.END)
+        self.errors_listbox.delete(0, tk.END)
+        self.tokens = []  # Reset tokens list
+        all_tokens = []  # Store token types for additional analysis
+        
+        try:
+            token_lines = lexer.get_tokens() or []
+            self.tokens = token_lines  # Store the token lines
+            
+            # Check if we have valid tokens
+            if not token_lines:
+                self.errors_listbox.insert(tk.END, "Lexer Error: No tokens detected")
+                return
+                
+            for line_num, line_tokens in enumerate(token_lines, 1):
+                # Add separator between lines
+                # if line_num > 1:
+                
+                token_types = []  # Store token types for this line
+                
+                if not line_tokens:  # If the line has no tokens
+                    self.output_listbox.insert(tk.END, f" ")
+                    self.token_listbox.insert(tk.END, " ")
+                else:
+                    for token in line_tokens:
+                        if isinstance(token, Token):
+                            self.output_listbox.insert(tk.END, f"{token.value}")
+                            
+                            if hasattr(token, 'token_type'):
+                                definition = token.token_type.replace("_", " ")
+                                self.token_listbox.insert(tk.END, f"{definition}")
+                                token_types.append(token.token_type)  # Store the token type
+                
+                all_tokens.append(token_types)  # Add this line's token types to all_tokens
+            
+            # Update line numbers after adding all tokens
+            self.update_lexer_token_line_numbers()
+            
+            if lexer.errors:
+                for error in lexer.errors:
+                    self.errors_listbox.insert(tk.END, error)
+            else:
+                # No lexer errors, proceed to syntax analysis with both full tokens and token types
+                self.run_syntax_analyzer(all_tokens)
 
-    #         except SyntaxError as e:
-    #             self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
-    #         except Exception as e:
-    #             self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
-    #             import traceback
-    #             self.errors_listbox.insert(tk.END, f"Details: {traceback.format_exc()}")
+        except SyntaxError as e:
+            self.errors_listbox.insert(tk.END, f"Lexical Error: {str(e)}")
+        except Exception as e:
+            self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
+            import traceback
+            self.errors_listbox.insert(tk.END, f"Details: {traceback.format_exc()}")
+                
 
+    def run_syntax_analyzer(self, tokens):
+        """Run the syntax analyzer with tokens"""
+        parser = RoyalScriptParser(tokens)
+
+        try:
+            parser.parse()  # Run the syntax analysis
+            # self.errors_listbox.insert(tk.END, "\n─── Parser Output ───")
+            self.errors_listbox.insert(tk.END, parser.get_parsing_result())
+
+        except SyntaxError as e:
+            # self.errors_listbox.insert(tk.END, "\n─── Parser Error ───")
+            self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
+            
+        except Exception as e:
+            # self.errors_listbox.insert(tk.END, "\n─── Parser Error ───")
+            self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
 
 
     def on_hover(self, event):
