@@ -157,6 +157,7 @@ class RoyalScriptParser:
         elif self.data_type():
             return True
         else:
+            self.error_message = f"Syntax Error: Missing data type at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
 
@@ -239,7 +240,7 @@ class RoyalScriptParser:
 
         if self.match('='):
             if not self.array_list():
-                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' must be an array list at {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
         # 16	<array_initialization>	→	λ
