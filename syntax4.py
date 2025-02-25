@@ -540,8 +540,9 @@ class RoyalScriptParser:
                 
                 elif not self.index():  # Parse the function call
                     return False
-                print(f" Token: {token}")
-                return True  # Successfully parsed function call as operand
+                # print(f" Token: {token}")
+            else:
+                return self.match(token)
         # 40	<assignment_operand>	→	treasures_lit
         elif token == 'treasures_lit' or token == '1' or token == '0':
             if next_token in ['+', '-', '/', '*', '%']:
