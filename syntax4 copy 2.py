@@ -58,33 +58,8 @@ class RoyalScriptParser:
         if token is None:
             self.error_message = f"Syntax Error: Unexpected end of input at Line {self.current_line + 1}"
         else:
-            if expected == 'crown':
-                self.error_message = f"Syntax Error: Program must start with 'crown' "
-            elif expected == '~':
-                self.error_message = f"Syntax Error: Missing tilde '~' at Line {self.current_line - 1 }, Index {self.current_index + 1}"
-            elif expected == 'castle':
-                self.error_message = f"Syntax Error: Program must have a main function starts with 'castle'"
-            elif expected == 'treasures':
-                self.error_message = f"Syntax Error: Expected treasures, but got '{repr(self.current_token())}' at Line {self.current_line - 1 }, Index {self.current_index + 1}"
-            elif expected == 'identifier':
-                self.error_message = f"Syntax Error: Missing identifier at Line {self.current_line - 1 }, Index {self.current_index + 1}"
-            elif expected == ')':
-                self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
-            elif expected == ']':
-                self.error_message = f"Syntax Error: Unclosed ] at Line {self.current_line - 1 }, Index {self.current_index + 1}"
-            elif expected == 'return':
-                self.error_message = f"Syntax Error: Missing return statement at Line {self.current_line - 1 }, Index {self.current_index + 1}"
-            elif expected == '0':
-                self.error_message = f"Syntax Error: Expected 0, but got '{repr(self.current_token())}' at Line {self.current_line - 1 }, Index {self.current_index + 1}"
-            elif expected == 'reign':
-                self.error_message = f"Syntax Error: Program must end with 'reign' "
-            elif expected == 'scroll_lit':
-                self.error_message = f"Syntax Error: Expected scroll literal, but got '{repr(self.current_token())}' at Line {self.current_line - 1 }, Index {self.current_index + 1}"
-            elif expected == 'treasures_lit':
-                self.error_message = f"Syntax Error: Expected treasures literal, but got '{repr(self.current_token())}' at Line {self.current_line - 1 }, Index {self.current_index + 1}"
-            else:
-                self.error_message = f"Syntax Error: Expected {expected}, but got {repr(token)} at Line {self.current_line + 1}, Index {self.current_index}"
-        print(f"Matching '{repr(self.current_token())}' against {repr(expected)}")
+            self.error_message = f"Syntax Error: Expected {expected}, but got {repr(token)} at Line {self.current_line + 1}, Index {self.current_index + 1}"
+        print(f"Matching {repr(self.current_token())} against {repr(expected)}")
         return False
     
     def program(self):
@@ -157,6 +132,7 @@ class RoyalScriptParser:
         elif self.data_type():
             return True
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
 
@@ -172,8 +148,10 @@ class RoyalScriptParser:
         elif self.match('['):
             # Handle the first dimension (e.g., `identifier[2]`)
             if not self.match('treasures_lit'):  
+                self.error_message = f"Syntax Error: Invalid array size at {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.match(']'): 
+                self.error_message = f"Syntax Error: Unclosed [ at {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             
             # If there are additional dimensions (e.g., `[2][2]`)
@@ -189,9 +167,11 @@ class RoyalScriptParser:
                 return False
             
             # Match the end of the variable declaration with "~"
-            return self.match('~')
+            if not self.match('~'):
+                self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
+                return False
 
-        self.error_message = f"Syntax Error: Expected '=', but got '{repr(self.current_token())}' at Line {self.current_line + 1}"
+        # self.error_message = f"Syntax Error: Expected '=', but got '{repr(self.current_token())}' at Line {self.current_line + 1}"
         return False
 
 
@@ -206,7 +186,7 @@ class RoyalScriptParser:
         # 11	<vardec_more>	→	, id_lit <initialization> <vardec_more>
         if self.match(','):
             if not self.match('identifier') or not self.initialization():
-                self.error_message = f"Syntax Error: Missing variable name '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Missing variable name at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return self.vardec_more()
         # 12	<vardec_more>	→	λ
@@ -219,8 +199,10 @@ class RoyalScriptParser:
 
         if self.match('['):
             if not self.match('treasures_lit'):
+                self.error_message = f"Syntax Error: Invalid array size at {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.match(']'):
+                self.error_message = f"Syntax Error: Unclosed [ at {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
         
@@ -229,6 +211,7 @@ class RoyalScriptParser:
             return True  
         
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at {self.current_line - 1 }, Index {self.current_index + 1}"
             return False 
 
         
@@ -239,7 +222,6 @@ class RoyalScriptParser:
 
         if self.match('='):
             if not self.array_list():
-                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
         # 16	<array_initialization>	→	λ
@@ -247,6 +229,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
 
@@ -254,12 +237,14 @@ class RoyalScriptParser:
         # 17	<array_list>	→	{<array_content>}
 
         if not self.match('{'):
+            self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
         if not self.array_content():
             return False
 
         if not self.match('}'):
+            self.error_message = f"Syntax Error: Unclosed {{ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
         return True
@@ -278,12 +263,14 @@ class RoyalScriptParser:
             if not self.array_row():
                 return False
             if not self.match('}'):
+                self.error_message = f"Syntax Error: Unclosed {{ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.row_more():
                 return False
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
 
@@ -305,10 +292,12 @@ class RoyalScriptParser:
 
         if self.match(','):
             if not self.match('{'):
+                self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.array_row():
                 return False
             if not self.match('}'):
+                self.error_message = f"Syntax Error: Unclosed {{ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.row_more():
                 return False
@@ -319,6 +308,7 @@ class RoyalScriptParser:
             return True  # If no more rows, end with closing bracket
 
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
 
@@ -328,7 +318,6 @@ class RoyalScriptParser:
 
         if self.match(','):
             if not self.array_lit():
-                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.lit_more():
                 return False
@@ -339,6 +328,7 @@ class RoyalScriptParser:
             return True  # If no more literals, end with closing bracket
 
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
 
@@ -348,13 +338,16 @@ class RoyalScriptParser:
 
         if self.match(','):
             if not self.match('identifier'):
-                self.error_message = f"Syntax Error: Missing variable name '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Missing variable name at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.match('['):
+                self.error_message = f"Syntax Error: Expected [, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.match('treasures_lit'):
+                self.error_message = f"Syntax Error: Invalid array size at {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.match(']'):
+                self.error_message = f"Syntax Error: Unclosed [ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.column():
                 return False
@@ -369,6 +362,7 @@ class RoyalScriptParser:
             return True  # End of array initialization with tilde
 
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
 
@@ -392,6 +386,7 @@ class RoyalScriptParser:
         elif self.match('identifier'):
             return True
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
     def assignment_exp(self):
@@ -399,16 +394,16 @@ class RoyalScriptParser:
 
         print("Entering assignment_exp")  # Debugging line
         if not self.match('identifier'):
-            self.error_message = f"Syntax Error: Missing variable name '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid identifier  at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
-        print(f"Passed ID match: '{repr(self.current_token())}'")  # Debugging line
+        print(f"Passed ID match: {repr(self.current_token())}")  # Debugging line
         
         if not self.assignment_operator():
-            self.error_message = f"Syntax Error: Invalid assignment operator '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid assignment operator  at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
         if not self.assignment_operand():
-            self.error_message = f"Syntax Error: Invalid assignment operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid assignment operand  at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
         return True
@@ -450,7 +445,7 @@ class RoyalScriptParser:
             return True
 
         else:
-            self.error_message = f"Syntax Error: Invalid input // {repr(token)} at Line {self.current_line + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}"
             return False
 
 
@@ -544,6 +539,7 @@ class RoyalScriptParser:
             if not self.more_arith():
                 return False
             if not self.match(')'):
+                self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
 
@@ -558,6 +554,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
 
@@ -567,15 +564,14 @@ class RoyalScriptParser:
         # 45	<array_element>	→	id_lit <index>
 
         if not self.match('identifier'):
-            self.error_message = f"Syntax Error: Missing variable name '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid variable name at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
         if not self.index():
-            self.error_message = f"Syntax Error: Invalid array index '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid array index at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
         return True
-
 
     def logical_exp(self):
         # 46	<logical_exp>	→	<logical_operand> <logical_operator> <logical_operand> <more_log>
@@ -584,11 +580,11 @@ class RoyalScriptParser:
         if self.logical_operand():
             print(f"passed log_operand {token}")
             if not self.logical_operator():
-                self.error_message = f"Syntax Error: Invalid logical operator '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Invalid logical operator at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             print(f"passed log_operator {token}")
             if not self.logical_operand():
-                self.error_message = f"Syntax Error: Invalid logical operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Invalid logical operand at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             print(f"passed log_operand {token}")
             if not self.more_log():
@@ -599,14 +595,14 @@ class RoyalScriptParser:
         
         elif self.logical_operator1():
             if not self.logical_operand():
-                self.error_message = f"Syntax Error: Invalid logical operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Invalid logical operand at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.more_log():
                 return False
             return True
         
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         
     
@@ -648,17 +644,15 @@ class RoyalScriptParser:
         # 52	<logical_operand>	→	(<relational_exp>)
         elif self.match('('):  
             if not self.relational_operand():
-                self.error_message = f"Syntax Error: Invalid relational operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not (self.match('<') or self.match('>') or self.match('<=') or self.match('>=') or self.match('==') or self.match('!=')):
-                self.error_message = f"Syntax Error: Invalid relational operator '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.relational_operand():
-                self.error_message = f"Syntax Error: Invalid relational operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.relational_more():
                 return False
             if not self.match(')'):
+                self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
         # for checking if pwede tanggalin
@@ -706,7 +700,7 @@ class RoyalScriptParser:
             return True
 
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
 
@@ -720,13 +714,13 @@ class RoyalScriptParser:
         # 61	<more_log_ext>	→	<logical_operator1> <logical_operand><more_log>
         elif self.logical_operator1():
             if not self.logical_operand():
+                self.error_message = f"Syntax Error: Invalid logical operand at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.more_log():
                 return False
             return True
         
         else:
-            self.error_message = f"Syntax Error: Invalid invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
     
@@ -734,17 +728,18 @@ class RoyalScriptParser:
     def func_call(self):
         # 62	<func_call>	→	id_lit (<args>)
         if not self.match('identifier'):
-            self.error_message = f"Syntax Error: Missing variable name '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid identifier at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
         if not self.match('('):
+            self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
         if not self.args():
-            self.error_message = f"Syntax Error: Invalid argument '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
         if not self.match(')'):
+            self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
         print("pass func_call")
@@ -768,6 +763,7 @@ class RoyalScriptParser:
             return True
         
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
     
 
@@ -792,7 +788,7 @@ class RoyalScriptParser:
             return True
 
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid argument value at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
     
@@ -812,7 +808,7 @@ class RoyalScriptParser:
             return True
         
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
     def treasures_mirror(self):
@@ -824,7 +820,7 @@ class RoyalScriptParser:
             return True
         
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
     
 
@@ -833,15 +829,15 @@ class RoyalScriptParser:
         # 75	<arithmetic_exp>	→	<arithmetic_operand> <arithmetic_operator><arithmetic_operand><more_arith>
         print(f"Enter Arith_exp {token}")
         if not self.arithmetic_operand():
-            self.error_message = f"Syntax Error: Invalid arithmetic operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid arithmetic operand at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         print("Enter Arith_op success")
         if not self.arithmetic_operator():
-            self.error_message = f"Syntax Error: Invalid arithmetic operator '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid arithmetic operator at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
         if not self.arithmetic_operand():
-            self.error_message = f"Syntax Error: Invalid arithmetic operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid arithmetic operand at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
         if not self.more_arith():
@@ -879,24 +875,20 @@ class RoyalScriptParser:
         # 80	<arithmetic_operand>	→	(<arithmetic_exp>)
         elif self.match('('):  # Only call arithmetic_exp() if inside parentheses
             if not self.arithmetic_operand():
-                self.error_message = f"Syntax Error: Invalid arithmetic operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not (self.match('+') or self.match('-') or self.match('/') or self.match('*') or self.match('%')):
-                self.error_message = f"Syntax Error: Invalid arithmetic operator '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
                 print("Invalid operand")
                 return False
             if not self.arithmetic_operand():
-                self.error_message = f"Syntax Error: Invalid arithmetic operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.more_arith():
                 return False
             if not self.match(')'):
+                self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
         else:
             return False
-
-
 
         
     def arithmetic_operator(self):
@@ -946,7 +938,7 @@ class RoyalScriptParser:
         # 88	<more_arith>	→	<arithmetic_operator> <arithmetic_operand> <more_arith>
         if self.arithmetic_operator():
             if not self.arithmetic_operand():
-                self.error_message = f"Syntax Error: Expected operand but got '{repr(self.current_token())}' at Line {self.current_line + 1}"
+                self.error_message = f"Syntax Error: Invalid arithmetic operand at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return self.more_arith()  # Continue parsing if there's more arithmetic
 
@@ -955,20 +947,20 @@ class RoyalScriptParser:
             return True  
 
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Unexpected token {repr(token)} at Line {self.current_line + 1}"
             return False
 
 
     def relational_exp(self):
        # 90	<relational_exp>	→	<relational_operand> <relational_operator> <relational_operand> <relational_more>  
        if not self.relational_operand():
-            self.error_message = f"Syntax Error: Invalid relational operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid relational operand at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
        if not self.relational_operator():
-            self.error_message = f"Syntax Error: Invalid relational operator '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid relational operator at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
        if not self.relational_operand():
-            self.error_message = f"Syntax Error: Invalid relational operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid relational operand at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
        if not self.relational_more():
             return False
@@ -1016,6 +1008,7 @@ class RoyalScriptParser:
             if not self.more_arith():
                 return False
             if not self.match(')'):
+                self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
         # for checking if pwede tanggalin
@@ -1028,7 +1021,6 @@ class RoyalScriptParser:
         elif self.array_element():
             return True
         
-
         else:
             return False
 
@@ -1070,7 +1062,7 @@ class RoyalScriptParser:
 
         if self.relational_operator():
             if not self.relational_operand():
-                self.error_message = f"Syntax Error: Invalid relational operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Invalid relational operand at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.relational_more():
                 return False
@@ -1089,11 +1081,11 @@ class RoyalScriptParser:
         # 107	<unary>	→	id_lit <unary_operator>
         print("Unary")
         if not self.match('identifier'):
-            self.error_message = f"Syntax Error: Missing variable name '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid variable name at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         print(f"This is {token}")
         if not self.unary_operator():
-            self.error_message = f"Syntax Error: Invalid unary operator '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid unary operator at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         return True
     
@@ -1113,12 +1105,13 @@ class RoyalScriptParser:
         token = self.current_token()
         print(f"Enter concat {token}")
         if not self.string_operand():
-            self.error_message = f"Syntax Error: Invalid string operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid string operand at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('+'):
+            self.error_message = f"Syntax Error: Invalid string operator '+' at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.string_operand():
-            self.error_message = f"Syntax Error: Invalid string operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid string operand at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         return self.string_more()
 
@@ -1151,22 +1144,23 @@ class RoyalScriptParser:
         # 116	<string_operand>	→	toscroll(<conver_value>)
         elif self.match('toscroll'):
             if not self.match('('):
+                self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.conversion_value():
                 return False
             if not self.match(')'):
+                self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             print(f"Token = {token}")
             return True
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
     def string_more(self):
         # 117	<string_more>	→	+ <string_operand> <string_more>
         if self.match('+'):
             if not self.string_operand():
-                self.error_message = f"Syntax Error: Invalid string operand '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Invalid string operand at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return self.string_more()
         # 118	<string_more>	→	λ
@@ -1180,23 +1174,28 @@ class RoyalScriptParser:
         # 119	<user-defined_func>	→	spell <return_type> id_lit(<param>) {<body><ret_statement>} <user-defined_func>
         if self.match('spell'):
             if not self.return_type():
+                self.error_message = f"Syntax Error: Missing return type at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.match('identifier'):
-                self.error_message = f"Syntax Error: Missing function name '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Invalid function name at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.match('('):
+                self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.param():
                 return False
             if not self.match(')'):
+                self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.match('{'):
+                self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.body():
                 return False
             if not self.ret_statement():
                 return False
             if not self.match('}'):
+                self.error_message = f"Syntax Error: Unclosed {{ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.user_defined_func():
                 return False
@@ -1207,7 +1206,6 @@ class RoyalScriptParser:
             return True
         
         else: 
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
     
     def return_type(self):
@@ -1226,7 +1224,6 @@ class RoyalScriptParser:
         elif self.match('chamber'):
             return True
         else: 
-            self.error_message = f"Syntax Error: Invalid return type '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
     def param(self):
@@ -1237,7 +1234,7 @@ class RoyalScriptParser:
         if self.data_type():
             self.advance()
             if not self.match('identifier'):
-                self.error_message = f"Syntax Error: Missing variable name '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Invalid variable name at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.param_more():
                 return False
@@ -1248,7 +1245,6 @@ class RoyalScriptParser:
             return True
         
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
     
     def param_more(self):
@@ -1257,11 +1253,11 @@ class RoyalScriptParser:
         # 125	<param_more>	→	, <data_type> id_lit <param_more>
         if self.match(','):
             if not self.data_type():
-                self.error_message = f"Syntax Error: Missing data type '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Invalid data type at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             self.advance()
             if not self.match('identifier'):
-                self.error_message = f"Syntax Error: Missing variable name '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Invalid variable name at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.param_more():
                 return False
@@ -1293,6 +1289,7 @@ class RoyalScriptParser:
                 if not self.unary():
                     return False
                 if not self.match('~'):
+                    self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                     return False
                 return self.body()
             # 135	<body>	→	<assignment_exp>~ <body>
@@ -1300,6 +1297,7 @@ class RoyalScriptParser:
                 if not self.assignment_exp():
                     return False
                 if not self.match('~'):
+                    self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                     return False
                 return self.body()
             # 129	<body>	→	<func_call>~ <body>
@@ -1307,6 +1305,7 @@ class RoyalScriptParser:
                 if not self.func_call():
                     return False
                 if not self.match('~'):
+                    self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                     return False
                 return self.body()
         # 127	<body>	→	<var_dec> <body>
@@ -1338,9 +1337,8 @@ class RoyalScriptParser:
         elif token in ["single_comment", "multi_comment"]:
             return self.body()
         
-        
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
         
@@ -1353,10 +1351,12 @@ class RoyalScriptParser:
             print('passed return')
             # 141	<ret_statement>	→	return <val1> ~
             if not self.val1():
+                self.error_message = f"Syntax Error: Invalid return value at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             print('val1')
             # 142	<ret_statement>	→	λ
             if not self.match('~'):
+                self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
 
@@ -1365,18 +1365,21 @@ class RoyalScriptParser:
             return True
         
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
     def var_reassign(self):
         # 143	<var_reassign>	→	id_lit = <val> ~
         if not self.match('identifier'):
-            self.error_message = f"Syntax Error: Invalid variable name '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Invalid variable name at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('='):
+            self.error_message = f"Syntax Error: Expected =, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.val():
             return False
         if not self.match('~'):
+            self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         return True
     
@@ -1400,26 +1403,33 @@ class RoyalScriptParser:
     def for_loop(self):
         # 147	<for_loop>	→	tale (<loop_var> ~ <relational_exp> ~ <unary>) {<loop_body>}
         if not self.match('tale'):
+            self.error_message = f"Syntax Error: Expected tale, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('('):
+            self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.loop_var():
             return False
         if not self.match('~'):
+            self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.relational_exp():
             return False
         if not self.match('~'):
+            self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.unary():
             return False
         if not self.match(')'):
+            self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('{'):
+            self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.loop_body():
             return False
         if not self.match('}'):
+            self.error_message = f"Syntax Error: Unclosed {{ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         return True
 
@@ -1427,11 +1437,13 @@ class RoyalScriptParser:
         # 148	<loop_var>	→	treasures id_lit = <loop_val>
         if self.match('treasures'):
             if not self.match('identifier'):
-                self.error_message = f"Syntax Error: Missing variable name '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Invalid variable name at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.match('='):
+                self.error_message = f"Syntax Error: Expected =, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.loop_val():
+                
                 return False
             return True
 
@@ -1455,19 +1467,21 @@ class RoyalScriptParser:
             return True
         
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
     def loop_val(self):
         # 152	<loop_val>	→	id_lit
-        if self.match('identifier'):
-            return True
+        if not self.match('identifier'):
+            self.error_message = f"Syntax Error: Invalid variable name at Line {self.current_line - 1 }, Index {self.current_index + 1}"
+            return False
         # 153	<loop_val>	→	treasures_lit
-        elif self.match('treasures_lit'):
-            return True
+        elif not self.match('treasures_lit'):
+            self.error_message = f"Syntax Error: Expected treasures literals, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
+            return False
 
         else:
-            return False
+            return True
 
         
     def loop_body(self):
@@ -1492,18 +1506,21 @@ class RoyalScriptParser:
                 if not self.unary():
                     return False
                 if not self.match('~'):
+                    self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                     return False
                 return self.loop_body()
             elif next_token in ['+=', '-=', '*=', '/=', '%=']:
                 if not self.assignment_exp():
                     return False
                 if not self.match('~'):
+                    self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                     return False
                 return self.loop_body()
             elif next_token == '(':
                 if not self.func_call():
                     return False
                 if not self.match('~'):
+                    self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                     return False
                 return self.loop_body()
 
@@ -1541,27 +1558,32 @@ class RoyalScriptParser:
             return self.loop_body()
 
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
 
     
     def if_break(self):
         # 156	<if_break>	→	cast (<condition>) {<body><flow_control>} <elif_break> <else_break>
         if not self.match('cast'):
+            self.error_message = f"Syntax Error: Expected cast, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('('):
+            self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.condition():
             return False
         if not self.match(')'):
+            self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('{'):
+            self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.body():
             return False
         if not self.flow_control():
             return False
         if not self.match('}'):
+            self.error_message = f"Syntax Error: Unclosed {{ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.elif_break():
             return False
@@ -1575,18 +1597,22 @@ class RoyalScriptParser:
         # 157	<elif_break>	→	twist(<condition>) {<body><flow_control>}<elif_break>
         if self.match('twist'):
             if not self.match('('):
+                self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.condition():
                 return False
             if not self.match(')'):
+                self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.match('{'):
+                self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.body():
                 return False
             if not self.flow_control():
                 return False
             if not self.match('}'):
+                self.error_message = f"Syntax Error: Unclosed {{ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.elif_break():
                 return False
@@ -1597,6 +1623,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         
     
@@ -1606,12 +1633,14 @@ class RoyalScriptParser:
         # 159	<else_break>	→	curse {<body><flow_control>}
         if self.match('curse'):
             if not self.match('{'):
+                self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.body():
                 return False
             if not self.flow_control():
                 return False
             if not self.match('}'):
+                self.error_message = f"Syntax Error: Unclosed {{ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
 
@@ -1620,7 +1649,7 @@ class RoyalScriptParser:
             return True
 
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
     
     def flow_control(self):
@@ -1629,12 +1658,14 @@ class RoyalScriptParser:
         # 161	<flow_control>	→	break~
         if self.match('break'):
             if not self.match('~'):
+                self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
         
         # 162	<flow_control>	→	continue~
         elif self.match('continue'):
             if not self.match('~'):
+                self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
         
@@ -1643,28 +1674,35 @@ class RoyalScriptParser:
             return True
 
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
     
     def do_while_statement(self):
         # 164	<do_while>	→	believe {<loop_body>} forever(<condition>)~
         if not self.match('believe'):
+            self.error_message = f"Syntax Error: Expected believe, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('{'):
+            self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.loop_body():
             return False
         if not self.match('}'):
+            self.error_message = f"Syntax Error: Unclosed {{ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('forever'):
+            self.error_message = f"Syntax Error: Expected forever, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('('):
+            self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.condition():
             return False
         if not self.match(')'):
+            self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('~'):
+            self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         return True
     
@@ -1721,18 +1759,21 @@ class RoyalScriptParser:
             return True
         # <condition>	→	<logical_operator1> (<condition>)
         elif self.match('!'):
-            print(f"Current Token: {self.current_token()}, Next Token: {self.peek_next_token()}")
+            print(f"Current Token: {repr(self.current_token())}, Next Token: {self.peek_next_token()}")
             if not self.match('('):
+                self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.condition():
+                
                 return False
             if not self.match(')'):
+                self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
         elif self.func_call():
             return True
         else:
-            self.error_message = f"Syntax Error: Invalid condition '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Inavlid condition at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
     
     def mirror_init(self):
@@ -1741,14 +1782,14 @@ class RoyalScriptParser:
         # 171	<mirror_init>	→	== mirror_lit
         if self.match('=='):
             if not(self.match('mirror_lit') or self.match('0'), self.match('treasures_lit')):
-                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
 
         # 172	<mirror_init>	→	!= mirror_lit
         elif self.match('!='):
             if not(self.match('mirror_lit') or self.match('0'), self.match('treasures_lit')):
-                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
         
@@ -1757,25 +1798,29 @@ class RoyalScriptParser:
             return True
         
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
     
     def while_statement(self):
         # 174	<while>	→	forever (<condition>) {<loop_body>}
         token = self.current_token()
         if not self.match('forever'):
+            self.error_message = f"Syntax Error: Expected forever, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         print(f"passed forever {token}")
         if not self.match('('):
+            self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         print(f"passed ( {token}")
         if not self.condition():
             return False
         print(f"passed condition {token}")
         if not self.match(')'):
+            self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         print(f"passed ) {token}")
         if not self.match('{'):
+            self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         print(f"passed open curly {token}")
         if not self.loop_body():
@@ -1783,6 +1828,7 @@ class RoyalScriptParser:
         print(f"passed loop body {token}")
             
         if not self.match('}'):
+            self.error_message = f"Syntax Error: Unclosed {{ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         print(f"passed close curly {token}")
         return True
@@ -1791,18 +1837,23 @@ class RoyalScriptParser:
     def if_statement(self):
         # 175	<if>	→	cast (<condition>) {<body>} <elif> <else>
         if not self.match('cast'):
+            self.error_message = f"Syntax Error: Expected cast, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not self.match('('):
+            self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.condition():
             return False
         if not self.match(')'):
+            self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('{'):
+            self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.body():
             return False
         if not self.match('}'):
+            self.error_message = f"Syntax Error: Unclosed {{ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.elif_statement():
             return False
@@ -1816,16 +1867,20 @@ class RoyalScriptParser:
         # 176	<elif>	→	twist(<condition>) {<body>}<elif>
         if self.match('twist'):
             if not self.match('('):
+                self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.condition():
                 return False
             if not self.match(')'):
+                self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.match('{'):
+                self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.body():
                 return False
             if not self.match('}'):
+                self.error_message = f"Syntax Error: Unclosed {{ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             if not self.elif_statement():
                 return False
@@ -1836,7 +1891,7 @@ class RoyalScriptParser:
             return True
 
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
     def else_statement(self):
@@ -1845,10 +1900,12 @@ class RoyalScriptParser:
         # 178	<else>	→	curse {<body>}
         if self.match('curse'):
             if not self.match('{'):
+                self.error_message = f"Syntax Error: Expected {{, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.body():
                 return False
             if not self.match('}'):
+                self.error_message = f"Syntax Error: Unclosed {{ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
         
@@ -1857,22 +1914,26 @@ class RoyalScriptParser:
             return True
 
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
     def output(self):
         # 180	<output>	→	granted(<granted_content> <more_granted>) ~
         if not self.match('granted'):
+            self.error_message = f"Syntax Error: Expected granted, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not self.match('('):
+            self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.granted_content():
             return False
         if not self.more_granted():
             return False
         if not self.match(')'):
+            self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('~'):
+            self.error_message = f"Syntax Error: Missing tilde (~) at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         return True
     
@@ -2090,22 +2151,28 @@ class RoyalScriptParser:
         # elif self.func_call():
         #     return True
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         
     def set_precision(self):
         # 197	<set_precision>	→	“%.[treasures_lit]f”
         if not self.match('%'):
+            
             return False
         if not self.match('.'):
+            
             return False
         if not self.match('['):
+            self.error_message = f"Syntax Error: Expected [, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('treasures_lit'):
+            
             return False
         if not self.match(']'):
+            self.error_message = f"Syntax Error: Unclosed [ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('f'):
+            
             return False
         return True
         
@@ -2117,8 +2184,10 @@ class RoyalScriptParser:
         # 198	<more_granted>	→	, <granted_content> <more_granted>
         if self.match(','):
             if not self.granted_content():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.more_granted():
+                self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             return True
 
@@ -2127,7 +2196,7 @@ class RoyalScriptParser:
             return True
 
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
 
@@ -2141,6 +2210,7 @@ class RoyalScriptParser:
         if token in {'scroll', 'treasures', 'mirror', 'ocean', 'rose'}:
             # self.advance()  # Consume the data_type token
             return True
+        self.error_message = f"Syntax Error: Expected wish, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
         return False
 
 
@@ -2358,7 +2428,7 @@ class RoyalScriptParser:
         # elif self.logical_exp():
         #     return True
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
     
     def val1(self):
@@ -2568,7 +2638,7 @@ class RoyalScriptParser:
         # elif self.array_element():
         #     return True
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
     
@@ -2577,10 +2647,12 @@ class RoyalScriptParser:
         if not self.conversion_func():
             return False
         if not self.match('('):
+            self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.conversion_value():
             return False
         if not self.match(')'):
+            self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         return True
     
@@ -2600,7 +2672,7 @@ class RoyalScriptParser:
         elif self.match('torose'):
             return True
         else:
-            self.error_message = f"Syntax Error: Invalid conversion function '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         
     def conversion_value(self):
@@ -2628,7 +2700,7 @@ class RoyalScriptParser:
         elif self.func_call():
             return True
         else:
-            self.error_message = f"Syntax Error: Invalid coversion value '{repr(self.current_token())}' at {self.current_line - 1 }, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
     def index(self):
@@ -2637,9 +2709,10 @@ class RoyalScriptParser:
         # 236	<index>	→	[treasures_lit] <column1>
         if self.match('['):
             if not self.match('treasures_lit'):
+                self.error_message = f"Syntax Error: Expected treasures literals, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.match(']'):
-               return False
+                self.error_message = f"Syntax Error: Unclosed [ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             print("index-done")
             if not self.column1():
                 return False
@@ -2651,6 +2724,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
             
 
@@ -2660,8 +2734,10 @@ class RoyalScriptParser:
         # 238	<column1>	→	[treasures_lit]
         if self.match('['):
             if not self.match('treasures_lit'):
+                self.error_message = f"Syntax Error: Expected treasures literals, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.match(']'):
+                self.error_message = f"Syntax Error: Unclosed [ at Line {self.current_line - 1 }, Index {self.current_index + 1}"
                 return False
             return True
 
@@ -2670,18 +2746,23 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         
         
     def input(self):
         # 240	<input>	→	wish (scroll_lit)
         if not self.match('wish'):
+            self.error_message = f"Syntax Error: Expected wish, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not self.match('('):
+            self.error_message = f"Syntax Error: Expected (, but got {repr(self.current_token())} at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         if not self.match('scroll_lit'):
+            self.error_message = f"Syntax Error: Expected scroll literals, but got {repr(self.current_token())} at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not self.match(')'):
+            self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line - 1 }, Index {self.current_index + 1}"
             return False
         return True
     
