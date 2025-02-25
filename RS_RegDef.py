@@ -31,7 +31,7 @@ RegDef = {
         'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
         'Z', '[', '\\', ']', '^', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
         'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
-        'v', 'w', 'x', 'y', 'z', '{', '|', '}', '”'
+        'v', 'w', 'x', 'y', 'z', '{', '|', '}', '”', '°'
     },
     'assignment_op': {
         '%=', '*=', '+=', '-=', '/='
@@ -152,7 +152,7 @@ Delims = {
 
     'arithmetic_operator_delim': {' ', '(', *RegDef['alpha_big'], *RegDef['number']},
 
-    'book_delim': {' ', ')', '+', ',', '~'},
+    'book_delim': {' ', ')', '+', ',', '~', '}'},
 
     'close_curly_bracket_delim': {'}', *RegDef['alphanum'], *RegDef['whitespace'], ',', '~'},
 
@@ -176,7 +176,7 @@ Delims = {
 
     'logical_operator_delim': {' ', '(', *RegDef['alphanum']},
 
-    'mirror-lit_delim': {' ', ')', '~', ','},
+    'mirror-lit_delim': {' ', ')', '~', ',', '}'},
 
     'minus_delim': {' ', '(', *RegDef['alpha_big']},
 
@@ -186,7 +186,7 @@ Delims = {
 
     'number_delim': {' ', ')', ',', '=', ']', '}', '~', '&', '|', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['logical_op'], *RegDef['relational_op'], *RegDef['unary_op']},
 
-    'open_curly_bracket_delim': {'{', *RegDef['alphanum'], *RegDef['whitespace'], '-', '('},
+    'open_curly_bracket_delim': {'{', *RegDef['alphanum'], *RegDef['whitespace'], '-', '(', "'", '"'},
 
     'open_parentheses_delim': {' ', '!', '"', ')', *RegDef['alphanum'], "'"},
 
