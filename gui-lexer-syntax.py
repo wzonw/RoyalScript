@@ -105,14 +105,14 @@ class RoyalScriptLexerGUI(tk.Tk):
     def setup_lexer_tokens_section(self):
         # Lexer label
         self.output_label = tk.Label(
-            self.lr_frame, text="Lexer", fg="white",
+            self.lr_frame, text="Lexeme", fg="white",
             font=("Arial", 14, "bold"), bg="#f99dbc"
         )
         self.output_label.grid(row=0, column=0, padx=5)
 
         # Tokens label
         self.tokens_label = tk.Label(
-            self.lr_frame, text="Tokens", fg="white",
+            self.lr_frame, text="Token", fg="white",
             font=("Arial", 14, "bold"), bg="#f99dbc"
         )
         self.tokens_label.grid(row=0, column=1, padx=5)
@@ -174,7 +174,7 @@ class RoyalScriptLexerGUI(tk.Tk):
     def setup_errors_section(self):
         # Errors label
         self.errors_label = tk.Label(
-            self.bottom_frame, text="Errors", fg="white",
+            self.bottom_frame, text="Output", fg="white",
             font=("Arial", 14, "bold"), bg="#f99dbc"
         )
         self.errors_label.grid(row=0, column=0)
