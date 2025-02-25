@@ -67,6 +67,7 @@ class TokenType:
     CHAR_LITERAL = "rose_lit"
     BOOL_LITERAL = "mirror_lit"
     ZERO = "0"
+    ONE = '1'
 
     # Operators
     # Arithmetic Operators
@@ -3637,7 +3638,8 @@ class RoyalScriptLexer:
 
         if input_str == "0" and self.current_char() in Delims['number_delim']:
             return self.stateZero(input_str)  # Handle zero separately
-
+        if input_str == "1" and self.current_char() in Delims['number_delim']:
+            return self.stateOne(input_str)  # Handle one separately
 
         if self.current_char() in RegDef['number']  and self.current_char() not in ["."]:
             return self.state247(input_str) 
@@ -3894,6 +3896,8 @@ class RoyalScriptLexer:
 
     def stateZero(self, input_str):
         return True, input_str, TokenType.ZERO
+    def stateOne(self, input_str):
+        return True, input_str, TokenType.ONE
 
     def normalize_integer(self, input_str):
         """
