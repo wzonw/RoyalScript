@@ -421,13 +421,17 @@ class RoyalScriptParser:
             return False
         
     def assignment_exp(self):
-        # 33	<assignment_exp>	→	id_lit <assignment_operator> <assignment_operand>
+        # 33	<assignment_exp>	→	id_lit <index> <assignment_operator> <assignment_operand>
 
         print("Entering assignment_exp")  # Debugging line
         if not self.match('identifier'):
             self.error_message = f"Syntax Error: Missing variable name '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         print(f"Passed ID match: '{repr(self.current_token())}'")  # Debugging line
+
+        if not self.index():
+            self.error_message = f"Syntax Error: Invalid array index '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
+            return False
         
         if not self.assignment_operator():
             self.error_message = f"Syntax Error: Invalid assignment operator '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
@@ -483,66 +487,35 @@ class RoyalScriptParser:
     def assignment_operand(self):
         next_token = self.peek_next_token()
         token = self.current_token()
-        start_pos = self.current_index
         #39	<assignment_operand>	→	id_lit
         if token == 'identifier':
             next_token = self.peek_next_token()
-            if next_token == '(':  # If it's a function call
-                while self.current_token() and self.current_token() != ')':
-                    self.advance()
-                # self.advance()
-                token = self.current_token()
-                print(f" Token: {token}")
-                next_paren_token = self.peek_next_token()
-                if next_paren_token in ['+', '-', '/', '*', '%']:
-                    self.current_index = start_pos
-                    if not self.arithmetic_exp():
-                        return False
-                    return True
-                elif not self.func_call():  # Parse the function call
-                    return False
-                print(f" Token: {token}")
-                return True  # Successfully parsed function call as operand
-            # 42	<assignment_operand>	→	<array_element>
+            print(f"Next token after identifier: {next_token}")
+            # 53	<logical_operand>	→	<func_call>
+            if next_token == '(':
+                start_pos = self.current_index
+                if self.func_call():  # Parse the function call
+                    print("Function call detected and parsed.")
+                    next_token = self.current_token()
+                    if next_token in ['+', '-', '*', '/', '*']:
+                        self.current_index = start_pos
+                        return self.arithmetic_exp()
+                    elif next_token == '~':
+                        return True
+            #54	<logical_operand>	→	<array_element>
             elif next_token == '[':
-                brackets = 1  # Track nested brackets
+                start_pos = self.current_index
                 self.advance()
-                token = self.current_token()
-                print(f" Token: {token}")
-                while self.current_token() == '[' or self.current_token() == ']' or self.current_token() == 'treasures_lit' or self.current_token() == '0' or self.current_token() == '1':
-                    self.advance()
-                    # If we reach the end of tokens, prevent infinite loop
-                    if self.current_token() is None:
-                        print("Error: Unexpected end of tokens while parsing array indexing")
-                        return False
-                    
-                    if self.current_token in ['[', ']']:
-                        brackets += 1
-
-                if brackets > 4:
-                    print("Error: Only 2d array is allowed")
-                    return False
-
-                
-                token = self.current_token()
-                print(f"Token after ]: {token}")  # Debugging line
-
-                # Check for arithmetic operators after the array indexing
-                next_paren_token = self.current_token()
-                print(f"Next token after array indexing: {next_paren_token}")  # Debugging line
-
-                if next_paren_token in ['+', '-', '/', '*', '%']:
-                    self.current_index = start_pos
-                    if not self.arithmetic_exp():
-                        self.advance()
-                        return False
-                    return True
-                
-                elif not self.index():  # Parse the function call
-                    return False
-                # print(f" Token: {token}")
+                if self.index():
+                    print("Index detected and parsed.")
+                    next_token = self.current_token()
+                    if next_token in ['+', '-', '*', '/', '*']:
+                        self.current_index = start_pos
+                        return self.arithmetic_exp()
+                    elif next_token == '~':
+                        return True
             else:
-                return self.match(token)
+                return self.match('identifier')
         # 40	<assignment_operand>	→	treasures_lit
         elif token == 'treasures_lit' or token == '1' or token == '0':
             if next_token in ['+', '-', '/', '*', '%']:
@@ -863,15 +836,18 @@ class RoyalScriptParser:
         if not self.arithmetic_operand():
             self.error_message = f"Syntax Error: Invalid arithmetic operand '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
-        print("Enter Arith_op success")
+        token = self.current_token()
+        print(f"Enter Arith_operand success {token} ")
         if not self.arithmetic_operator():
             self.error_message = f"Syntax Error: Invalid arithmetic operator '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
-        
+        token = self.current_token()
+        print(f"Enter Arith_operator success {token}")
         if not self.arithmetic_operand():
             self.error_message = f"Syntax Error: Invalid arithmetic operand '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
-        
+        token = self.current_token()
+        print(f"Enter Arith_operand success {token}")
         if not self.more_arith():
             return False
         
@@ -965,6 +941,12 @@ class RoyalScriptParser:
 
         elif self.match('!='):
             return True
+        
+        elif self.match('&&'):
+            return True
+
+        elif self.match('||'):
+            return True
 
         else:
             return False
@@ -974,10 +956,13 @@ class RoyalScriptParser:
         token = self.current_token()
 
         # 88	<more_arith>	→	<arithmetic_operator> <arithmetic_operand> <more_arith>
+        print(f"more_arith {token}")
+
         if self.arithmetic_operator():
             if not self.arithmetic_operand():
                 self.error_message = f"Syntax Error: Expected operand but got '{repr(self.current_token())}' at Line {self.current_line + 1}"
                 return False
+            print("more_arith_operand")
             return self.more_arith()  # Continue parsing if there's more arithmetic
 
         # 89	<more_arith>	→	λ
@@ -1334,12 +1319,32 @@ class RoyalScriptParser:
                     return False
                 return self.body()
             # 129	<body>	→	<func_call>~ <body>
-            elif next_token == '(':
-                if not self.func_call():
+            elif next_token == '(':  # Function call
+                if not self.func_call():  
                     return False
                 if not self.match('~'):
                     return False
                 return self.body()
+            elif next_token == '[':
+                start_pos = self.current_index 
+                self.advance()
+                if self.index():  # Parse the index expression
+                    print("passed")
+                    next_token = self.current_token()
+                    if next_token in ['+=', '-=', '*=', '/=', '%=']:
+                        self.current_index = start_pos  # Reset to identifier
+                        if not self.assignment_exp():
+                            return False
+                        if not self.match('~'):
+                            return False
+                        return self.body()
+                    elif next_token == '=':
+                        self.current_index = start_pos  # Reset to identifier
+                        if not self.var_reassign():
+                            return False
+                        return self.body()
+                    return False
+                return False
         # 127	<body>	→	<var_dec> <body>
         elif token in ['dynasty', 'scroll', 'treasures', 'mirror', 'rose', 'ocean']:
             if not self.var_dec():
@@ -1539,7 +1544,27 @@ class RoyalScriptParser:
                 if not self.match('~'):
                     return False
                 return self.loop_body()
-
+            elif next_token == '[':
+                start_pos = self.current_index 
+                self.advance()
+                if self.index():  # Parse the index expression
+                    print("passed")
+                    next_token = self.current_token()
+                    if next_token in ['+=', '-=', '*=', '/=', '%=']:
+                        self.current_index = start_pos  # Reset to identifier
+                        if not self.assignment_exp():
+                            return False
+                        if not self.match('~'):
+                            return False
+                        return self.loop_body()
+                    elif next_token == '=':
+                        self.current_index = start_pos  # Reset to identifier
+                        if not self.var_reassign():
+                            return False
+                        return self.loop_body()
+                    return False
+                return False
+            
         elif token in ['dynasty', 'scroll', 'treasures', 'mirror', 'rose', 'ocean']:
             if not self.var_dec():
                 return False
@@ -1723,6 +1748,9 @@ class RoyalScriptParser:
                     elif next_after_func in ['&&', '||']:
                         self.current_index = start_pos
                         return self.logical_exp()
+                    elif next_token in ['+', '-', '*', '/', '%']:
+                        self.current_index = start_pos
+                        return self.arithmetic_exp()
                     return True  
                 return False
             elif next_token == '[':
@@ -1738,10 +1766,15 @@ class RoyalScriptParser:
                     elif next_after_func in ['&&', '||']:
                         self.current_index = start_pos
                         return self.logical_exp()
+                    elif next_token in ['+', '-', '*', '/', '%']:
+                        self.current_index = start_pos
+                        return self.arithmetic_exp()
                     return True  
                 return False
             elif next_token in ['>', '<', '>=', '<=', '==', '!=']:
                 return self.relational_exp()
+            elif next_token in ['+', '-', '*', '/', '%']:
+                return self.arithmetic_exp()
             elif next_token in ['&&', '||']:
                 return self.logical_exp()
             else:
@@ -2419,6 +2452,9 @@ class RoyalScriptParser:
                     elif next_after_func in ['>', '<', '>=', '<=', '==', '!=']:
                         self.current_index = start_pos
                         return self.relational_exp()
+                    elif next_after_func in ['+=', '-=', '/=', '%=', '*=']:
+                        self.current_index = start_pos
+                        return self.assignment_exp()
                     return True  
                 return False
             elif next_token == '[':
@@ -2432,6 +2468,9 @@ class RoyalScriptParser:
                     elif next_after_func in ['>', '<', '>=', '<=', '==', '!=']:
                         self.current_index = start_pos
                         return self.relational_exp()
+                    elif next_after_func in ['+=', '-=', '/=', '%=', '*=']:
+                        self.current_index = start_pos
+                        return self.assignment_exp()
                     return True  
                 return False
             elif next_token in ['+', '-', '*', '/', '%']:
@@ -2691,7 +2730,7 @@ class RoyalScriptParser:
             return True
 
         # 237	<index>	→	λ
-        elif token in ['&&', '||' , ',' , '~', ')', '+', '-', '/', '*', '%', ')', '<', '>', '<=', '>=', '==', '!=', '{']:
+        elif token in ['&&', '||' , ',' , '~', ')', '+', '-', '/', '*', '%', ')', '<', '>', '<=', '>=', '==', '!=', '{', '+=', '-=', '*=', '/=', '%=']:
             return True
 
         else:
@@ -2710,7 +2749,7 @@ class RoyalScriptParser:
             return True
 
         # 239	<column1>	→	λ
-        elif token in ['&&', '||' , ',' , '~', ')', '+', '-', '/', '*', '%', ')', '<', '>', '<=', '>=', '==', '!=', '{' ]:
+        elif token in ['&&', '||' , ',' , '~', ')', '+', '-', '/', '*', '%', ')', '<', '>', '<=', '>=', '==', '!=', '{', '+=', '-=', '*=', '/=', '%=' ]:
             return True
 
         else:

@@ -85,7 +85,7 @@ class TokenType:
     PLUS_EQUAL = "+="
     MINUS_EQUAL = "-="
     MULTI_EQUAL = "*="
-    DIV_EQUAL = "*/"
+    DIV_EQUAL = "/="
     MODULO_EQUAL = "%="
     # Unary Operators
     INCREMENT = "++"
