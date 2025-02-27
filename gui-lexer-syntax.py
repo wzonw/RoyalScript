@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import scrolledtext
+from tkinter import PhotoImage, scrolledtext
 from PIL import Image, ImageTk 
 from lexer2 import RoyalScriptLexer
 from lexer2 import Token
@@ -13,12 +13,14 @@ class RoyalScriptLexerGUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.tokens = [] 
+
         def intro_music():
             mixer.music.load("fairytale_intro.mp3")
             mixer.music.play(-1) 
         intro_music()
             
-        self.title("RoyalScript Lexer")
+        self.title("RoyalScript")
+        self.iconphoto(False, PhotoImage(file="crown_logo2.png")) 
         self.geometry("1050x700")
         self.resizable(False, False)
 
