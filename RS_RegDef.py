@@ -188,7 +188,7 @@ Delims = {
 
     'open_curly_bracket_delim': {'{', *RegDef['alphanum'], *RegDef['whitespace'], '-', '(', "'", '"'},
 
-    'open_parentheses_delim': {' ', '!', '"', ')', *RegDef['alphanum'], "'"},
+    'open_parentheses_delim': {' ', '!', '"', ')', *RegDef['alphanum'], "'", "("},
 
     'open_square_bracket_delim': {' ', '‘', '”', *RegDef['alpha_big'], *RegDef['number']},
 

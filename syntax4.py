@@ -633,31 +633,68 @@ class RoyalScriptParser:
         # 50	<logical_operand>	→	<treasures_mirror> for tokenize pa yung 1
         elif self.match('treasures_mirror'):
             return True
+        
+        elif self.match('!'):
+            if not self.logical_operand():
+                return False
+            return True
+        
         # 49	<logical_operand>	→	mirror_lit
         elif self.match('mirror_lit'):
             return True
 
         elif self.treasures_mirror():
             return True
-        # 51	<logical_operand>	→	<relational_exp>
+        # 52	<logical_operand>	→	(<relational_exp>)
+        elif self.current_token() == '(':
+            print("parenthesis detected")
+            saved_position = self.current_index
+            self.advance()  # Move past '('
+            
+            # Try parsing a relational expression inside parentheses
+            if self.relational_operand():
+                print("rel_operand detected")
+                
+                if self.match('<') or self.match('>') or self.match('<=') or self.match('>=') or self.match('==') or self.match('!='):
+                    print("rel_operator detected")
+                    
+                    if self.relational_operand() and self.relational_more() and self.match(')'):
+                        print("close_paren detected")
+                        return True  # Successfully parsed relational expression
+            
+            # If relational expression failed, restore position and try logical expression
+            self.current_index = saved_position
+            self.advance()  # Skip the opening parenthesis again
+            
+            if self.logical_operand():
+                print(f"passed logical operand: {self.current_token()}")
+                
+                if self.logical_operator():
+                    print(f"passed logical operator: {self.current_token()}")
+                    
+                    if self.logical_operand() and self.more_log() and self.match(')'):
+                        print("close_paren detected")
+                        return True  # Successfully parsed logical expression
+            
+            # If logical expression failed, restore position and try NOT expression
+            self.current_index = saved_position
+            self.advance()  # Skip the opening parenthesis again
+            
+            if self.logical_operator1():
+                print("Logical NOT operator detected")  # Example: (!A)
+                
+                if self.logical_operand() and self.more_log() and self.match(')'):
+                    print("close_paren detected")
+                    return True  # Successfully parsed NOT expression
+            
+            # If all parsing strategies failed for parenthesized expression, restore position
+            self.current_index = saved_position
+            return False
+
+         # 51	<logical_operand>	→	<relational_exp>
         elif self.relational_exp():
             return True
-        # 52	<logical_operand>	→	(<relational_exp>)
-        elif self.match('('):  
-            if not self.relational_operand():
-                self.error_message = f"Syntax Error: Invalid relational operand '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
-                return False
-            if not (self.match('<') or self.match('>') or self.match('<=') or self.match('>=') or self.match('==') or self.match('!=')):
-                self.error_message = f"Syntax Error: Invalid relational operator '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
-                return False
-            if not self.relational_operand():
-                self.error_message = f"Syntax Error: Invalid relational operand '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
-                return False
-            if not self.relational_more():
-                return False
-            if not self.match(')'):
-                return False
-            return True
+
         # for checking if pwede tanggalin
         elif self.func_call():  # Function calls as logical operands
             return True
@@ -1006,7 +1043,7 @@ class RoyalScriptParser:
                     return False
                 return True
             else:
-                return self.match('identifier')
+                return self.match(token)
         # 92	<relational_operand>	→	scroll_lit
         elif self.match('scroll_lit'):
             return True
@@ -2376,7 +2413,7 @@ class RoyalScriptParser:
                     print("Error invalid operand")
                     return False
                 elif next_after_paren in ['&&', '||']:
-                    if operator_in_paren == 'relational':
+                    if operator_in_paren == 'relational' or operator_in_paren == 'logical':
                         return self.logical_exp()
                     print("Error invalid operand")
                     return False
