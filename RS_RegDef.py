@@ -31,7 +31,7 @@ RegDef = {
         'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
         'Z', '[', '\\', ']', '^', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
         'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
-        'v', 'w', 'x', 'y', 'z', '{', '|', '}', '”', '°'
+        'v', 'w', 'x', 'y', 'z', '{', '|', '}', '"', '°'
     },
     'assignment_op': {
         '%=', '*=', '+=', '-=', '/='
@@ -150,59 +150,59 @@ Delims = {
     # 'multi-comment_delim' : {*RegDef['ascii'], *RegDef['whitespace']}
 
 
-    'arithmetic_operator_delim': {' ', '(', *RegDef['alpha_big'], *RegDef['number']},
+    'arithmetic_operator_delim': {' ', '(', *RegDef['alpha_big'], *RegDef['number'], '?'},
 
-    'book_delim': {' ', ')', '+', ',', '~', '}'},
+    'book_delim': {' ', ')', '+', ',', '~', '}', '?'},
 
-    'close_curly_bracket_delim': {'}', *RegDef['alphanum'], *RegDef['whitespace'], ',', '~'},
+    'close_curly_bracket_delim': {'}', *RegDef['alphanum'], *RegDef['whitespace'], ',', '~', '?'},
 
-    'close_parentheses_delim': {' ', '\n', ')', '{', '~', *RegDef['arithmetic_op'], *RegDef['logical_op'], *RegDef['relational_op'], '&', '|', '='},
+    'close_parentheses_delim': {' ', '\n', ')', '{', '~', *RegDef['arithmetic_op'], *RegDef['logical_op'], *RegDef['relational_op'], '&', '|', '=', '?'},
 
-    'close_square_bracket_delim': {' ', ',', '=', '[', '~', ')', *RegDef['arithmetic_op'], '&', '|', *RegDef['relational_op']},
+    'close_square_bracket_delim': {' ', ',', '=', '[', '~', ')', *RegDef['arithmetic_op'], '&', '|', *RegDef['relational_op'], '?'},
 
-    'comma_delim': {'-', '‘', '“', *RegDef['alphanum'], *RegDef['whitespace'], '{'},
+    'comma_delim': {'-', '‘', '“', *RegDef['alphanum'], *RegDef['whitespace'], '{', '?'},
 
-    'escape_sequence_delim': {' ', '"', '"', *RegDef['ascii'], *RegDef['escape_seq']},
+    'escape_sequence_delim': {' ', '"', '"', *RegDef['ascii'], *RegDef['escape_seq'], '?'},
 
-    'equal_delim': {' ', '(', '[', '‘', '“', *RegDef['alphanum'], '{'},
+    'equal_delim': {' ', '(', '[', '‘', '“', *RegDef['alphanum'], '{', '?'},
 
-    'gate_delim': {' ', '~'},
+    'gate_delim': {' ', '~', '?'},
 
-    'phantom_delim': {' ', '~', ')'},
+    'phantom_delim': {' ', '~', ')', '?'},
 
-    'genie_delim': {' ', '('},
+    'genie_delim': {' ', '(', '?'},
 
-    'id_delim': {' ', '(', ')', ',', '[', ']', '=', '~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op'], *RegDef['unary_op'], '&', '|', '}', '!'},
+    'id_delim': {' ', '(', ')', ',', '[', ']', '=', '~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op'], *RegDef['unary_op'], '&', '|', '}', '!', '?'},
 
-    'logical_operator_delim': {' ', '(', *RegDef['alphanum']},
+    'logical_operator_delim': {' ', '(', *RegDef['alphanum'], '?'},
 
-    'mirror-lit_delim': {' ', ')', '~', ',', '}'},
+    'mirror-lit_delim': {' ', ')', '~', ',', '}', '?'},
 
-    'minus_delim': {' ', '(', *RegDef['alpha_big']},
+    'minus_delim': {' ', '(', *RegDef['alpha_big'], '?'},
 
     'multi-comment_delim': {*RegDef['ascii'], *RegDef['whitespace']},
 
-    'not_logical_delim': {' ', '"', "'", '(', *RegDef['alphanum']},
+    'not_logical_delim': {' ', '"', "'", '(', *RegDef['alphanum'], '?'},
 
-    'number_delim': {' ', ')', ',', '=', ']', '}', '~', '&', '|', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['logical_op'], *RegDef['relational_op'], *RegDef['unary_op']},
+    'number_delim': {' ', ')', ',', '=', ']', '}', '~', '&', '|', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['logical_op'], *RegDef['relational_op'], *RegDef['unary_op'], '?'},
 
-    'open_curly_bracket_delim': {'{', *RegDef['alphanum'], *RegDef['whitespace'], '-', '(', "'", '"'},
+    'open_curly_bracket_delim': {'{', *RegDef['alphanum'], *RegDef['whitespace'], '-', '(', "'", '"', '?'},
 
-    'open_parentheses_delim': {' ', '!', '"', ')', *RegDef['alphanum'], "'", "("},
+    'open_parentheses_delim': {' ', '!', '"', ')', *RegDef['alphanum'], "'", "(", '?'},
 
-    'open_square_bracket_delim': {' ', '‘', '”', *RegDef['alpha_big'], *RegDef['number']},
+    'open_square_bracket_delim': {' ', '‘', '”', *RegDef['alpha_big'], *RegDef['number'], '?'},
 
-    'other_assignment_operator_delim': {' ', '(', *RegDef['alpha_big'], *RegDef['number'], '-'},
+    'other_assignment_operator_delim': {' ', '(', *RegDef['alpha_big'], *RegDef['number'], '-', '?'},
 
-    'plus_delim': {' ', '"', "'", '(', *RegDef['alphanum']},
+    'plus_delim': {' ', '"', "'", '(', *RegDef['alphanum'], '?'},
 
-    'relational_operator_delim': {' ', '(', '‘', '“', *RegDef['alphanum'], '"'},
+    'relational_operator_delim': {' ', '(', '‘', '“', *RegDef['alphanum'], '"', '?'},
 
-    'terminator_delim': {' ', '?', '}', *RegDef['alpha'], *RegDef['whitespace']},
+    'terminator_delim': {' ', '?', '}', *RegDef['alpha'], *RegDef['whitespace'], '?'},
 
-    'unary_operator_delim': {' ', ')', '~'},
+    'unary_operator_delim': {' ', ')', '~', '?'},
 
-    'witch_delim': {' ', '{'},
+    'witch_delim': {' ', '{', '?'},
 
 }
 

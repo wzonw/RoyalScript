@@ -1106,6 +1106,9 @@ class RoyalScriptParser:
         elif self.match('!='):
             return True
         
+        # if maging relational operand yung arithmetic 
+        
+        
         #if naging logical operand yung relational 
         elif self.match('&&'):
             return True
@@ -1816,6 +1819,19 @@ class RoyalScriptParser:
                 return self.logical_exp()
             else:
                 return self.match(token)
+        # <condition>	→	<logical_operator1> (<condition>)
+        elif self.match('!'):
+            print(f"Current Token: {self.current_token()}, Next Token: {self.peek_next_token()}")
+            if not self.match('('):
+                return False
+            if not self.condition():
+                return False
+            if not self.match(')'):
+                return False
+            return True
+        elif self.func_call():
+            return True
+        
         # 165	<condition>	→	<treasures_mirror>
         elif self.match('mirror_lit'):
             return True
@@ -1828,18 +1844,6 @@ class RoyalScriptParser:
         elif self.logical_exp():
             return True
         elif self.treasures_mirror():
-            return True
-        # <condition>	→	<logical_operator1> (<condition>)
-        elif self.match('!'):
-            print(f"Current Token: {self.current_token()}, Next Token: {self.peek_next_token()}")
-            if not self.match('('):
-                return False
-            if not self.condition():
-                return False
-            if not self.match(')'):
-                return False
-            return True
-        elif self.func_call():
             return True
         else:
             self.error_message = f"Syntax Error: Invalid condition '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
