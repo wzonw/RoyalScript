@@ -55,6 +55,9 @@ class TokenType:
     TOSCROLL = "toscroll"
     TOOCEAN = "toocean"
     TOTREASURES = "totreasures"
+    TOMIRROR = "tomirror"
+    LENGTHOF = "lengthof"
+    SETPRECISION = 'setprecission'
     RETURN = "return"
 
 
@@ -119,7 +122,7 @@ class TokenType:
     EOF = "EOF"
 
 
-allowed_symbols = ['b', 'c', 'd', 'f', 'g', 'm', 'o', 'p', 'r', 's', 't', 'w', '=', 'M', '+', '-', '*', '/', '%', '!', '&', '|', '<', '>', '(', ')', '{', '}', '[', ']', '~', ',', '\\', '"', "'", '?', '.']
+allowed_symbols = ['b', 'c', 'd', 'f', 'g', 'l', 'm', 'o', 'p', 'r', 's', 't', 'w', '=', 'M', '+', '-', '*', '/', '%', '!', '&', '|', '<', '>', '(', ')', '{', '}', '[', ']', '~', ',', '\\', '"', "'", '?', '.']
 
 class RoyalScriptLexer:
     
@@ -236,10 +239,21 @@ class RoyalScriptLexer:
                         self.advance()
                     continue
                 
-                
-            if char == 'm':
+            if char == 'l':
                 pos_start = self.position
                 valid, input_str, tokenType= self.state76()
+
+                if valid:
+                    # Append the recognized token
+                    self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start))
+                else:
+                    while self.current_char() is not None and self.current_char() != ' ':
+                        self.advance()
+                    continue
+
+            if char == 'm':
+                pos_start = self.position
+                valid, input_str, tokenType= self.state85()
 
                 if valid:
                     # Append the recognized token
@@ -252,7 +266,7 @@ class RoyalScriptLexer:
 
             if char == 'o':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state83()
+                valid, input_str, tokenType= self.state92()
 
                 if valid:
                     # Append the recognized token
@@ -265,7 +279,7 @@ class RoyalScriptLexer:
                 
             if char == 'p':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state89()
+                valid, input_str, tokenType= self.state98()
 
                 if valid:
                     # Append the recognized token
@@ -277,7 +291,7 @@ class RoyalScriptLexer:
                 
             if char == 'r':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state97()
+                valid, input_str, tokenType= self.state106()
 
                 if valid:
                     # Append the recognized token
@@ -290,7 +304,7 @@ class RoyalScriptLexer:
 
             if char == 's':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state112()
+                valid, input_str, tokenType= self.state121()
 
                 if valid:
                     # Append the recognized token
@@ -303,7 +317,7 @@ class RoyalScriptLexer:
 
             if char == 't':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state124()
+                valid, input_str, tokenType= self.state133()
 
                 if valid:
                     # Append the recognized token
@@ -316,7 +330,7 @@ class RoyalScriptLexer:
 
             if char == 'w':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state175()
+                valid, input_str, tokenType= self.state191()
 
                 if valid:
                     # Append the recognized token
@@ -330,7 +344,7 @@ class RoyalScriptLexer:
             #RESERVED SYMBOL
             if char == '=':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state180()
+                valid, input_str, tokenType= self.state196()
 
                 if valid:
                     # Append the recognized token
@@ -342,7 +356,7 @@ class RoyalScriptLexer:
             
             if char == '+':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state184()
+                valid, input_str, tokenType= self.state200()
 
                 if valid:
                     # Append the recognized token
@@ -355,7 +369,7 @@ class RoyalScriptLexer:
 
             if char == '-':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state190()
+                valid, input_str, tokenType= self.state206()
 
                 if valid:
                     # Append the recognized token
@@ -368,7 +382,7 @@ class RoyalScriptLexer:
                 
             if char == '*':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state196()
+                valid, input_str, tokenType= self.state212()
 
                 if valid:
                     # Append the recognized token
@@ -380,7 +394,7 @@ class RoyalScriptLexer:
                 
             if char == '/':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state200()
+                valid, input_str, tokenType= self.state216()
 
                 if valid:
                     # Append the recognized token
@@ -393,7 +407,7 @@ class RoyalScriptLexer:
                 
             if char == '%':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state204()
+                valid, input_str, tokenType= self.state220()
 
                 if valid:
                     # Append the recognized token
@@ -406,7 +420,7 @@ class RoyalScriptLexer:
 
             if char == '!':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state208()
+                valid, input_str, tokenType= self.state224()
 
                 if valid:
                     # Append the recognized token
@@ -419,7 +433,7 @@ class RoyalScriptLexer:
                 
             if char == '&':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state212()
+                valid, input_str, tokenType= self.state228()
 
                 if valid:
                     # Append the recognized token
@@ -432,7 +446,7 @@ class RoyalScriptLexer:
                 
             if char == '|':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state215()
+                valid, input_str, tokenType= self.state231()
 
                 if valid:
                     # Append the recognized token
@@ -445,7 +459,7 @@ class RoyalScriptLexer:
 
             if char == '>':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state218()
+                valid, input_str, tokenType= self.state234()
 
                 if valid:
                     # Append the recognized token
@@ -458,7 +472,7 @@ class RoyalScriptLexer:
             
             if char == '<':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state222()
+                valid, input_str, tokenType= self.state238()
 
                 if valid:
                     # Append the recognized token
@@ -471,7 +485,7 @@ class RoyalScriptLexer:
 
             if char == '(':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state226()
+                valid, input_str, tokenType= self.state242()
 
                 if valid:
                     # Append the recognized token
@@ -483,7 +497,7 @@ class RoyalScriptLexer:
                 
             if char == ')':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state228()
+                valid, input_str, tokenType= self.state244()
 
                 if valid:
                     # Append the recognized token
@@ -496,7 +510,7 @@ class RoyalScriptLexer:
             
             if char == '{':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state230()
+                valid, input_str, tokenType= self.state246()
 
                 if valid:
                     # Append the recognized token
@@ -509,7 +523,7 @@ class RoyalScriptLexer:
                 
             if char == '}':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state232()
+                valid, input_str, tokenType= self.state248()
 
                 if valid:
                     # Append the recognized token
@@ -521,7 +535,7 @@ class RoyalScriptLexer:
                 
             if char == '[':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state234()
+                valid, input_str, tokenType= self.state250()
 
                 if valid:
                     # Append the recognized token
@@ -533,7 +547,7 @@ class RoyalScriptLexer:
                 
             if char == ']':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state236()
+                valid, input_str, tokenType= self.state252()
 
                 if valid:
                     # Append the recognized token
@@ -546,7 +560,7 @@ class RoyalScriptLexer:
                 
             if char == '~':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state238()
+                valid, input_str, tokenType= self.state254()
 
                 if valid:
                     # Append the recognized token
@@ -559,7 +573,7 @@ class RoyalScriptLexer:
             
             if char == ',':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state240()
+                valid, input_str, tokenType= self.state256()
 
                 if valid:
                     # Append the recognized token
@@ -572,7 +586,7 @@ class RoyalScriptLexer:
             #IDENTIFIER    
             if char in RegDef['alpha_big']:
                 pos_start = self.position
-                valid, input_str, tokenType = self.state243("")
+                valid, input_str, tokenType = self.state259("")
 
                 if valid:
                     # Append the recognized token
@@ -586,7 +600,7 @@ class RoyalScriptLexer:
             #COMMENTS
             if char == '?':
                 pos_start = self.position
-                valid, input_str, tokenType = self.state262("")
+                valid, input_str, tokenType = self.state282("")
 
                 if valid:
                     # Append the recognized token
@@ -600,7 +614,7 @@ class RoyalScriptLexer:
             #SCROLL LITERALS 
             if char == '"':
                 pos_start = self.position
-                valid, input_str, tokenType = self.state255("")
+                valid, input_str, tokenType = self.state275("")
 
                 if valid:
                     # Append the recognized token
@@ -615,7 +629,7 @@ class RoyalScriptLexer:
             #ROSE LITERALS    
             if char == "'":
                 pos_start = self.position
-                valid, input_str, tokenType = self.state258("")
+                valid, input_str, tokenType = self.state278("")
 
                 if valid:
                     # Append the recognized token
@@ -629,7 +643,7 @@ class RoyalScriptLexer:
             #TREASURES & FLOAT LITERALS
             if char in RegDef ['number']:
                 pos_start = self.position
-                valid, input_str, tokenType = self.state247("")
+                valid, input_str, tokenType = self.state263("")
 
                 if valid:
                     # Append the recognized token
@@ -644,7 +658,7 @@ class RoyalScriptLexer:
             #FLOAT LITERALS STARTING WITH .
             if char == ".":
                 pos_start = self.position
-                valid, input_str, tokenType = self.state252("")
+                valid, input_str, tokenType = self.state268("")
 
                 if valid:
                     # Append the recognized token
@@ -1628,14 +1642,14 @@ class RoyalScriptLexer:
         return True, input_str, TokenType.GRANTED
     
     #################################################################
-
+    
     def state76(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "i":
+            case "e":
                 return self.state77(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -1648,7 +1662,7 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "r":
+            case "n":
                 return self.state78(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -1661,7 +1675,7 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "r":
+            case "g":
                 return self.state79(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -1675,7 +1689,7 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "o":
+            case "t":
                 return self.state80(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -1688,70 +1702,67 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "r":
+            case "h":
                 return self.state81(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
-			
 
     def state81(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [' ']:
-            return self.state82(input_str)
+        match self.current_char():
+            case "o":
+                return self.state82(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None			
+
+    def state82(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "f":
+                return self.state83(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+
+    def state83(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in ['(']:
+            return self.state84(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
 
-    #################### FINAL STATE FOR MIRROR ####################
-
-    def state82(self, input_str):
-        return True, input_str, TokenType.MIRROR
-    
-    ################################################################
-    
-    def state83(self):
-        input_str = ""
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "c":
-                return self.state84(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
+    #################### FINAL STATE FOR LENGTHOF ####################
 
     def state84(self, input_str):
-        input_str += self.current_char()
-        self.advance()
+        return True, input_str, TokenType.LENGTHOF
+    
+    ################################################################
 
-        match self.current_char():
-            case "e":
-                return self.state85(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-                
-    def state85(self, input_str):
-        input_str += self.current_char()
-        self.advance()
+    def state85(self):
+            input_str = ""
+            input_str += self.current_char()
+            self.advance()
 
-        match self.current_char():
-            case "a":
-                return self.state86(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
+            match self.current_char():
+                case "i":
+                    return self.state86(input_str)
+                case _:
+                    error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                    self.errors.append(error_message)
+                    return False, input_str, None
 			
 
     def state86(self, input_str):
@@ -1759,105 +1770,104 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "n":
+            case "r":
                 return self.state87(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-
+                
     def state87(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [' ']:
-            return self.state88(input_str)
-        else:
-            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
-            self.errors.append(error_message)
-            return False, input_str, None
-        
-    #################### FINAL STATE FOR OCEAN ####################
+        match self.current_char():
+            case "r":
+                return self.state88(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+
 
     def state88(self, input_str):
-        return True, input_str, TokenType.OCEAN
-    
-    ###############################################################
-    
-    def state89(self):
-        input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "h":
+            case "o":
+                return self.state89(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+
+    def state89(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
                 return self.state90(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
-			
-
+    
     def state90(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "a":
-                return self.state91(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-                
+        if self.current_char() in [' ']:
+            return self.state91(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+
+    #################### FINAL STATE FOR MIRROR ####################
+
     def state91(self, input_str):
+        return True, input_str, TokenType.MIRROR
+    
+    ################################################################
+    
+    def state92(self):
+        input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "n":
-                return self.state92(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-
-
-    def state92(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "t":
+            case "c":
                 return self.state93(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-            
+
     def state93(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "o":
+            case "e":
                 return self.state94(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-    
+                
     def state94(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "m":
+            case "a":
                 return self.state95(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -1869,66 +1879,60 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['phantom_delim']:
-            return self.state96(input_str)
+        match self.current_char():
+            case "n":
+                return self.state96(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+
+    def state96(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ']:
+            return self.state97(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
         
-    #################### FINAL STATE FOR PHANTOM ####################
+    #################### FINAL STATE FOR OCEAN ####################
+
+    def state97(self, input_str):
+        return True, input_str, TokenType.OCEAN
     
-    def state96(self, input_str):
-        return True, input_str, TokenType.PHANTOM
+    ###############################################################
     
-    #################################################################
-    
-    
-    def state97(self):
+    def state98(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "e":
-                return self.state98(input_str)
-            case "o":
-                return self.state108(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-
-    def state98(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "i":
+            case "h":
                 return self.state99(input_str)
-            case "t":
-                return self.state103(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-                
+
     def state99(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "g":
+            case "a":
                 return self.state100(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-
-
+                
     def state100(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -1942,30 +1946,39 @@ class RoyalScriptLexer:
                 return False, input_str, None
 			
 
+
     def state101(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['gate_delim']:
-            return self.state102(input_str)
-        else:
-            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
-            self.errors.append(error_message)
-            return False, input_str, None
-        
-    #################### FINAL STATE FOR REIGN ####################
-
+        match self.current_char():
+            case "t":
+                return self.state102(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+            
     def state102(self, input_str):
-        return True, input_str, TokenType.REIGN
-    
-    ###############################################################
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "o":
+                return self.state103(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
     
     def state103(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "u":
+            case "m":
                 return self.state104(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -1977,52 +1990,58 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "r":
-                return self.state105(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-
-    def state105(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "n":
-                return self.state106(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-
-    def state106(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in [' ']:
-            return self.state107(input_str)
+        if self.current_char() in Delims ['phantom_delim']:
+            return self.state105(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
         
-    #################### FINAL STATE FOR RETURN ####################
+    #################### FINAL STATE FOR PHANTOM ####################
+    
+    def state105(self, input_str):
+        return True, input_str, TokenType.PHANTOM
+    
+    #################################################################
+    
+    
+    def state106(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state107(input_str)
+            case "o":
+                return self.state117(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
 
     def state107(self, input_str):
-        return True, input_str, TokenType.RETURN    
-    
-    ################################################################
-    
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "i":
+                return self.state108(input_str)
+            case "t":
+                return self.state112(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+                
     def state108(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "s":
+            case "g":
                 return self.state109(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -2036,48 +2055,44 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "e":
+            case "n":
                 return self.state110(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-            
 
     def state110(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [' ']:
+        if self.current_char() in Delims ['gate_delim']:
             return self.state111(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
         
-    #################### FINAL STATE FOR ROSE ####################
+    #################### FINAL STATE FOR REIGN ####################
 
     def state111(self, input_str):
-        return True, input_str, TokenType.ROSE    
+        return True, input_str, TokenType.REIGN
     
-    ##############################################################
-
-    def state112(self):
-        input_str = ""
+    ###############################################################
+    
+    def state112(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "c":
+            case "u":
                 return self.state113(input_str)
-            case "p":
-                return self.state119(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
-			   
+			
 
     def state113(self, input_str):
         input_str += self.current_char()
@@ -2091,143 +2106,139 @@ class RoyalScriptLexer:
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-            
+
     def state114(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "o":
+            case "n":
                 return self.state115(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-            
+
     def state115(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "l":
-                return self.state116(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-    
-    def state116(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "l":
-                return self.state117(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-            
-
-    def state117(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
         if self.current_char() in [' ']:
-            return self.state118(input_str)
+            return self.state116(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
         
-    #################### FINAL STATE FOR SCROLL ####################
+    #################### FINAL STATE FOR RETURN ####################
 
-    def state118(self, input_str):
-        return True, input_str, TokenType.SCROLL  
-
+    def state116(self, input_str):
+        return True, input_str, TokenType.RETURN    
+    
     ################################################################
     
-    
-    def state119(self, input_str):
+    def state117(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
+                return self.state118(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+
+
+    def state118(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "e":
-                return self.state120(input_str)
+                return self.state119(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
             
-    def state120(self, input_str):
-        input_str += self.current_char()
-        self.advance()
 
-        match self.current_char():
-            case "l":
-                return self.state121(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-            
-    def state121(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "l":
-                return self.state122(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-
-    def state122(self, input_str):
+    def state119(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in [' ']:
-            return self.state123(input_str)
+            return self.state120(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
         
-    #################### FINAL STATE FOR SPELL ####################
+    #################### FINAL STATE FOR ROSE ####################
 
-    def state123(self, input_str):
-        return True, input_str, TokenType.SPELL 
-
-    ###############################################################
+    def state120(self, input_str):
+        return True, input_str, TokenType.ROSE    
     
-    def state124(self):
+    ##############################################################
+
+    def state121(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "a":
-                return self.state125(input_str)
-            case "o":
-                return self.state129(input_str)
+            case "c":
+                return self.state122(input_str)
+            case "p":
+                return self.state128(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			   
+
+    def state122(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
             case "r":
-                return self.state158(input_str)
-            case "w":
-                return self.state170(input_str)
+                return self.state123(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
             
+    def state123(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "o":
+                return self.state124(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+            
+    def state124(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "l":
+                return self.state125(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+    
     def state125(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -2241,50 +2252,46 @@ class RoyalScriptLexer:
                 return False, input_str, None
 			
             
+
     def state126(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "e":
-                return self.state127(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-
-    def state127(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['genie_delim']:
-            return self.state128(input_str)
+        if self.current_char() in [' ']:
+            return self.state127(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
         
-    #################### FINAL STATE FOR TALE ####################
+    #################### FINAL STATE FOR SCROLL ####################
 
+    def state127(self, input_str):
+        return True, input_str, TokenType.SCROLL  
+
+    ################################################################
+    
+    
     def state128(self, input_str):
-        return True, input_str, TokenType.TALE
-    
-    ##############################################################
-    
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state129(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+            
     def state129(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "o":
+            case "l":
                 return self.state130(input_str)
-            case "r":
-                return self.state136(input_str)
-            case "s":
-                return self.state141(input_str)
-            case "t":
-                return self.state148(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
@@ -2296,136 +2303,148 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "c":
+            case "l":
                 return self.state131(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-    
+
     def state131(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "e":
-                return self.state132(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
+        if self.current_char() in [' ']:
+            return self.state132(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+        
+    #################### FINAL STATE FOR SPELL ####################
 
     def state132(self, input_str):
+        return True, input_str, TokenType.SPELL 
+
+    ###############################################################
+    
+    def state133(self):
+        input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "a":
-                return self.state133(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-    
-    def state133(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "n":
                 return self.state134(input_str)
+            case "o":
+                return self.state138(input_str)
+            case "r":
+                return self.state174(input_str)
+            case "w":
+                return self.state186(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-
+            
     def state134(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() == '(':
-            return self.state135(input_str)
-        else:
-            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
-            self.errors.append(error_message)
-            return False, input_str, None
-        
-    #################### FINAL STATE FOR TOOCEAN ####################
-
+        match self.current_char():
+            case "l":
+                return self.state135(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+            
     def state135(self, input_str):
-        return True, input_str, TokenType.TOOCEAN
-    
-    #################################################################
-    
-
-    def state136(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "o":
-                return self.state137(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-    
-    def state137(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "s":
-                return self.state138(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-
-    def state138(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "e":
-                return self.state139(input_str)
+                return self.state136(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
 
-    def state139(self, input_str):
+    def state136(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() == '(':
-            return self.state140(input_str)
+        if self.current_char() in Delims ['genie_delim']:
+            return self.state137(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
         
-    #################### FINAL STATE FOR TOROSE ####################
+    #################### FINAL STATE FOR TALE ####################
 
+    def state137(self, input_str):
+        return True, input_str, TokenType.TALE
+    
+    ##############################################################
+    
+    def state138(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "m":
+                return self.state139(input_str)
+            case "o":
+                return self.state146(input_str)
+            case "r":
+                return self.state152(input_str)
+            case "s":
+                return self.state157(input_str)
+            case "t":
+                return self.state164(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+
+    def state139(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "i":
+                return self.state140(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+    
     def state140(self, input_str):
-        return True, input_str, TokenType.TOROSE
-    
-    ################################################################
-    
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state141(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
 
     def state141(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "c":
+            case "r":
                 return self.state142(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -2438,20 +2457,19 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "r":
+            case "o":
                 return self.state143(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
-			
-
+    
     def state143(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "o":
+            case "r":
                 return self.state144(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -2463,52 +2481,52 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "l":
-                return self.state145(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-    
-    def state145(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "l":
-                return self.state146(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-
-    def state146(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
         if self.current_char() == '(':
-            return self.state147(input_str)
+            return self.state145(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
         
-    #################### FINAL STATE FOR TOSCROLL ###################
+    #################### FINAL STATE FOR TOOCEAN ####################
 
-    def state147(self, input_str):
-        return True, input_str, TokenType.TOSCROLL
+    def state145(self, input_str):
+        return True, input_str, TokenType.TOMIRROR
     
     #################################################################
+            
+    def state146(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "c":
+                return self.state147(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
     
+    def state147(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state148(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+
     def state148(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "r":
+            case "a":
                 return self.state149(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -2521,7 +2539,7 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "e":
+            case "n":
                 return self.state150(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -2533,47 +2551,40 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "a":
-                return self.state151(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
+        if self.current_char() == '(':
+            return self.state151(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+        
+    #################### FINAL STATE FOR TOOCEAN ####################
 
     def state151(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        match self.current_char():
-            case "s":
-                return self.state152(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
+        return True, input_str, TokenType.TOOCEAN
     
+    #################################################################
+    
+
     def state152(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "u":
+            case "o":
                 return self.state153(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-            
+    
     def state153(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "r":
+            case "s":
                 return self.state154(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -2593,72 +2604,71 @@ class RoyalScriptLexer:
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-    
+
     def state155(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "s":
-                return self.state156(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-
-    def state156(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
         if self.current_char() == '(':
-            return self.state157(input_str)
+            return self.state156(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
         
-    #################### FINAL STATE FOR TOTREASURES ################
+    #################### FINAL STATE FOR TOROSE ####################
+
+    def state156(self, input_str):
+        return True, input_str, TokenType.TOROSE
+    
+    ################################################################
+    
 
     def state157(self, input_str):
-        return True, input_str, TokenType.TOTREASURES
-    
-    #################################################################
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "c":
+                return self.state158(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
     
     def state158(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "e":
+            case "r":
                 return self.state159(input_str)
-            case "u":
-                return self.state167(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-    
+
     def state159(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "a":
+            case "o":
                 return self.state160(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-    
+
     def state160(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "s":
+            case "l":
                 return self.state161(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -2671,115 +2681,123 @@ class RoyalScriptLexer:
         self.advance()
 
         match self.current_char():
-            case "u":
+            case "l":
                 return self.state162(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-    
+
     def state162(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "r":
-                return self.state163(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-    
-    def state163(self, input_str):
-        input_str += self.current_char()
-        self.advance()
+        if self.current_char() == '(':
+            return self.state163(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+        
+    #################### FINAL STATE FOR TOSCROLL ###################
 
-        match self.current_char():
-            case "e":
-                return self.state164(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-            
+    def state163(self, input_str):
+        return True, input_str, TokenType.TOSCROLL
+    
+    #################################################################
+    
     def state164(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "s":
+            case "r":
                 return self.state165(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-
+    
     def state165(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['genie_delim']:
-            return self.state166(input_str)
-        else:
-            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
-            self.errors.append(error_message)
-            return False, input_str, None
-        
-    #################### FINAL STATE FOR TREASURES ##################
-
-    def state166(self, input_str):
-        return True, input_str, TokenType.TREASURES
-    
-    #################################################################
-    
-    def state167(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "e":
+                return self.state166(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+
+    def state166(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "a":
+                return self.state167(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+
+    def state167(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
                 return self.state168(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-            
+    
     def state168(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['mirror-lit_delim']:
-            return self.state169(input_str)
-        else:
-           error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
-           self.errors.append(error_message)
-           return False, input_str, None
-    
-    #################### FINAL STATE FOR TRUE ####################
-
-    def state169(self, input_str):
-        return True, input_str, TokenType.BOOL_LITERAL
-    
-    ##############################################################
-    
-    def state170(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
         match self.current_char():
-            case "i":
-                return self.state171(input_str)
+            case "u":
+                return self.state169(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
             
+    def state169(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state170(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+
+    def state170(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state171(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+    
     def state171(self, input_str):
         input_str += self.current_char()
         self.advance()
@@ -2792,45 +2810,46 @@ class RoyalScriptLexer:
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-    
+
     def state172(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        match self.current_char():
-            case "t":
-                return self.state173(input_str)
-            case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
-                self.errors.append(error_message)
-                return False, input_str, None
-			
-
-    def state173(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['genie_delim']:
-            return self.state174(input_str)
+        if self.current_char() == '(':
+            return self.state173(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
         
-    #################### FINAL STATE FOR TWIST ####################
+    #################### FINAL STATE FOR TOTREASURES ################
 
+    def state173(self, input_str):
+        return True, input_str, TokenType.TOTREASURES
+    
+    #################################################################
+    
     def state174(self, input_str):
-        return True, input_str, TokenType.TWIST
-    
-    ###############################################################
-    
-    def state175(self):
-        input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "i":
+            case "e":
+                return self.state175(input_str)
+            case "u":
+                return self.state183(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+    
+    def state175(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "a":
                 return self.state176(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
@@ -2850,14 +2869,199 @@ class RoyalScriptLexer:
                 self.errors.append(error_message)
                 return False, input_str, None
 			
-            
+    
     def state177(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
-            case "h":
+            case "u":
                 return self.state178(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+    
+    def state178(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "r":
+                return self.state179(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+    
+    def state179(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state180(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+            
+    def state180(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
+                return self.state181(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+
+    def state181(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['genie_delim']:
+            return self.state182(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+        
+    #################### FINAL STATE FOR TREASURES ##################
+
+    def state182(self, input_str):
+        return True, input_str, TokenType.TREASURES
+    
+    #################################################################
+    
+    def state183(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state184(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+            
+    def state184(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['mirror-lit_delim']:
+            return self.state185(input_str)
+        else:
+           error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+           self.errors.append(error_message)
+           return False, input_str, None
+    
+    #################### FINAL STATE FOR TRUE ####################
+
+    def state185(self, input_str):
+        return True, input_str, TokenType.BOOL_LITERAL
+    
+    ##############################################################
+    
+    def state186(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "i":
+                return self.state187(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+            
+    def state187(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
+                return self.state188(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+    
+    def state188(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "t":
+                return self.state189(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+
+    def state189(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['genie_delim']:
+            return self.state190(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+        
+    #################### FINAL STATE FOR TWIST ####################
+
+    def state190(self, input_str):
+        return True, input_str, TokenType.TWIST
+    
+    ###############################################################
+    
+    def state191(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "i":
+                return self.state192(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+    
+    def state192(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "s":
+                return self.state193(input_str)
+            case _:
+                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+            
+    def state193(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "h":
+                return self.state194(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
@@ -2865,12 +3069,12 @@ class RoyalScriptLexer:
 			
             
 
-    def state178(self, input_str):
+    def state194(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['genie_delim']:
-            return self.state179(input_str)
+            return self.state195(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -2878,7 +3082,7 @@ class RoyalScriptLexer:
         
     #################### FINAL STATE FOR WISH ####################
 
-    def state179(self, input_str):
+    def state195(self, input_str):
         return True, input_str, TokenType.WISH
     
     ##############################################################
@@ -2922,179 +3126,12 @@ class RoyalScriptLexer:
     #   STATE 242 & STATE 249-250 => \"                #
     #==================================================#
 
-    def state180(self):
-        input_str = ""
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['equal_delim']:
-            return self.state181(input_str)
-        elif self.current_char() == "=":
-            return self.state182(input_str)
-        else:
-            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
-            self.errors.append(error_message)
-            return False, input_str, None
-			
-    
-    #################### FINAL STATE FOR EQUAL (=) ####################
-
-    def state181(self, input_str):
-        return True, input_str, TokenType.EQUAL
-    
-    ##################################################################
-    
-    def state182(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['relational_operator_delim']:
-            return self.state183(input_str)
-        else:
-            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
-            self.errors.append(error_message)
-            return False, input_str, None
-
-    #################### FINAL STATE FOR RELATIONAL (==) ####################
-    
-    def state183(self, input_str):
-        return True, input_str, TokenType.EQUAL_EQUAL
-    
-    #########################################################################
-    
-
-    def state184(self):
-        input_str = ""
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['plus_delim']:
-            return self.state185(input_str)
-        elif self.current_char() == "+":
-            return self.state186(input_str)
-        elif self.current_char() == "=":
-            return self.state188(input_str)
-        else:
-            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
-            self.errors.append(error_message)
-            return False, input_str, None
-			
-
-            
-    #################### FINAL STATE FOR ARITHMETIC OPERATOR (+) ####################
-
-    def state185(self, input_str):
-        return True, input_str, TokenType.ADDITION_OPERATOR
-    
-    #################################################################################
-    
-    def state186(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['unary_operator_delim']:
-            return self.state187(input_str)
-        else:
-           error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
-           self.errors.append(error_message)
-           return False, input_str, None
-        
-        
-    #################### FINAL STATE FOR UNARY OPERATOR (++) ####################
-    
-    def state187(self, input_str):
-        return True, input_str, TokenType.INCREMENT
-    
-    #############################################################################
-    
-    def state188(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['other_assignment_operator_delim']:
-            return self.state189(input_str)
-        else:
-            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
-            self.errors.append(error_message)
-            return False, input_str, None
-    
-    #################### FINAL STATE FOR ASSIGNMENT OPERATOR (+=) ####################
-
-    def state189(self, input_str):
-        return True, input_str, TokenType.PLUS_EQUAL
-    
-    ##################################################################################
-    
-    def state190(self):
-        input_str = ""
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['minus_delim']:
-            return self.state191(input_str)
-        elif self.current_char() == "-":
-            return self.state192(input_str)
-        elif self.current_char() == "=":
-            return self.state194(input_str)
-        elif self.current_char() in RegDef ['number']:
-            return self.state245(input_str)
-        elif self.current_char() == ".":
-            return self.state249(input_str)
-        else:
-            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
-            self.errors.append(error_message)
-            return False, input_str, None
-			
-            
-    #################### FINAL STATE FOR ARITHMETIC OPERATOR (-) ####################
-
-    def state191(self, input_str):
-        return True, input_str, TokenType.SUBTRACTION_OPERATOR
-    
-    #################################################################################
-    
-    def state192(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['unary_operator_delim']:
-            return self.state193(input_str)
-        else:
-            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
-            self.errors.append(error_message)
-            return False, input_str, None
-        
-    #################### FINAL STATE FOR UNARY OPERATOR (--) ####################
-
-    def state193(self, input_str):
-        return True, input_str, TokenType.DECRCEMENT
-    
-    #############################################################################
-    
-    def state194(self, input_str):
-        input_str += self.current_char()
-        self.advance()
-
-        if self.current_char() in Delims ['other_assignment_operator_delim']:
-            return self.state195(input_str)
-        else:
-            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
-            self.errors.append(error_message)
-            return False, input_str, None
-        
-    #################### FINAL STATE FOR ASSIGNMENT OPERATOR (-=) ####################
-    
-    def state195(self, input_str):
-        return True, input_str, TokenType.MINUS_EQUAL
-    
-    ##################################################################################
-    
     def state196(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['arithmetic_operator_delim']:
+        if self.current_char() in Delims ['equal_delim']:
             return self.state197(input_str)
         elif self.current_char() == "=":
             return self.state198(input_str)
@@ -3104,30 +3141,30 @@ class RoyalScriptLexer:
             return False, input_str, None
 			
     
-    #################### FINAL STATE FOR ARITHMETIC OPERATOR (*) ####################
-    
+    #################### FINAL STATE FOR EQUAL (=) ####################
+
     def state197(self, input_str):
-        return True, input_str, TokenType.MULTIPLICATION_OPERATOR
+        return True, input_str, TokenType.EQUAL
     
-    #################################################################################
+    ##################################################################
     
     def state198(self, input_str):
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['other_assignment_operator_delim']:
+        if self.current_char() in Delims ['relational_operator_delim']:
             return self.state199(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
 
-    #################### FINAL STATE FOR ASSIGNMENT OPERATOR (*=) ####################
+    #################### FINAL STATE FOR RELATIONAL (==) ####################
     
     def state199(self, input_str):
-        return True, input_str, TokenType.MULTI_EQUAL
+        return True, input_str, TokenType.EQUAL_EQUAL
     
-    ##################################################################################
+    #########################################################################
     
 
     def state200(self):
@@ -3135,10 +3172,177 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in Delims ['arithmetic_operator_delim']:
+        if self.current_char() in Delims ['plus_delim']:
             return self.state201(input_str)
-        elif self.current_char() == "=":
+        elif self.current_char() == "+":
             return self.state202(input_str)
+        elif self.current_char() == "=":
+            return self.state204(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+			
+
+            
+    #################### FINAL STATE FOR ARITHMETIC OPERATOR (+) ####################
+
+    def state201(self, input_str):
+        return True, input_str, TokenType.ADDITION_OPERATOR
+    
+    #################################################################################
+    
+    def state202(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['unary_operator_delim']:
+            return self.state203(input_str)
+        else:
+           error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+           self.errors.append(error_message)
+           return False, input_str, None
+        
+        
+    #################### FINAL STATE FOR UNARY OPERATOR (++) ####################
+    
+    def state203(self, input_str):
+        return True, input_str, TokenType.INCREMENT
+    
+    #############################################################################
+    
+    def state204(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['other_assignment_operator_delim']:
+            return self.state205(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+    
+    #################### FINAL STATE FOR ASSIGNMENT OPERATOR (+=) ####################
+
+    def state205(self, input_str):
+        return True, input_str, TokenType.PLUS_EQUAL
+    
+    ##################################################################################
+    
+    def state206(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['minus_delim']:
+            return self.state207(input_str)
+        elif self.current_char() == "-":
+            return self.state208(input_str)
+        elif self.current_char() == "=":
+            return self.state210(input_str)
+        elif self.current_char() in RegDef ['number']:
+            return self.state265(input_str) # balikan
+        elif self.current_char() == ".":
+            return self.state269(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+			
+            
+    #################### FINAL STATE FOR ARITHMETIC OPERATOR (-) ####################
+
+    def state207(self, input_str):
+        return True, input_str, TokenType.SUBTRACTION_OPERATOR
+    
+    #################################################################################
+    
+    def state208(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['unary_operator_delim']:
+            return self.state209(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+        
+    #################### FINAL STATE FOR UNARY OPERATOR (--) ####################
+
+    def state209(self, input_str):
+        return True, input_str, TokenType.DECRCEMENT
+    
+    #############################################################################
+    
+    def state210(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['other_assignment_operator_delim']:
+            return self.state211(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+        
+    #################### FINAL STATE FOR ASSIGNMENT OPERATOR (-=) ####################
+    
+    def state211(self, input_str):
+        return True, input_str, TokenType.MINUS_EQUAL
+    
+    ##################################################################################
+    
+    def state212(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['arithmetic_operator_delim']:
+            return self.state213(input_str)
+        elif self.current_char() == "=":
+            return self.state214(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+			
+    
+    #################### FINAL STATE FOR ARITHMETIC OPERATOR (*) ####################
+    
+    def state213(self, input_str):
+        return True, input_str, TokenType.MULTIPLICATION_OPERATOR
+    
+    #################################################################################
+    
+    def state214(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['other_assignment_operator_delim']:
+            return self.state215(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+
+    #################### FINAL STATE FOR ASSIGNMENT OPERATOR (*=) ####################
+    
+    def state215(self, input_str):
+        return True, input_str, TokenType.MULTI_EQUAL
+    
+    ##################################################################################
+    
+
+    def state216(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in Delims ['arithmetic_operator_delim']:
+            return self.state217(input_str)
+        elif self.current_char() == "=":
+            return self.state218(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3147,17 +3351,17 @@ class RoyalScriptLexer:
 
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (/) ####################
     
-    def state201(self, input_str):
+    def state217(self, input_str):
         return True, input_str, TokenType.DIVISION_OPERATOR
     
     #################################################################################
     
-    def state202(self, input_str):
+    def state218(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['other_assignment_operator_delim']:
-            return self.state203(input_str)
+            return self.state219(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3165,20 +3369,22 @@ class RoyalScriptLexer:
 
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (/=) ####################
 
-    def state203(self, input_str):
+    def state219(self, input_str):
         return True, input_str, TokenType.DIV_EQUAL
     
     ##################################################################################
     
-    def state204(self):
+    def state220(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['arithmetic_operator_delim']:
-            return self.state205(input_str)
+            return self.state221(input_str)
         elif self.current_char() == "=":
-            return self.state206(input_str)
+            return self.state222(input_str)
+        elif self.current_char() == ".":
+            return self.state271(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3187,17 +3393,17 @@ class RoyalScriptLexer:
     
     #################### FINAL STATE FOR ARITHMETIC OPERATOR (%) ####################
 
-    def state205(self, input_str):
+    def state221(self, input_str):
         return True, input_str, TokenType.MODULUS_OPERATOR
     
     #################################################################################
     
-    def state206(self, input_str):
+    def state222(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['other_assignment_operator_delim']:
-            return self.state207(input_str)
+            return self.state223(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3205,20 +3411,20 @@ class RoyalScriptLexer:
 
     #################### FINAL STATE FOR ASSIGNMENT OPERATOR (%=) ####################
 
-    def state207(self, input_str):
+    def state223(self, input_str):
         return True, input_str, TokenType.MODULO_EQUAL
     
     ##################################################################################
     
-    def state208(self):
+    def state224(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['not_logical_delim']:
-            return self.state209(input_str)
+            return self.state225(input_str)
         elif self.current_char() == "=":
-            return self.state210(input_str)
+            return self.state226(input_str)
         else:
             error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3227,17 +3433,17 @@ class RoyalScriptLexer:
     
     #################### FINAL STATE FOR NOT LOGIC (!) ####################
     
-    def state209(self, input_str):
+    def state225(self, input_str):
         return True, input_str, TokenType.NOT_OPERATOR
     
     #######################################################################
     
-    def state210(self, input_str):
+    def state226(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['relational_operator_delim']:
-            return self.state211(input_str)
+            return self.state227(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3245,31 +3451,31 @@ class RoyalScriptLexer:
 
     #################### FINAL STATE FOR REALTIONAL OPERATOR (!=) ####################
 
-    def state211(self, input_str):
+    def state227(self, input_str):
         return True, input_str, TokenType.NOT_EQUAL
     
     ##################################################################################
 
-    def state212(self):
+    def state228(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "&":
-                return self.state213(input_str)
+                return self.state229(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
             
-    def state213(self, input_str):
+    def state229(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['logical_operator_delim']:
-            return self.state214(input_str)
+            return self.state230(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3277,31 +3483,31 @@ class RoyalScriptLexer:
     
     #################### FINAL STATE FOR LOGICAL OPERATOR (&&) ####################
 
-    def state214(self, input_str):
+    def state230(self, input_str):
         return True, input_str, TokenType.AND_OPERATOR
     
     ###############################################################################
 
-    def state215(self):
+    def state231(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         match self.current_char():
             case "|":
-                return self.state216(input_str)
+                return self.state232(input_str)
             case _:
                 error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
             
-    def state216(self, input_str):
+    def state232(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['logical_operator_delim']:
-            return self.state217(input_str)
+            return self.state233(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3309,20 +3515,20 @@ class RoyalScriptLexer:
     
     #################### FINAL STATE FOR LOGICAL OPERATOR (||) ####################
 
-    def state217(self, input_str):
+    def state233(self, input_str):
         return True, input_str, TokenType.OR_OPERATOR
     
     ###############################################################################
 
-    def state218(self):
+    def state234(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['relational_operator_delim']:
-            return self.state219(input_str)
+            return self.state235(input_str)
         elif self.current_char() == "=":
-            return self.state220(input_str)
+            return self.state236(input_str)
         else:
             error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3331,17 +3537,17 @@ class RoyalScriptLexer:
 
     #################### FINAL STATE FOR RELATIONAL OPERATOR (>) ####################
 
-    def state219(self, input_str):
+    def state235(self, input_str):
         return True, input_str, TokenType.GREATER_THAN
             
     ##################################################################################
 
-    def state220(self, input_str):
+    def state236(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['relational_operator_delim']:
-            return self.state221(input_str)
+            return self.state237(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3349,20 +3555,20 @@ class RoyalScriptLexer:
     
     #################### FINAL STATE FOR RELATIONAL OPERATOR (>=) ####################
     
-    def state221(self, input_str):
+    def state237(self, input_str):
         return True, input_str, TokenType.GREATER_EQUAL
     
     ##################################################################################
 
-    def state222(self):
+    def state238(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['relational_operator_delim']:
-            return self.state223(input_str)
+            return self.state239(input_str)
         elif self.current_char() == "=":
-            return self.state224(input_str)
+            return self.state240(input_str)
         else:
             error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3372,17 +3578,17 @@ class RoyalScriptLexer:
             
     #################### FINAL STATE FOR RELATIONAL OPERATOR (<) ####################
     
-    def state223(self, input_str):
+    def state239(self, input_str):
         return True, input_str, TokenType.LESS_THAN
     
     #################################################################################
 
-    def state224(self, input_str):
+    def state240(self, input_str):
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['relational_operator_delim']:
-            return self.state225(input_str)
+            return self.state241(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3390,18 +3596,18 @@ class RoyalScriptLexer:
     
     #################### FINAL STATE FOR RELATIONAL OPERATOR (<=) ####################
     
-    def state225(self, input_str):
+    def state241(self, input_str):
         return True, input_str, TokenType.LESS_EQUAL
     
     ##################################################################################
 
-    def state226(self):
+    def state242(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['open_parentheses_delim']:
-            return self.state227(input_str)
+            return self.state243(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3409,18 +3615,18 @@ class RoyalScriptLexer:
             
     #################### FINAL STATE FOR OPEN PARENTHESIS ( ####################
     
-    def state227(self, input_str):
+    def state243(self, input_str):
         return True, input_str, TokenType.OPEN_PAREN
     
     #############################################################################
 
-    def state228(self):
+    def state244(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['close_parentheses_delim']:
-            return self.state229(input_str)
+            return self.state245(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3429,18 +3635,18 @@ class RoyalScriptLexer:
             
     #################### FINAL STATE FOR CLOSE PARENTHESIS ) ####################
 
-    def state229(self, input_str):
+    def state245(self, input_str):
         return True, input_str, TokenType.CLOSE_PAREN
     
     #############################################################################
     
-    def state230(self):
+    def state246(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['open_curly_bracket_delim']:
-            return self.state231(input_str)
+            return self.state247(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3449,18 +3655,18 @@ class RoyalScriptLexer:
             
     #################### FINAL STATE FOR OPEN CURLY BRACKET { ####################
 
-    def state231(self, input_str):
+    def state247(self, input_str):
         return True, input_str, TokenType.OPEN_CURLY
     
     ##############################################################################
 
-    def state232(self):
+    def state248(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['close_curly_bracket_delim']:
-            return self.state233(input_str)
+            return self.state249(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3469,18 +3675,18 @@ class RoyalScriptLexer:
             
     #################### FINAL STATE FOR CLOSE CURLY BRACKET } ####################
 
-    def state233(self, input_str):
+    def state249(self, input_str):
         return True, input_str, TokenType.CLOSE_CURLY
     
     ###############################################################################
 
-    def state234(self):
+    def state250(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['open_square_bracket_delim']:
-            return self.state235(input_str)
+            return self.state251(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3488,18 +3694,18 @@ class RoyalScriptLexer:
 
     #################### FINAL STATE FOR OPEN SQUARE BRACKET [ ####################
 
-    def state235(self, input_str):
+    def state251(self, input_str):
         return True, input_str, TokenType.OPEN_SQUARE
     
     ###############################################################################
 
-    def state236(self):
+    def state252(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['close_square_bracket_delim']:
-            return self.state237(input_str)
+            return self.state253(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3508,18 +3714,18 @@ class RoyalScriptLexer:
             
     #################### FINAL STATE FOR CLOSE SQUARE BRACKET ] ####################
    
-    def state237(self, input_str):
+    def state253(self, input_str):
         return True, input_str, TokenType.CLOSE_SQUARE
 
     ################################################################################
 
-    def state238(self):
+    def state254(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['terminator_delim']:
-            return self.state239(input_str)
+            return self.state255(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3527,18 +3733,18 @@ class RoyalScriptLexer:
             
     #################### FINAL STATE FOR TERMINATOR ~ ####################
     
-    def state239(self, input_str):
+    def state255(self, input_str):
         return True, input_str, TokenType.TERMINATOR
     
     ######################################################################
 
-    def state240(self):
+    def state256(self):
         input_str = ""
         input_str += self.current_char()
         self.advance()
 
         if self.current_char() in Delims ['comma_delim']:
-            return self.state241(input_str)
+            return self.state257(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3546,24 +3752,24 @@ class RoyalScriptLexer:
         
     #################### FINAL STATE FOR COMMA ####################
     
-    def state241(self, input_str):
+    def state257(self, input_str):
         return True, input_str, TokenType.COMMA
     
     ###############################################################
 
-    def state242(self, input_str):
+    def state258(self, input_str):
         input_str += self.current_char()
         self.advance()
         
         match self.current_char():
             case "n":
-                return self.state255(input_str)
+                return self.state275(input_str)
             case "t":
-                return self.state255(input_str)
+                return self.state275(input_str)
             case "\\":
-                return self.state255(input_str)
+                return self.state275(input_str)
             case '"':
-                return self.state255(input_str)
+                return self.state275(input_str)
             case _:
                 raise SyntaxError(f"Invalid escape sequence '\\{self.current_char()}' at line {self.line}, position {self.position}")
 
@@ -3581,19 +3787,19 @@ class RoyalScriptLexer:
     #   STATE 270 & STATE 272-275 => MULTI-LINE COMMENT   #
     #=====================================================#
 
-    def state243(self, input_str):
+    def state259(self, input_str):
         """Initial state for identifiers."""
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in RegDef['alphanum'] | {'_'} and self.current_char() not in Delims['id_delim']:
-            return self.state243(input_str) 
+            return self.state259(input_str) 
         elif self.current_char() in RegDef['special_char'] and self.current_char() not in Delims['id_delim']:
             error_message = f"Invalid character '{self.current_char()}' for Identifier at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
         elif self.current_char() in Delims['id_delim']:
-            return self.state244(input_str)  
+            return self.state260(input_str)  
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3601,12 +3807,12 @@ class RoyalScriptLexer:
 
     #################### FINAL STATE FOR IDENTIFIER ####################
 
-    def state244(self, input_str):
+    def state260(self, input_str):
         return True, input_str, TokenType.IDENTIFIER
 
     ####################################################################
 
-    def state245(self, input_str):
+    def state261(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
@@ -3614,11 +3820,11 @@ class RoyalScriptLexer:
             return self.stateZero(input_str)  # Handle zero separately
 
         if self.current_char() in RegDef['number']  and self.current_char() not in ["."]:
-            return self.state245(input_str) 
+            return self.state261(input_str) 
         elif self.current_char() in Delims['number_delim']:
-            return self.state246(input_str) 
+            return self.state262(input_str) 
         elif self.current_char() == ".":
-            return self.state249(input_str)  
+            return self.state265(input_str)  
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3626,13 +3832,13 @@ class RoyalScriptLexer:
         
     #################### FINAL STATE FOR NEGATIVE TREASURES LITERALS ####################
 
-    def state246(self, input_str):
+    def state262(self, input_str):
         normalized = self.normalize_integer(input_str)
         return True, normalized, TokenType.NEG_TREASURES_INT
     
     #####################################################################################
     
-    def state247(self, input_str):
+    def state263(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
@@ -3642,11 +3848,11 @@ class RoyalScriptLexer:
             return self.stateOne(input_str)  # Handle one separately
 
         if self.current_char() in RegDef['number']  and self.current_char() not in ["."]:
-            return self.state247(input_str) 
+            return self.state263(input_str) 
         elif self.current_char() in Delims['number_delim']:
-            return self.state248(input_str) 
+            return self.state264(input_str) 
         elif self.current_char() == ".":
-            return self.state252(input_str)  
+            return self.state278(input_str)  
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3654,18 +3860,18 @@ class RoyalScriptLexer:
 
     #################### FINAL STATE FOR POSITIVE TREASURES LITERALS ####################
 
-    def state248(self, input_str):
+    def state264(self, input_str):
         normalized = self.normalize_integer(input_str)
         return True, normalized, TokenType.POS_TREASURES_INT
     
     ####################################################################################
 
-    def state249(self, input_str):
+    def state265(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
  
         if self.current_char() in RegDef['number']:
-            return self.state250(input_str) 
+            return self.state266(input_str) 
         elif self.current_char is None or self.current_char() == '' or self.current_char() in RegDef['whitespace']:
             error_message = f"Invalid float format: fractional part is missing after decimal point at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3676,17 +3882,17 @@ class RoyalScriptLexer:
             return False, input_str, None
 			
 
-    def state250(self, input_str):
+    def state266(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in RegDef['number']:
             while self.deci <= 14:  # Allow up to 14 decimals
                 self.deci += 1
-                return self.state250(input_str)
+                return self.state266(input_str)
             raise SyntaxError(f"Too many decimals: max 15 allowed, found more at line {self.line}, position {self.position}")
         elif self.current_char() in Delims['number_delim']:
-            return self.state251(input_str)
+            return self.state267(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3694,7 +3900,7 @@ class RoyalScriptLexer:
 
     #################### FINAL STATE FOR NEGATIVE OCEAN LITERALS ####################
     
-    def state251(self, input_str):
+    def state267(self, input_str):
         normalized = self.normalize_float(input_str)
         self.deci = 1 
         return True, normalized, TokenType.NEG_FLOAT_LITERAL
@@ -3702,12 +3908,12 @@ class RoyalScriptLexer:
     #################################################################################
     
 
-    def state252(self, input_str):
+    def state268(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
  
         if self.current_char() in RegDef['number']:
-            return self.state253(input_str) 
+            return self.state269(input_str) 
         elif self.current_char is None or self.current_char() == '' or self.current_char() in RegDef['whitespace']:
             error_message = f"Invalid float format: fractional part is missing after decimal point at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3719,17 +3925,17 @@ class RoyalScriptLexer:
 			
     
 
-    def state253(self, input_str):
+    def state269(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in RegDef['number']:
             while self.deci <= 14:  # Allow up to 14 decimals
                 self.deci += 1
-                return self.state253(input_str)
+                return self.state269(input_str)
             raise SyntaxError(f"Too many decimals: max 15 allowed, found more at line {self.line}, position {self.position}")
         elif self.current_char() in Delims['number_delim']:
-            return self.state254(input_str)
+            return self.state270(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3737,37 +3943,79 @@ class RoyalScriptLexer:
         
     #################### FINAL STATE FOR POSITIVE OCEAN LITERALS ####################
     
-    def state254(self, input_str):
+    def state270(self, input_str):
         normalized = self.normalize_float(input_str)
         self.deci = 1 
         return True, normalized, TokenType.POS_FLOAT_LITERAL
     
     #################################################################################
     
+    def state271(self):
+        input_str = ""
+        input_str += self.current_char()
+        self.advance()
 
-    def state255(self, input_str):
+        if self.current_char() in RegDef['number']:
+            return self.state272(input_str) 
+        else:
+            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+    
+    def state272(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in RegDef['number']:
+            return self.state272(input_str) 
+        elif self.current_char() == 'f':
+            return self.state273(input_str) 
+        else:
+            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+			
+
+    def state273(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [',', ' ']:
+            return self.state274(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+        
+    #################### FINAL STATE FOR WISH ####################
+
+    def state274(self, input_str):
+        return True, input_str, TokenType.SETPRECISION
+    
+    ##############################################################
+
+
+    def state275(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() not in ['\n', '\\', '"'] and (self.current_char() in RegDef['ascii'] or self.current_char() in ['\t', ' ', '_']):
-            return self.state255(input_str)
+            return self.state275(input_str)
         elif self.current_char() == '\\':  # Correct representation of backslash
-            return self.state242(input_str)
+            return self.state258(input_str)
         elif self.current_char() == '"':
-            return self.state256(input_str)  # Handle double-quote
+            return self.state276(input_str)  # Handle double-quote
         else:
             error_message = f"Unclosed scroll literal detected at line {self.line}, position {self.position}.'"
             self.errors.append(error_message)
             return False, input_str, None
 			
-
-
-    def state256(self, input_str):
+    def state276(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in Delims ['book_delim']:
-            return self.state257(input_str)   
+            return self.state277(input_str)   
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3776,43 +4024,43 @@ class RoyalScriptLexer:
 
     #################### FINAL STATE FOR SCROLL LITERALS ####################
         
-    def state257(self, input_str):
+    def state277(self, input_str):
         return True, input_str, TokenType.STRING_LITERAL
     
     #########################################################################
 
-    def state258(self, input_str):
+    def state278(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if  self.current_char() not in ["'"] and self.current_char() in RegDef['ascii'] or self.current_char() == ' ':
-            return self.state259(input_str)  
+            return self.state279(input_str)  
         elif self.current_char() == "'":
-            return self.state260(input_str)  
+            return self.state280(input_str)  
         else:
             error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
 			
 
-    def state259(self, input_str):
+    def state279(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
  
         if self.current_char() == "'":
-            return self.state260(input_str) 
+            return self.state280(input_str) 
         else:
             error_message = f"Unclosed rose literal detected at line {self.line}, position {self.position}.'"
             self.errors.append(error_message)
             return False, input_str, None
 			
 
-    def state260(self, input_str):
+    def state280(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in Delims ['book_delim']:
-            return self.state261(input_str)   
+            return self.state281(input_str)   
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3820,22 +4068,22 @@ class RoyalScriptLexer:
         
     #################### FINAL STATE FOR rose LITERALS ####################
         
-    def state261(self, input_str):
+    def state281(self, input_str):
         return True, input_str, TokenType.CHAR_LITERAL
     
     #######################################################################
     
     #COMMENT
-    def state262(self, input_str):
+    def state282(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() not in ['\n', '*'] and self.current_char() in RegDef['ascii'] or self.current_char() in [' ', '\t', '~']:
-            return self.state262(input_str)   
+            return self.state282(input_str)   
         elif self.current_char() == '\n':
-            return self.state263(input_str)  
+            return self.state283(input_str)  
         elif self.current_char() == '*':
-            return self.state264(input_str) 
+            return self.state284(input_str) 
         else:
             error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3844,43 +4092,43 @@ class RoyalScriptLexer:
     
     #################### FINAL STATE FOR SINGLE-LINE COMMENTS ####################
 
-    def state263(self, input_str):
+    def state283(self, input_str):
         return True, input_str, TokenType.SINGLE_COMMENT
     
     #############################################################################
     
-    def state264(self, input_str):
+    def state284(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() != '*' and self.current_char() in RegDef['ascii'] or self.current_char() in ['\t', ' ', '\n', '~']:
-            return self.state264(input_str) 
+            return self.state284(input_str) 
         elif self.current_char() == '*':
-            return self.state265(input_str) 
+            return self.state285(input_str) 
         else:
             error_message = f"Unclosed multi-line comment detected at line {self.line}, position {self.position}.'"
             self.errors.append(error_message)
             return False, input_str, None
 			
         
-    def state265(self, input_str):
+    def state285(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() == '?':
-            return self.state266(input_str) 
+            return self.state286(input_str) 
         else:
             error_message = f"Unclosed multi-line comment detected at line {self.line}, position {self.position}.'"
             self.errors.append(error_message)
             return False, input_str, None
 			
         
-    def state266(self, input_str):
+    def state286(self, input_str):
         input_str += self.current_char()  # Append the current character
         self.advance()
 
         if self.current_char() in Delims['multi-comment_delim']:
-            return self.state267(input_str) 
+            return self.state287(input_str) 
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3889,7 +4137,7 @@ class RoyalScriptLexer:
     
     #################### FINAL STATE FOR MULTI-LINE COMMENTS ####################
         
-    def state267(self, input_str):
+    def state287(self, input_str):
         return True, input_str, TokenType.MULTI_COMMENT
     
     #############################################################################

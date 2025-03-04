@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import scrolledtext
 from PIL import Image, ImageTk 
-from lexer import RoyalScriptLexer
-from lexer import Token
+from lexer2 import RoyalScriptLexer
+from lexer2 import Token
 from pygame import mixer
 from syntax import RoyalScriptParser
 
