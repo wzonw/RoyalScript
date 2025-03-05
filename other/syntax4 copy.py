@@ -2106,8 +2106,14 @@ class RoyalScriptParser:
                 else:
                     print(f"This is == {token}")
                     return False
+                
+        # 206	<granted_content>	→	%.treasures_litf
+        
+        elif self.match('setprecission'):
+            return True
+
         # 189	<granted_content>	→	<type_conversion>
-        elif token in ['toscroll', 'toocean', 'totreasures', 'torose']:
+        elif token in ['toscroll', 'toocean', 'tomirror', 'totreasures', 'torose']:
             start_pos = self.current_index  # Store initial position
             self.advance()  # Move past the current token
             
@@ -2138,6 +2144,8 @@ class RoyalScriptParser:
             else:
                 print("Invalid string operations")
                 return False
+        
+
             
         # elif self.set_precision():
         #     return True
@@ -2384,7 +2392,7 @@ class RoyalScriptParser:
                     print(f"This is == {token}")
                     return False
         # 215	<val>	→	<type_conversion>
-        elif token in ['toscroll', 'toocean', 'totreasures', 'torose']:
+        elif token in ['toscroll', 'toocean', 'tomirror', 'totreasures', 'torose']:
             start_pos = self.current_index  # Store initial position
             self.advance()  # Move past the current token
             
@@ -2420,6 +2428,16 @@ class RoyalScriptParser:
         elif token == 'wish':
             return self.input()
         
+        # 224	<val2>	→	lengthof(<id_lit>)
+        elif self.match('lengthof'):
+            if not self.match('('):
+                return False
+            if not self.match('identifier'):
+                return False
+            if not self.match(')'):
+                return False
+            return True
+
         
             
         # elif self.type_conversion():
@@ -2589,7 +2607,7 @@ class RoyalScriptParser:
                     print(f"This is == {token}")
                     return False
             
-        elif token in ['toscroll', 'toocean', 'totreasures', 'torose']:
+        elif token in ['toscroll', 'toocean', 'tomirror', 'totreasures', 'torose']:
             start_pos = self.current_index  # Store initial position
             self.advance()  # Move past the current token
             
@@ -2667,8 +2685,8 @@ class RoyalScriptParser:
         # 227	<conversion_func>	→	totreasures
         elif self.match('totreasures'):
             return True
-        # elif self.match('tomirror'):
-        #     return True
+        elif self.match('tomirror'):
+            return True
         # 228	<conversion_func>	→	toocean
         elif self.match('toocean'):
             return True

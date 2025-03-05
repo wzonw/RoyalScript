@@ -3241,9 +3241,9 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state210(input_str)
         elif self.current_char() in RegDef ['number']:
-            return self.state265(input_str) # balikan
+            return self.state261(input_str) # balikan
         elif self.current_char() == ".":
-            return self.state269(input_str)
+            return self.state265(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3852,7 +3852,7 @@ class RoyalScriptLexer:
         elif self.current_char() in Delims['number_delim']:
             return self.state264(input_str) 
         elif self.current_char() == ".":
-            return self.state278(input_str)  
+            return self.state268(input_str)  
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
@@ -3950,8 +3950,8 @@ class RoyalScriptLexer:
     
     #################################################################################
     
-    def state271(self):
-        input_str = ""
+    
+    def state271(self, input_str):
         input_str += self.current_char()
         self.advance()
 
@@ -3980,7 +3980,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()
         self.advance()
 
-        if self.current_char() in [',', ' ']:
+        if self.current_char() in [',', ' ', ')']:
             return self.state274(input_str)
         else:
             error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
