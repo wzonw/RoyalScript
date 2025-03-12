@@ -469,6 +469,21 @@ class RoyalScriptSemanticAnalyzer:
                     return (True, "")
                 elif value == 'phantom':
                     return (True, "")
+                elif value == 'lengthof':
+                    self.advance()
+                    token = self.current()
+
+                    if token[0] == '(':
+                        self.advance()
+                        token = self.current()
+                        
+                    if token[0] == 'identifier':
+                        return self.check_identifier_type(token[1], "scroll")
+                    self.advance()
+                    token = self.current()
+
+                    if token[0] == ')':
+                        return (True, "")
                 elif value == 'totreasures':
                     self.advance()
                     token = self.current()
