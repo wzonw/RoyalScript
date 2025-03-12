@@ -5,119 +5,168 @@ import traceback
 class RoyalScriptParser:
     def __init__(self, tokens):
         """Initialize with tokens and syntax rules."""
-        self.tokens = tokens  # List of token types for each line
+        self.tokens = tokens  # List of token tuples for each line: each token is (token_type, token_value)
         self.current_line = 0  # Current line index
-        self.current_index = 0  # Current token index
+        self.current_index = 0  # Current token index in current line
         self.error_message = ""
         self.parsing_result = ""  # Parsing output
 
-        # Store tokens of the current statement
+        # Store tokens of the current statement (we store only token types for now)
         self.current_statement_tokens = []  
 
         # Store finalized statements with their labels
         self.final_statements_list = []
 
-
-        
-    
     def current_token(self):
-        """Return the current token type in the current line, skipping empty tokens."""
+        """Return the current token type (a string) in the current line, skipping empty lines."""
         while self.current_line < len(self.tokens):
             if self.tokens[self.current_line]:  # Ensure line is not empty
                 if self.current_index < len(self.tokens[self.current_line]):
-                    return self.tokens[self.current_line][self.current_index]
+                    # Return only the token type (the first element of the tuple)
+                    return self.tokens[self.current_line][self.current_index][0]
             self.current_line += 1
             self.current_index = 0
         return None  # End of tokens
 
+    def current_token_tuple(self):
+        """Return the entire token tuple (type, value) of the current token (if any)."""
+        if self.current_line < len(self.tokens) and self.current_index < len(self.tokens[self.current_line]):
+            return self.tokens[self.current_line][self.current_index]
+        return None
+
+    def peek_next_token(self):
+        """Peek at the next token type without advancing the position."""
+        if self.current_line < len(self.tokens):
+            temp_line, temp_index = self.current_line, self.current_index
+            if temp_index + 1 < len(self.tokens[temp_line]):  # Next token in same line
+                return self.tokens[temp_line][temp_index + 1][0]
+            elif temp_line + 1 < len(self.tokens) and self.tokens[temp_line + 1]:
+                return self.tokens[temp_line + 1][0][0]
+        return None  # No more tokens
 
     def advance(self):
         """Move to the next token, automatically skipping comments and empty lines."""
-        token = self.current_token()
-
-        if token:
-            self.current_statement_tokens.append(token)  #Store token
-
-
+        # token = self.current_token()
+        token_tuple = self.current_token_tuple()  # Get the full (type, value) tuple.
+        if token_tuple:
+            self.current_statement_tokens.append(token_tuple)  # Store full tuple.
         while True:
             if self.current_index + 1 < len(self.tokens[self.current_line]):
                 self.current_index += 1
             elif self.current_line + 1 < len(self.tokens):
                 self.current_line += 1
                 self.current_index = 0
-                while self.current_line < len(self.tokens) and not self.tokens[self.current_line]:  # Skip empty lines
+                while self.current_line < len(self.tokens) and not self.tokens[self.current_line]:
                     self.current_line += 1
             else:
                 return None  # End of tokens
-
-            # Automatically skip comments
+            # Automatically skip comment tokens
             if self.current_token() not in ["single_comment", "multi_comment"]:
                 break
 
+    def current_token_tuple(self):
+        """Return the entire token tuple (type, value) of the current token (if any)."""
+        if self.current_line < len(self.tokens) and self.current_index < len(self.tokens[self.current_line]):
+            return self.tokens[self.current_line][self.current_index]
+        return None
+
     def store_completed_statement(self, statement_type):
-        """Store the completed statement with its type and reset tracking."""
+        """Store the completed statement with its type and reset tracking.
+        Only filters out specific special tokens (crown~, reign~, EOF) before storing.
+        Prints the final tokens for debugging."""
         if self.current_statement_tokens:
-            labeled_statement = [statement_type] + self.current_statement_tokens
+            # Initialize a filtered list to hold clean tokens
+            filtered_tokens = []
+            
+            # Process tokens to remove only specific special markers
+            i = 0
+            while i < len(self.current_statement_tokens):
+                current_token = self.current_statement_tokens[i]
+                
+                # Check for the exact "crown~" pattern
+                if (i + 1 < len(self.current_statement_tokens) and 
+                    isinstance(current_token, tuple) and len(current_token) >= 2 and 
+                    current_token[0] == "crown" and current_token[1] == "crown" and
+                    isinstance(self.current_statement_tokens[i+1], tuple) and 
+                    self.current_statement_tokens[i+1][0] == "~" and self.current_statement_tokens[i+1][1] == "~"):
+                    i += 2  # Skip both tokens
+                    continue
+                    
+                # Check for the exact "reign~" pattern
+                if (i + 1 < len(self.current_statement_tokens) and 
+                    isinstance(current_token, tuple) and len(current_token) >= 2 and 
+                    current_token[0] == "reign" and current_token[1] == "reign" and
+                    isinstance(self.current_statement_tokens[i+1], tuple) and 
+                    self.current_statement_tokens[i+1][0] == "~" and self.current_statement_tokens[i+1][1] == "~"):
+                    i += 2  # Skip both tokens
+                    continue
+                    
+                # Skip only exact EOF token
+                if (isinstance(current_token, tuple) and 
+                    ((len(current_token) == 1 and current_token[0] == "EOF") or 
+                    (len(current_token) >= 2 and current_token[0] == "EOF" and current_token[1] == "EOF"))):
+                    i += 1  # Skip this token
+                    continue
+                    
+                # If not one of the specific special tokens, add it to the filtered list
+                filtered_tokens.append(current_token)
+                i += 1
+            
+            # Create the labeled statement with the filtered tokens
+            labeled_statement = [statement_type] + filtered_tokens
             self.final_statements_list.append(labeled_statement)
-            self.current_statement_tokens = []  # ✅ Reset for the next statement
-
-    def peek_next_token(self):
-        """Peek at the next token without advancing the position."""
-        if self.current_line < len(self.tokens):
-            temp_line, temp_index = self.current_line, self.current_index
-
-            if temp_index + 1 < len(self.tokens[temp_line]):  # Ensure next token exists in the same row
-                return self.tokens[temp_line][temp_index + 1]
-            elif temp_line + 1 < len(self.tokens) and self.tokens[temp_line + 1]:  # Ensure next line has tokens
-                return self.tokens[temp_line + 1][0]
-
-        return None  # No more tokens
-
+            
+            # Print the original and filtered tokens for debugging
+            print(f"[DEBUG] Original tokens: {self.current_statement_tokens}")
+            print(f"[DEBUG] Filtered tokens: {filtered_tokens}")
+            print(f"[DEBUG] Final labeled statement: {labeled_statement}")
+            
+            # Reset tracking for the next statement
+            self.current_statement_tokens = []
+            
+            print(f"[DEBUG] Stored statement: {statement_type} with {len(filtered_tokens)} tokens (removed special tokens)")
 
     def match(self, expected):
-        """Match the current token against the expected value while ignoring comments."""
-        
-        # Skip all comments before matching
+        """Match the current token type against the expected value while ignoring comments."""
+        # Skip comment tokens first
         while self.current_token() in ["single_comment", "multi_comment"]:
-            self.advance()  # Move to the next token
-
+            self.advance()
         token = self.current_token()
-        
         if token == expected:
             self.advance()
             return True
-        
+        # If no token or token does not match, prepare an error message.
+        full_token = self.current_token_tuple()
         if token is None:
             self.error_message = f"Syntax Error: Unexpected end of input at Line {self.current_line + 1}"
         else:
             if expected == 'crown':
-                self.error_message = f"Syntax Error: Program must start with 'crown' "
+                self.error_message = f"Syntax Error: Program must start with 'crown'"
             elif expected == '~':
                 self.error_message = f"Syntax Error: Missing tilde '~' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             elif expected == 'castle':
                 self.error_message = f"Syntax Error: Program must have a main function starting with 'castle'"
             elif expected == 'treasures':
-                self.error_message = f"Syntax Error: Expected treasures, but got '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Expected treasures, but got '{full_token}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             elif expected == 'identifier':
                 self.error_message = f"Syntax Error: Missing identifier at Line {self.current_line + 1}, Index {self.current_index + 1}"
             elif expected == ')':
-                self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line }, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Unclosed ( at Line {self.current_line}, Index {self.current_index + 1}"
             elif expected == ']':
                 self.error_message = f"Syntax Error: Unclosed ] at Line {self.current_line + 1}, Index {self.current_index + 1}"
             elif expected == 'return':
                 self.error_message = f"Syntax Error: Missing return statement at Line {self.current_line + 1}, Index {self.current_index + 1}"
             elif expected == '0':
-                self.error_message = f"Syntax Error: Expected 0, but got '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Expected 0, but got '{full_token}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             elif expected == 'reign':
-                self.error_message = f"Syntax Error: Program must end with 'reign' "
+                self.error_message = f"Syntax Error: Program must end with 'reign'"
             elif expected == 'scroll_lit':
-                self.error_message = f"Syntax Error: Expected scroll literal, but got '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Expected scroll literal, but got '{full_token}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             elif expected == 'treasures_lit':
-                self.error_message = f"Syntax Error: Expected treasures literal, but got '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
+                self.error_message = f"Syntax Error: Expected treasures literal, but got '{full_token}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             else:
-                self.error_message = f"Syntax Error: Expected {expected}, but got {repr(token)} at Line {self.current_line + 1}, Index {self.current_index}"
-
-        print(f"Matching '{repr(self.current_token())}' against {repr(expected)}")
+                self.error_message = f"Syntax Error: Expected {expected}, but got {full_token} at Line {self.current_line + 1}, Index {self.current_index + 1}"
+        print(f"Matching expected: {repr(expected)} | Current token: {self.current_token_tuple()}")
         return False
 
     def program(self):
@@ -2040,7 +2089,7 @@ class RoyalScriptParser:
             return False
         if not self.match('~'):
             return False
-        self.store_completed_statement("OUTPUT")
+        self.store_completed_statement("ELSE_STATEMENT")
         return True
     
 
@@ -2556,10 +2605,8 @@ class RoyalScriptParser:
     
     def val1(self):
         token = self.current_token()
-
-
-        token = self.current_token()
         next_token = self.peek_next_token()
+        print("Entered Val1")
         # 221	<val1>	→	<val>
         if token == 'identifier':
             if next_token == '(':  # Function call
@@ -2781,7 +2828,6 @@ class RoyalScriptParser:
             return False
         if not self.match(')'):
             return False
-        self.store_completed_statement("TYPE_CONVERSION")
         return True
     
     def conversion_func(self):
@@ -2818,7 +2864,7 @@ class RoyalScriptParser:
             return True
         elif self.match('1'):
             return True
-        elif self.match('t0'):
+        elif self.match('0'):
             return True
         # 233	<conversion_value>	→	mirror_lit
         elif self.match('mirror_lit'):
