@@ -484,6 +484,22 @@ class RoyalScriptSemanticAnalyzer:
 
                     if token[0] == ')':
                         return (True, "")
+                    
+                elif value == "wish":
+                    self.advance()
+                    token = self.current()
+
+                    if token[0] == '(':
+                        self.advance()
+                        token = self.current()
+
+                    if token[0] == 'scroll_lit':
+                        self.advance()
+                        token = self.current()
+
+                    if token[0] == ')':
+                        return (True, "")
+                    
                 elif value == 'totreasures':
                     self.advance()
                     token = self.current()
@@ -581,6 +597,22 @@ class RoyalScriptSemanticAnalyzer:
                 # 1) Phantom is always valid for ocean
                 if value == 'phantom':
                     return (True, "")
+
+                elif value == "wish":
+                    self.advance()
+                    token = self.current()
+
+                    if token[0] == '(':
+                        self.advance()
+                        token = self.current()
+
+                    if token[0] == 'scroll_lit':
+                        self.advance()
+                        token = self.current()
+
+                    if token[0] == ')':
+                        return (True, "")
+                    
 
                 # 2) If user wrote "toocean"
                 if value == 'toocean':
@@ -708,6 +740,23 @@ class RoyalScriptSemanticAnalyzer:
                     return (True, "")
                 elif value == 'phantom':
                     return (True, "")
+                
+                elif value == "wish":
+                    self.advance()
+                    token = self.current()
+
+                    if token[0] == '(':
+                        self.advance()
+                        token = self.current()
+
+                    if token[0] == 'scroll_lit':
+                        self.advance()
+                        token = self.current()
+
+                    if token[0] == ')':
+                        return (True, "")
+                    
+
                 elif value == 'toscroll':
                     self.advance()
                     token = self.current()
@@ -779,6 +828,23 @@ class RoyalScriptSemanticAnalyzer:
                     return (True, "")
                 elif value == 'phantom':
                     return (True, "")
+                
+                elif value == "wish":
+                    self.advance()
+                    token = self.current()
+
+                    if token[0] == '(':
+                        self.advance()
+                        token = self.current()
+
+                    if token[0] == 'scroll_lit':
+                        self.advance()
+                        token = self.current()
+
+                    if token[0] == ')':
+                        return (True, "")
+                    
+
                 elif value == 'torose':
                     self.advance()
                     token = self.current()
@@ -846,6 +912,23 @@ class RoyalScriptSemanticAnalyzer:
             elif data_type == "mirror":
                 if value.lower() in ["true", "false", "0", "1"]:
                     return (True, "")
+                
+                elif value == "wish":
+                    self.advance()
+                    token = self.current()
+
+                    if token[0] == '(':
+                        self.advance()
+                        token = self.current()
+
+                    if token[0] == 'scroll_lit':
+                        self.advance()
+                        token = self.current()
+
+                    if token[0] == ')':
+                        return (True, "")
+                    
+
                 elif value == 'tomirror':
                     self.advance()
                     token = self.current()
