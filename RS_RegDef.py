@@ -160,7 +160,7 @@ Delims = {
 
     'close_square_bracket_delim': {' ', ',', '=', '[', '~', ')', *RegDef['arithmetic_op'], '&', '|', *RegDef['relational_op'], '?'},
 
-    'comma_delim': {'-', '‘', '“', *RegDef['alphanum'], *RegDef['whitespace'], '{', '?', '"'},
+    'comma_delim': {'-', '‘', '“', *RegDef['alphanum'], *RegDef['whitespace'], '{', '?', '"', "'"},
 
     'escape_sequence_delim': {' ', '"', '"', *RegDef['ascii'], *RegDef['escape_seq'], '?'},
 

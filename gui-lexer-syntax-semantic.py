@@ -438,56 +438,56 @@ class RoyalScriptLexerGUI(tk.Tk):
 
                 
 
-    def run_syntax_analyzer(self, tokens):
-        """Run the syntax analyzer with tokens"""
-        parser = RoyalScriptParser(tokens)
-
-        try:
-            parser.parse()  # Run the syntax analysis
-            # self.errors_listbox.insert(tk.END, "\n─── Parser Output ───")
-            self.errors_listbox.insert(tk.END, parser.get_parsing_result())
-
-        except SyntaxError as e:
-            # self.errors_listbox.insert(tk.END, "\n─── Parser Error ───")
-            self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
-            
-        except Exception as e:
-            # self.errors_listbox.insert(tk.END, "\n─── Parser Error ───")
-            self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
-
-
     # def run_syntax_analyzer(self, tokens):
-    #     """Run the syntax analyzer with tokens."""
+    #     """Run the syntax analyzer with tokens"""
     #     parser = RoyalScriptParser(tokens)
 
     #     try:
-    #         syntax_result = parser.parse()  # Run syntax analysis
-
-    #         if syntax_result:  # ✅ If syntax analysis succeeds, proceed to semantic analysis
-    #             self.errors_listbox.insert(tk.END, "✅ Syntax Analysis Successful!")
-    #             self.run_semantic_analyzer(parser.final_statements_list)  # ✅ Pass parsed statements
-    #         else:
-    #             self.errors_listbox.insert(tk.END, "❌ Syntax Analysis Failed.")
+    #         parser.parse()  # Run the syntax analysis
+    #         # self.errors_listbox.insert(tk.END, "\n─── Parser Output ───")
+    #         self.errors_listbox.insert(tk.END, parser.get_parsing_result())
 
     #     except SyntaxError as e:
-    #         self.errors_listbox.insert(tk.END, f"❌ Syntax Error: {str(e)}")
+    #         # self.errors_listbox.insert(tk.END, "\n─── Parser Error ───")
+    #         self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
+            
     #     except Exception as e:
-    #         self.errors_listbox.insert(tk.END, f"⚠️ Unexpected Error in Syntax Analysis: {str(e)}")
+    #         # self.errors_listbox.insert(tk.END, "\n─── Parser Error ───")
+    #         self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
 
-    # def run_semantic_analyzer(self, final_statements_list):
-    #     """Run the semantic analyzer if syntax is correct."""
-    #     semantic_analyzer = RoyalScriptSemanticAnalyzer(final_statements_list)
 
-    #     try:
-    #         analysis_successful = semantic_analyzer.analyze()  # Returns True if no errors
+    def run_syntax_analyzer(self, tokens):
+        """Run the syntax analyzer with tokens."""
+        parser = RoyalScriptParser(tokens)
 
-    #         if analysis_successful:  # ✅ True means successful semantic analysis
-    #             self.errors_listbox.insert(tk.END, "✅ Semantic Analysis Successful!")
-    #         else:
-    #             self.errors_listbox.insert(tk.END, "❌ Semantic Analysis Failed. Errors found:")
-    #             for error in semantic_analyzer.errors:
-    #                 if error and error.strip():  # ensures error isn't empty or whitespace-only
-    #                     self.errors_listbox.insert(tk.END, f"   ➤ {error}")
+        try:
+            syntax_result = parser.parse()  # Run syntax analysis
+
+            if syntax_result:  # ✅ If syntax analysis succeeds, proceed to semantic analysis
+                self.errors_listbox.insert(tk.END, "✅ Syntax Analysis Successful!")
+                self.run_semantic_analyzer(parser.final_statements_list)  # ✅ Pass parsed statements
+            else:
+                self.errors_listbox.insert(tk.END, "❌ Syntax Analysis Failed.")
+
+        except SyntaxError as e:
+            self.errors_listbox.insert(tk.END, f"❌ Syntax Error: {str(e)}")
+        except Exception as e:
+            self.errors_listbox.insert(tk.END, f"⚠️ Unexpected Error in Syntax Analysis: {str(e)}")
+
+    def run_semantic_analyzer(self, final_statements_list):
+        """Run the semantic analyzer if syntax is correct."""
+        semantic_analyzer = RoyalScriptSemanticAnalyzer(final_statements_list)
+
+        try:
+            analysis_successful = semantic_analyzer.analyze()  # Returns True if no errors
+
+            if analysis_successful:  # ✅ True means successful semantic analysis
+                self.errors_listbox.insert(tk.END, "✅ Semantic Analysis Successful!")
+            else:
+                self.errors_listbox.insert(tk.END, "❌ Semantic Analysis Failed. Errors found:")
+                for error in semantic_analyzer.errors:
+                    if error and error.strip():  # ensures error isn't empty or whitespace-only
+                        self.errors_listbox.insert(tk.END, f"   ➤ {error}")
 
 
         except Exception as e:

@@ -136,7 +136,7 @@ class RoyalScriptParser:
             self.advance()
             return True
         # If no token or token does not match, prepare an error message.
-        full_token = self.current_token_tuple()
+        full_token = self.current_token()
         if token is None:
             self.error_message = f"Syntax Error: Unexpected end of input at Line {self.current_line + 1}"
         else:
@@ -164,8 +164,8 @@ class RoyalScriptParser:
                 self.error_message = f"Syntax Error: Expected scroll literal, but got '{full_token}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             elif expected == 'treasures_lit':
                 self.error_message = f"Syntax Error: Expected treasures literal, but got '{full_token}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
-            else:
-                self.error_message = f"Syntax Error: Expected {expected}, but got {full_token} at Line {self.current_line + 1}, Index {self.current_index + 1}"
+            # else:
+            #     self.error_message = f"Syntax Error: Expected {expected}, but got {full_token} at Line {self.current_line + 1}, Index {self.current_index + 1}"
         print(f"Matching expected: {repr(expected)} | Current token: {self.current_token_tuple()}")
         return False
 
@@ -290,6 +290,7 @@ class RoyalScriptParser:
             return True
 
         # self.error_message = f"Syntax Error: Expected '=', but got '{repr(self.current_token())}' at Line {self.current_line + 1}"
+        self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
         return False
 
 
@@ -317,6 +318,7 @@ class RoyalScriptParser:
 
         if self.match('['):
             if not (self.match('treasures_lit') or self.match('1')):
+                self.error_message = f"Syntax Error: Expected treasures literals but got '{repr(self.current_token())}, at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.match(']'):
                 return False
@@ -327,6 +329,7 @@ class RoyalScriptParser:
             return True  
         
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False 
 
         
@@ -345,6 +348,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
 
@@ -382,6 +386,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
 
@@ -417,6 +422,7 @@ class RoyalScriptParser:
             return True  # If no more rows, end with closing bracket
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
 
@@ -437,6 +443,7 @@ class RoyalScriptParser:
             return True  # If no more literals, end with closing bracket
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
 
@@ -467,6 +474,7 @@ class RoyalScriptParser:
             return True  # End of array initialization with tilde
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
 
@@ -494,6 +502,7 @@ class RoyalScriptParser:
         elif self.match('identifier'):
             return True
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         
     def assignment_exp(self):
@@ -635,6 +644,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
 
@@ -783,6 +793,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
   
@@ -795,6 +806,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
     
@@ -804,6 +816,7 @@ class RoyalScriptParser:
             return True
         
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         
     def more_log(self):
@@ -883,6 +896,7 @@ class RoyalScriptParser:
             return True
         
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
     
 
@@ -1019,6 +1033,7 @@ class RoyalScriptParser:
                 return False
             return True
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
 
@@ -1068,6 +1083,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
         
@@ -1166,6 +1182,7 @@ class RoyalScriptParser:
         
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
         
@@ -1200,6 +1217,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
 
@@ -1220,6 +1238,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
 
@@ -1246,6 +1265,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
     def concat(self):
@@ -1418,6 +1438,7 @@ class RoyalScriptParser:
             return True
         
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         
     def body(self):
@@ -1533,6 +1554,7 @@ class RoyalScriptParser:
             return True
         
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
     def var_reassign(self):
@@ -1565,6 +1587,7 @@ class RoyalScriptParser:
             return self.do_while_statement()
         
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
     
     def for_loop(self):
@@ -1638,6 +1661,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
         
@@ -1695,7 +1719,9 @@ class RoyalScriptParser:
                         if not self.var_reassign():
                             return False
                         return self.loop_body()
+                    self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}" 
                     return False
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             
         elif token in ['dynasty', 'scroll', 'treasures', 'mirror', 'rose', 'ocean']:
@@ -1740,6 +1766,7 @@ class RoyalScriptParser:
     def if_break(self):
         # 156	<if_break>	→	cast (<condition>) {<body><flow_control>} <elif_break> <else_break>
         if not self.match('cast'):
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not self.match('('):
             return False
@@ -1768,20 +1795,28 @@ class RoyalScriptParser:
         # 157	<elif_break>	→	twist(<condition>) {<body><flow_control>}<elif_break>
         if self.match('twist'):
             if not self.match('('):
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.condition():
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.match(')'):
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.match('{'):
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.body():
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.flow_control():
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.match('}'):
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.elif_break():
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             self.store_completed_statement("ELIF_BREAK")
             return True
@@ -1791,6 +1826,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         
     
@@ -1844,6 +1880,7 @@ class RoyalScriptParser:
     def do_while_statement(self):
         # 164	<do_while>	→	believe {<loop_body>} forever(<condition>)~
         if not self.match('believe'):
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not self.match('{'):
             return False
@@ -1852,6 +1889,7 @@ class RoyalScriptParser:
         if not self.match('}'):
             return False
         if not self.match('forever'):
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not self.match('('):
             return False
@@ -1889,6 +1927,7 @@ class RoyalScriptParser:
                         self.current_index = start_pos
                         return self.arithmetic_exp()
                     return True  
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             elif next_token == '[':
                 start_pos = self.current_index 
@@ -1906,7 +1945,8 @@ class RoyalScriptParser:
                     elif next_token in ['+', '-', '*', '/', '%']:
                         self.current_index = start_pos
                         return self.arithmetic_exp()
-                    return True  
+                    return True
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             elif next_token in ['>', '<', '>=', '<=', '==', '!=']:
                 return self.relational_exp()
@@ -2082,8 +2122,10 @@ class RoyalScriptParser:
         if not self.match('('):
             return False
         if not self.granted_content():
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not self.more_granted():
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not self.match(')'):
             return False
@@ -2116,6 +2158,7 @@ class RoyalScriptParser:
                         self.current_index = start_pos
                         return self.logical_exp()
                     return True  
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             # 195	<granted_content>	→	<array_element>
             elif next_token == '[':
@@ -2136,6 +2179,7 @@ class RoyalScriptParser:
                         self.current_index = start_pos
                         return self.logical_exp()
                     return True  
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             # 194	<granted_content>	→	<arithmetic_exp>
             elif next_token in ['+', '-', '*', '/', '%']:
@@ -2233,6 +2277,7 @@ class RoyalScriptParser:
                 elif operator_in_paren == 'logical':
                     return self.logical_exp()
                 elif operator_in_paren == 'Not Valid':
+                    self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                     return False
             else:
                 # Reset position and parse according to the operator
@@ -2242,19 +2287,23 @@ class RoyalScriptParser:
                     if operator_in_paren == 'arithmetic':
                         return self.arithmetic_exp()
                     print("Error invalid operand")
+                    self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                     return False
                 elif next_after_paren in ['>', '<', '>=', '<=', '==', '!=']:
                     if operator_in_paren == 'arithmetic':
                         return self.relational_exp()
                     print("Error invalid operand")
+                    self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                     return False
                 elif next_after_paren in ['&&', '||']:
                     if operator_in_paren == 'relational':
                         return self.logical_exp()
                     print("Error invalid operand")
+                    self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                     return False
                 else:
                     print(f"This is == {token}")
+                    self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                     return False
                 
         # 206	<granted_content>	→	%.treasures_litf
@@ -2282,6 +2331,7 @@ class RoyalScriptParser:
             # If loop exited without closing parenthesis, there's a syntax error
             if paren_count > 0:
                 print("Syntax Error: Unmatched parenthesis")
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
 
             # Now we're at the closing parenthesis, check what follows
@@ -2294,15 +2344,19 @@ class RoyalScriptParser:
                 return self.type_conversion()
             else:
                 print("Invalid string operations")
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             
         # 199	<granted_content>	→	lengthof(<id_lit>)
         elif self.match('lengthof'):
             if not self.match('('):
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.match('identifier'):
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.match(')'):
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             return True
         
@@ -2330,16 +2384,22 @@ class RoyalScriptParser:
     def set_precision(self):
         # 197	<set_precision>	→	“%.[treasures_lit]f”
         if not self.match('%'):
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not self.match('.'):
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not self.match('['):
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not (self.match('treasures_lit') or self.match('1') or self.match('0')):
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not self.match(']'):
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         if not self.match('f'):
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         return True
         
@@ -2375,6 +2435,7 @@ class RoyalScriptParser:
         if token in {'scroll', 'treasures', 'mirror', 'ocean', 'rose'}:
             # self.advance()  # Consume the data_type token
             return True
+        self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
         return False
 
 
@@ -2400,7 +2461,8 @@ class RoyalScriptParser:
                     elif next_after_func in ['&&', '||']:
                         self.current_index = start_pos
                         return self.logical_exp()
-                    return True  
+                    return True 
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}" 
                 return False
             # 220	<val>	→	<array_element>
             elif next_token == '[':
@@ -2421,6 +2483,7 @@ class RoyalScriptParser:
                         self.current_index = start_pos
                         return self.logical_exp()
                     return True  
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             # 213	<val>	→	<arithmetic_exp>
             elif next_token in ['+', '-', '*', '/', '%']:
@@ -2520,6 +2583,7 @@ class RoyalScriptParser:
                 elif operator_in_paren == 'logical':
                     return self.logical_exp()
                 elif operator_in_paren == 'Not Valid':
+                    self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                     return False
             else:
                 # Reset position and parse according to the operator
@@ -2529,20 +2593,24 @@ class RoyalScriptParser:
                     if operator_in_paren == 'arithmetic':
                         return self.arithmetic_exp()
                     print("Error invalid operand")
+                    self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                     return False
                 # 216	<val>	→	<relational_exp>
                 elif next_after_paren in ['>', '<', '>=', '<=', '==', '!=']:
                     if operator_in_paren == 'arithmetic':
                         return self.relational_exp()
                     print("Error invalid operand")
+                    self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                     return False
                 elif next_after_paren in ['&&', '||']:
                     if operator_in_paren == 'relational' or operator_in_paren == 'logical':
                         return self.logical_exp()
                     print("Error invalid operand")
+                    self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                     return False
                 else:
                     print(f"This is == {token}")
+                    self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                     return False
         # 215	<val>	→	<type_conversion>
         elif token in ['toscroll', 'toocean', 'totreasures', 'torose', 'tomirror']:
@@ -2563,6 +2631,7 @@ class RoyalScriptParser:
             # If loop exited without closing parenthesis, there's a syntax error
             if paren_count > 0:
                 print("Syntax Error: Unmatched parenthesis")
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
 
             # Now we're at the closing parenthesis, check what follows
@@ -2575,6 +2644,7 @@ class RoyalScriptParser:
                 return self.type_conversion()
             else:
                 print("Invalid string operations")
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
 
         # 214	<val>	→	<input>        
@@ -2623,6 +2693,7 @@ class RoyalScriptParser:
                         self.current_index = start_pos
                         return self.assignment_exp()
                     return True  
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             elif next_token == '[':
                 start_pos = self.current_index 
@@ -2639,6 +2710,7 @@ class RoyalScriptParser:
                         self.current_index = start_pos
                         return self.assignment_exp()
                     return True  
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             elif next_token in ['+', '-', '*', '/', '%']:
                 return self.arithmetic_exp()
@@ -2714,7 +2786,7 @@ class RoyalScriptParser:
                 self.advance()
                 cur_token = self.current_token()
                 if cur_token is None:  # End of tokens before closing parenthesis
-                    self.error_message = ("Syntax Error: Missing closing parenthesis")
+                    self.error_message = (f"Syntax Error: Missing closing parenthesis, at Line {repr(self.current_line)}, Index {repr(self.current_index)}")
                     return False  # Or raise an exception
 
                 content.append(cur_token)
@@ -2738,6 +2810,7 @@ class RoyalScriptParser:
                 elif operator_in_paren == 'logical':
                     return self.logical_exp()
                 elif operator_in_paren == 'Not Valid':
+                    self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                     return False
             else:
                 # Reset position and parse according to the operator
@@ -2760,6 +2833,7 @@ class RoyalScriptParser:
                     return False
                 else:
                     print(f"This is == {token}")
+                    self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                     return False
             
         elif token in ['toscroll', 'toocean', 'totreasures', 'torose', 'tomirror']:
@@ -2780,6 +2854,7 @@ class RoyalScriptParser:
             # If loop exited without closing parenthesis, there's a syntax error
             if paren_count > 0:
                 print("Syntax Error: Unmatched parenthesis")
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
 
             # Now we're at the closing parenthesis, check what follows
@@ -2792,6 +2867,7 @@ class RoyalScriptParser:
                 return self.type_conversion()
             else:
                 print("Invalid string operations")
+                self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
 
 
@@ -2887,6 +2963,7 @@ class RoyalScriptParser:
         # 236	<index>	→	[treasures_lit] <column1>
         if self.match('['):
             if not (self.match('treasures_lit') or self.match('1') or self.match('0')):
+                self.error_message = f"Syntax Error: Invalid array index '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.match(']'):
                return False
@@ -2901,6 +2978,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
             
 
@@ -2910,6 +2988,7 @@ class RoyalScriptParser:
         # 238	<column1>	→	[treasures_lit]
         if self.match('['):
             if not (self.match('treasures_lit') or self.match('1') or self.match('0')):
+                self.error_message = f"Syntax Error: Invalid array index '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
             if not self.match(']'):
                 return False
@@ -2920,6 +2999,7 @@ class RoyalScriptParser:
             return True
 
         else:
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         
         
