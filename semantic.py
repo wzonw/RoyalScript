@@ -192,6 +192,40 @@ class RoyalScriptSemanticAnalyzer:
             self.current_statement_idx += 1
             print(f"[DEBUG] Moving to next statement. Current index: {self.current_statement_idx}")
 
+        print("Dynasty Name:")
+        for dtype, id_dict in self.dynasty_id.items():
+            print(f"  {dtype}: {list(id_dict)}")
+
+        print("Other Name:")
+        for dtype, id_dict in self.other_id.items():
+            print(f"  {dtype}: {list(id_dict)}")
+
+        print("Dynasty Array Name:")
+        for dtype, id_dict in self.dynasty_array_id.items():
+            print(f"  {dtype}: {list(id_dict)}")
+
+        print("Other Array Name:")
+        for dtype, id_dict in self.other_array_id.items():
+            print(f"  {dtype}: {list(id_dict)}")
+
+        print("1D ARRAY CONTENTS:")
+        for array_name, elements in self.one_dim.items():
+            print(f"  {array_name}: {elements}")
+
+        print("2D ARRAY CONTENTS:")
+        for array_name, rows in self.two_dim.items():
+            print(f"  {array_name}:")
+            for row_index, row in enumerate(rows):
+                print(f"    Row {row_index}: {row}")
+
+        print("Dynasty VALUES:")
+        for (dtype, var_name), value in self.dynasty_values.items():
+            print(f"  ({dtype}, {var_name}): {value} (Type: {type(value).__name__})")
+
+        print("Other VALUES:")
+        for (dtype, var_name), value in self.other_values.items():
+            print(f"  ({dtype}, {var_name}): {value} (Type: {type(value).__name__})")
+
         # After processing all statements, report errors
         if self.errors:
             print(f"[DEBUG] Semantic analysis completed with errors: {self.errors}")
@@ -212,7 +246,7 @@ class RoyalScriptSemanticAnalyzer:
         token = self.current()
         self.datatype = None
         self.isDynasty = False
-        self.dynasty_dval = False
+        self.dynasty_dval = "phantom"
         self.other_dval = "phantom"
         self.name = None
 
@@ -240,19 +274,34 @@ class RoyalScriptSemanticAnalyzer:
             self.errors.append(f"{token[1]} is already declared")
             return
 
+        peeked_token = self.peek()
+        if peeked_token != '=':
+            if self.isDynasty:
+                # Add the identifier to the set for the given data type.
+                self.dynasty_id[self.datatype].add(token[1])
+                # Store its associated value separately, if needed.
+                if self.datatype == "mirror":
+                    self.dynasty_values[(self.datatype, token[1])] = "false"
+                else:
+                    self.dynasty_values[(self.datatype, token[1])] = self.dynasty_dval
+            else:
+                self.other_id[self.datatype].add(token[1])
+                if self.datatype == "mirror":
+                    self.other_values[(self.datatype, token[1])] = "false"
+                else:
+                    self.other_values[(self.datatype, token[1])] = self.other_dval
+            self.name = token[1]
+
+        elif peeked_token == '=':
+            if self.isDynasty:
+                # Add the identifier to the set for the given data type.
+                self.dynasty_id[self.datatype].add(token[1])
+            else:
+                self.other_id[self.datatype].add(token[1])
+            self.name = token[1]
         
-        if self.isDynasty:
-            # Add the identifier to the set for the given data type.
-            self.dynasty_id[self.datatype].add(token[1])
-            # Store its associated value separately, if needed.
-            self.dynasty_values[(self.datatype, token[1])] = self.dynasty_dval
-        else:
-            self.other_id[self.datatype].add(token[1])
-            self.other_values[(self.datatype, token[1])] = self.other_dval
-        self.name = token[1]
+
         self.advance()
-
-
         token = self.current()
         if token[0] == '=':
             self.init(self.datatype, self.name, self.isDynasty)
@@ -266,17 +315,23 @@ class RoyalScriptSemanticAnalyzer:
     def init(self, datatype, name, isDynasty):
         self.advance()
         token = self.current()
-        is_valid, error_message = self.is_value_compatible_with_type(token[1], datatype, token[0])
+        self.current_datatype = token[0]
+        is_valid, error_message, _ = self.is_value_compatible_with_type(token[1], datatype, token[0], name, isDynasty)
 
         if not is_valid:
             self.errors.append(error_message)
             return
-
-        if isDynasty:
-            self.dynasty_values[(datatype, name)] = token[1]
         
-        else:
-            self.other_values[(datatype, name)] = token[1]
+        print(token[1], "----------------------------------")
+        
+        if self.current_datatype != "identifier" or self.current_datatype != "lengthof":
+            if isDynasty:
+                self.dynasty_values[(datatype, name)] = token[1]
+                
+            else:
+                self.other_values[(datatype, name)] = token[1]
+        
+    
 
         self.advance()
         token = self.current()
@@ -300,18 +355,34 @@ class RoyalScriptSemanticAnalyzer:
             self.errors.append(f"{token[1]} is already declared")
             return
         
-        if self.isDynasty:
-            # Add the identifier to the set for the given data type.
-            self.dynasty_id[self.datatype].add(token[1])
-            # Store its associated value separately, if needed.
-            self.dynasty_values[(self.datatype, token[1])] = self.dynasty_dval
-        else:
-            self.other_id[self.datatype].add(token[1])
-            self.other_values[(self.datatype, token[1])] = self.other_dval
-        self.name = token[1]
+        peeked_token = self.peek()
+        if peeked_token != '=':
+            if self.isDynasty:
+                # Add the identifier to the set for the given data type.
+                self.dynasty_id[self.datatype].add(token[1])
+                # Store its associated value separately, if needed.
+                if self.datatype == "mirror":
+                    self.dynasty_values[(self.datatype, token[1])] = "false"
+                else:
+                    self.dynasty_values[(self.datatype, token[1])] = self.dynasty_dval
+            else:
+                self.other_id[self.datatype].add(token[1])
+                if self.datatype == "mirror":
+                    self.other_values[(self.datatype, token[1])] = "false"
+                else:
+                    self.other_values[(self.datatype, token[1])] = self.other_dval
+            self.name = token[1]
+
+        elif peeked_token == '=':
+            if self.isDynasty:
+                # Add the identifier to the set for the given data type.
+                self.dynasty_id[self.datatype].add(token[1])
+            else:
+                self.other_id[self.datatype].add(token[1])
+            self.name = token[1]
+        
+
         self.advance()
-
-
         token = self.current()
         if token[0] == '=':
             self.init(datatype, self.name, isDynasty)
@@ -322,7 +393,7 @@ class RoyalScriptSemanticAnalyzer:
         elif token[0] == '~':
             return
 
-    def is_value_compatible_with_type(self, value: str, data_type: str, token_type) -> tuple[bool, str]:
+    def is_value_compatible_with_type(self, value: str, data_type: str, token_type, name, isDynasty) -> tuple[bool, str, any]:
         """
         Returns (is_valid, error_message) indicating if 'value' is valid
         for the given 'data_type'. If invalid, 'error_message' describes why.
@@ -331,144 +402,69 @@ class RoyalScriptSemanticAnalyzer:
 
         if any (value in s for s in self.dynasty_array_id.values()) or any (value in s for s in self.other_array_id.values()):
             self.isArray = True
-        token = self.current()
-        print(self.isArray)
-
-        print("Dynasty ID contents:")
-        for dtype, id_dict in self.dynasty_id.items():
-            print(f"  {dtype}: {list(id_dict)}")
-
-        print("Other ID contents:")
-        for dtype, id_dict in self.other_id.items():
-            print(f"  {dtype}: {list(id_dict)}")
+        # token = self.current()
+        
 
         if token_type == 'identifier':
-                # First check if we have a next token at all
+            # First check if we have a next token at all
             peeked_token = self.peek()
 
             if peeked_token is None:
-                return self.check_identifier_type(value, data_type)
+                return self.check_identifier_type(value, data_type, name)
             
-            if self.isArray:
-                token = self.current()
-                # Now check if the next token is a bracket for array access
-                if peeked_token[0] == '[':  # Compare with the token type, not value
-                    # Check if array exists in our tracking structures
-                    print("Array access detected for:", value)
-                    is_one_dim = value in self.one_dim
-                    is_two_dim = value in self.two_dim
-                    
-                    if not (is_one_dim or is_two_dim):
-                        return (False, f"Array '{value}' is not defined.")
-                    
-                    # Check if the identifier is valid for the given data type
-                    if not self.check_identifier_type(value, data_type):
-                        return (False, f"Type mismatch for array '{value}'.")
-                    
-                    # Move to the opening bracket
-                    self.advance()
-                    token = self.current()
-                    
-                    # Handle 1D array indexing
-                    if is_one_dim:
-                        expected_size = self.one_dim[value][0]  # Get the size from [size]
-                        print(f"1D array access for {value} with max index {expected_size-1}")
-                        
-                        # Parse the single `[index]`
-                        if token[0] == '[':
-                            self.advance()
-                            token = self.current()
-                            
-                            # if token[0] != 'number':
-                            #     return (False, f"Expected numeric index, got '{token[0]}'.")
-                            
-                            index = int(token[1])
-                            print(f"Checking index {index} against max {expected_size-1}")
-                            if index < 0 or index >= expected_size:
-                                return (False, f"Array index {index} out of bounds; max is {expected_size - 1}.")
-                            
-                            # Move past the index
-                            self.advance()
-                            token = self.current()
-                            
-                            if token[0] == ']':
-                                # self.advance()  # Move past the closing bracket
-                                return (True, "")
-                            else:
-                                return (False, f"Expected ']' after array index, got '{token[0]}'.")
-                        
-                        
-                    # Handle 2D array indexing
-                    elif is_two_dim:
-                        (expected_rows, expected_cols) = self.two_dim[value]
-                        print(f"2D array access for {value} with max indices [{expected_rows-1}][{expected_cols-1}]")
-                        
-                        # Parse the first `[row_index]`
-                        if token[0] == '[':
-                            self.advance()
-                            token = self.current()
-                            
-                            # if token[0] != 'number':
-                            #     return (False, f"Expected numeric row index, got '{token[0]}'.")
-                            
-                            row_index = int(token[1])
-                            print(f"Checking row index {row_index} against max {expected_rows-1}")
-                            if row_index < 0 or row_index >= expected_rows:
-                                return (False, f"Row index {row_index} out of bounds; max is {expected_rows - 1}.")
-                            
-                            # Move past the row index
-                            self.advance()
-                            token = self.current()
-                            
-                            if token[0] == ']':
-                                # self.advance()  # Move past the closing bracket
-                                token = self.current()
-                            else:
-                                return (False, f"Expected ']' after row index, got '{token[0]}'.")
-                            
-                            # Parse the second `[col_index]`
-                            if token[0] == '[':
-                                self.advance()
-                                token = self.current()
-                                
-                                # if token[0] != 'number':
-                                #     return (False, f"Expected numeric column index, got '{token[0]}'.")
-                                
-                                col_index = int(token[1])
-                                print(f"Checking col index {col_index} against max {expected_cols-1}")
-                                if col_index < 0 or col_index >= expected_cols:
-                                    return (False, f"Column index {col_index} out of bounds; max is {expected_cols - 1}.")
-                                
-                                # Move past the column index
-                                self.advance()
-                                token = self.current()
-                                
-                                if token[0] == ']':
-                                    # self.advance()  # Move past the closing bracket
-                                    return (True, "")
-                                else:
-                                    return (False, f"Expected ']' after column index, got '{token[0]}'.")
-                            else:
-                                return (False, f"Expected '[' for column index, got '{token[0]}'.")
-                        else:
-                            return (False, f"Expected '[' for row index, got '{token[0]}'.")
                 
-                elif peeked_token[0] == '~':
-                    # Not an array access, just check the identifier
-                    return (False, f"{token[1]} is an array and must have an index.")
+            if self.isArray:
+                is_OneDim, row, col = self.array_element(value, data_type, True, peeked_token)
 
-            elif (any(token[1] in s for s in self.dynasty_id.values()) or any(token[1] in s for s in self.other_id.values()) or any(token[1] in s for s in self.other_array_id.values())):
-                return self.check_identifier_type(value, data_type)
-            else:
-                return (False, f"Undefined identifier: '{value}'")
+                if row is None or (not is_OneDim and col is None):
+                    # An error has already been recorded inside array_element, just return now.
+                    return (False, "", None)
+
+                array_elements = self.one_dim.get(value)
+
+                if array_elements is None:
+                    self.errors.append(f"Array '{value}' is not declared.")
+                    return (False, f"Array '{value}' not declared.", None)
+
+                try:
+                    if is_OneDim:
+                        element_value = array_elements[row]
+                    else:
+                        element_value = array_elements[row][col]
+
+                    return self.check_array_element(element_value, data_type)
+
+                except IndexError:
+                    self.errors.append(f"Index out of bounds for array '{value}'.")
+                    return (False, f"Index out of bounds for '{value}'.", None)
             
-
+            elif (any(value in s for s in self.dynasty_id.values()) or any(value in s for s in self.other_id.values())):
+                print(value, data_type, token_type, name, "->>>>>>>>>>>>>>>>>>>>>>>>>")
+                
+                is_valid, error_message, actual_value = self.check_identifier_type(value, data_type, name)
+                
+                # Make sure to store the actual value if the check passed
+                if is_valid and actual_value is not None:
+                    if self.isDynasty:
+                        self.dynasty_values[(data_type, name)] = actual_value
+                    else:
+                        self.other_values[(data_type, name)] = actual_value
+                
+                return (is_valid, error_message, actual_value)
+            else:
+                print("xxxxxxxxxxxxxxxxxxxxxx")
+                print(value, data_type, token_type, name, "->>>>>>>>>>>>>>>>>>>>>>>>>")
+                return (False, f"Undefined identifier: '{value}'", None)
+            
+        
         else:
+            print("it is treasures---") 
             if data_type == "treasures":
+                self.length = 0
                 if value.isdigit() or (value.startswith('-') and value[1:].isdigit()):
-                    return (True, "")
+                    return (True, "", None)
                 elif value == 'phantom':
-                    return (True, "")
+                    return (True, "", None)
                 elif value == 'lengthof':
                     self.advance()
                     token = self.current()
@@ -478,12 +474,25 @@ class RoyalScriptSemanticAnalyzer:
                         token = self.current()
                         
                     if token[0] == 'identifier':
-                        return self.check_identifier_type(token[1], "scroll")
+                        return self.check_identifier_type(token[1], "scroll", name)
+                    
+                    if isDynasty:
+                        self.scroll_lit = self.dynasty_values[data_type, token[1]] 
+                        print(self.scroll_lit)
+                        self.length = len(self.scroll_lit)
+                    else:
+                        self.other_values[data_type, name] = self.length
                     self.advance()
                     token = self.current()
 
+                    if isDynasty:
+                        self.dynasty_values[data_type, name] = self.length
+                    
+                    else:
+                        self.other_values[data_type, name] = self.length
+
                     if token[0] == ')':
-                        return (True, "")
+                        return (True, "", None)
                     
                 elif value == "wish":
                     self.advance()
@@ -498,105 +507,142 @@ class RoyalScriptSemanticAnalyzer:
                         token = self.current()
 
                     if token[0] == ')':
-                        return (True, "")
+                        return (True, "", None)
                     
                 elif value == 'totreasures':
+                    print("to treasuress")
                     self.advance()
                     token = self.current()
                     if token[0] == '(':
                         self.advance()
                         token = self.current()
                         if token[0] == 'identifier':
+                            print("to treasures ID")
                             self.datatype = None
                             self.actual_value = None
                             self.isDynasty = False
-                        
-                            for dtype, identifiers in self.dynasty_id.items():
-                                if token[1] in identifiers:
-                                    self.datatype = dtype
-                                    self.isDynasty = True
-                                    break
-                            if not self.datatype:
-                                for dtype, identifiers in self.other_id.items():
+                            # First check if we have a next token at all
+                            peeked_token = self.peek()
+
+                            if peeked_token is None:
+                                return self.check_identifier_type(token[1], data_type, name)
+                            
+                            if any (token[1] in s for s in self.dynasty_array_id.values()) or any (token[1] in s for s in self.other_array_id.values()):
+                                self.isArray = True
+
+                            if self.isArray:
+                                print("it is -------- an array")
+                                is_OneDim, row, col = self.array_element(token[1], data_type, True, peeked_token)
+
+                                if row is None or (not is_OneDim and col is None):
+                                    # An error has already been recorded inside array_element, just return now.
+                                    return (False, "", None)
+
+                                array_elements = self.one_dim.get(token[1])
+
+                                if array_elements is None:
+                                    self.errors.append(f"Array '{token[1]}' is not declared.")
+                                    return (False, f"Array '{token[1]}' not declared.", None)
+
+                                try:
+                                    if is_OneDim:
+                                        element_value = array_elements[row]
+                                    else:
+                                        element_value = array_elements[row][col]
+
+                                    return self.check_array_element(element_value, "treasures")
+
+                                except IndexError:
+                                    self.errors.append(f"Index out of bounds for array '{token[1]}'.")
+                                    return (False, f"Index out of bounds for '{token[1]}'.", None)
+                            else:
+                                print("------ it is not an array ------- ")
+                                for dtype, identifiers in self.dynasty_id.items():
                                     if token[1] in identifiers:
                                         self.datatype = dtype
-                                        self.isDynasty = False
+                                        self.isDynasty = True
                                         break
+                                if not self.datatype:
+                                    for dtype, identifiers in self.other_id.items():
+                                        if token[1] in identifiers:
+                                            self.datatype = dtype
+                                            self.isDynasty = False
+                                            break
 
-                            if not self.datatype:
-                                return (False, f"Undefined identifier: '{token[1]}'")
+                                if not self.datatype:
+                                    return (False, f"Undefined identifier: '{token[1]}'", None)
+                                
+                                if self.isDynasty:
+                                    self.actual_value = self.dynasty_values[(self.datatype, token[1])]
+                                else:
+                                    self.actual_value = self.other_values[(self.datatype, token[1])]
                             
-                            if self.isDynasty:
-                                self.actual_value = self.dynasty_values[(self.datatype, token[1])]
-                            else:
-                                self.actual_value = self.other_values[(self.datatype, token[1])]
-                        
-                            # Check if the value can be converted to treasures
-                            if self.datatype == "treasures":
-                                # Already a treasures value
-                                return (True, "")
-                            elif self.datatype == "ocean":
-                                # Can convert ocean to treasures
-                                return (True, "")
-                            elif self.datatype == "scroll":
-                                # Check if string is numeric
-                                if self.actual_value is None:  # phantom
-                                    return (False, "Cannot convert phantom scroll to treasures")
-                                string_value = self.actual_value.strip('"')
-                                if string_value.isdigit() or (string_value.startswith('-') and string_value[1:].isdigit()):
-                                    return (True, "")
+                                # Check if the value can be converted to treasures
+                                if self.datatype == "treasures":
+                                    # Already a treasures value
+                                    return (True, "", None)
+                                elif self.datatype == "ocean":
+                                    # Can convert ocean to treasures
+                                    return (True, "", None)
+                                elif self.datatype == "scroll":
+                                    # Check if string is numeric
+                                    if self.actual_value is None:  # phantom
+                                        return (False, "Cannot convert phantom scroll to treasures", None)
+                                    string_value = self.actual_value.strip('"')
+                                    if string_value.isdigit() or (string_value.startswith('-') and string_value[1:].isdigit()):
+                                        return (True, "", None)
+                                    else:
+                                        return (False, f"Cannot convert non-numeric scroll '{string_value}' to treasures", None)
+                                elif self.datatype == "rose":
+                                    # Check if string is numeric
+                                    if self.actual_value is None:  # phantom
+                                        return (False, "Cannot convert phantom scroll to treasures", None)
+                                    string_value = self.actual_value.strip("'")
+                                    if string_value.isdigit():
+                                        return (True, "", None)
+                                    else:
+                                        return (False, f"Cannot convert non-numeric rose '{string_value}' to treasures", None)
+                                elif self.datatype == "mirror":
+                                    # Can convert boolean to 0/1
+                                    return (True, "", None)
                                 else:
-                                    return (False, f"Cannot convert non-numeric scroll '{string_value}' to treasures")
-                            elif self.datatype == "rose":
-                                # Check if string is numeric
-                                if self.actual_value is None:  # phantom
-                                    return (False, "Cannot convert phantom scroll to treasures")
-                                string_value = self.actual_value.strip("'")
-                                if string_value.isdigit():
-                                    return (True, "")
-                                else:
-                                    return (False, f"Cannot convert non-numeric rose '{string_value}' to treasures")
-                            elif self.datatype == "mirror":
-                                # Can convert boolean to 0/1
-                                return (True, "")
-                            else:
-                                return (False, f"Cannot convert {self.datatype} to treasures")
+                                    return (False, f"Cannot convert {self.datatype} to treasures", None)
 
-                            
+                                
                         elif token[0] == 'treasures_lit':
-                            return (True, "")
+                            return (True, "", None)
                         elif token[0] in  ['1', '0']:
-                            return (True, "")
+                            return (True, "", None)
                         elif token[0] == 'ocean_lit':
-                            return (True, "")
+                            return (True, "", None)
                         elif token[0] == 'scroll_lit':
                             # Check if string is numeric
                             if token[1] is None:  # phantom
-                                return (False, "Cannot convert phantom scroll to treasures")
+                                return (False, "Cannot convert phantom scroll to treasures", None)
                             string_value= token[1].strip('"')
                             if string_value.isdigit() or (string_value.startswith('-') and string_value[1:].isdigit()):
-                                return (True, "")
+                                return (True, "", None)
                             else:
-                                return (False, f"Cannot convert non-numeric scroll '{string_value}' to treasures")
+                                return (False, f"Cannot convert non-numeric scroll '{string_value}' to treasures",None)
                         elif token[0] == 'rose_lit':
                             if token[1] is None:  # phantom
-                                return (False, "Cannot convert phantom scroll to treasures")
+                                return (False, "Cannot convert phantom scroll to treasures", None)
                             string_value= token[1].strip("'")
                             if string_value.isdigit():
-                                return (True, "")
+                                return (True, "", None)
                             else:
-                                return (False, f"Cannot convert non-numeric rose '{string_value}' to treasures")
+                                return (False, f"Cannot convert non-numeric rose '{string_value}' to treasures", None)
                         elif token[0] == ['mirror_lit']:
                             # if token[1].isdigit():
-                            return (True, "")
+                            return (True, "", None)
 
                 else:
-                    return (False, f"'{value}' is not a valid integer (treasures).")
+                    return (False, f"'{value}' is not a valid integer (treasures).", None)
 
             elif data_type == "ocean":
                 # 1) Phantom is always valid for ocean
                 if value == 'phantom':
-                    return (True, "")
+                    return (True, "", None)
 
                 elif value == "wish":
                     self.advance()
@@ -611,7 +657,7 @@ class RoyalScriptSemanticAnalyzer:
                         token = self.current()
 
                     if token[0] == ')':
-                        return (True, "")
+                        return (True, "", None)
                     
 
                 # 2) If user wrote "toocean"
@@ -621,7 +667,7 @@ class RoyalScriptSemanticAnalyzer:
                     token = self.current()
 
                     if token[0] != '(':
-                        return (False, f"Expected '(' after 'toocean', got '{token[0]}' instead.")
+                        return (False, f"Expected '(' after 'toocean', got '{token[0]}' instead.", None)
                     self.advance()
                     token = self.current()
 
@@ -631,115 +677,152 @@ class RoyalScriptSemanticAnalyzer:
                         self.actual_value = None
                         self.isDynasty = False
 
-                        # Check dynasty IDs
-                        for dtype, identifiers in self.dynasty_id.items():
-                            if token[1] in identifiers:
-                                self.datatype = dtype
-                                self.isDynasty = True
-                                break
-                        # If not found in dynasty, check other IDs
-                        if not self.datatype:
-                            for dtype, identifiers in self.other_id.items():
+                        # First check if we have a next token at all
+                        peeked_token = self.peek()
+
+                        if peeked_token is None:
+                            return self.check_identifier_type(token[1], data_type, name)
+                        
+                        if any (token[1] in s for s in self.dynasty_array_id.values()) or any (token[1] in s for s in self.other_array_id.values()):
+                            self.isArray = True
+
+                        if self.isArray:
+                            print("it is -------- an array")
+                            is_OneDim, row, col = self.array_element(token[1], data_type, True, peeked_token)
+
+                            if row is None or (not is_OneDim and col is None):
+                                # An error has already been recorded inside array_element, just return now.
+                                return (False, "", None)
+
+                            array_elements = self.one_dim.get(token[1])
+
+                            if array_elements is None:
+                                self.errors.append(f"Array '{token[1]}' is not declared.")
+                                return (False, f"Array '{token[1]}' not declared.", None)
+
+                            try:
+                                if is_OneDim:
+                                    element_value = array_elements[row]
+                                else:
+                                    element_value = array_elements[row][col]
+
+                                return self.check_array_element(element_value, "ocean")
+
+                            except IndexError:
+                                self.errors.append(f"Index out of bounds for array '{token[1]}'.")
+                                return (False, f"Index out of bounds for '{token[1]}'.", None)
+                        else:
+                            print("------ it is not an array ------- ")
+
+                            # Check dynasty IDs
+                            for dtype, identifiers in self.dynasty_id.items():
                                 if token[1] in identifiers:
                                     self.datatype = dtype
-                                    self.isDynasty = False
+                                    self.isDynasty = True
                                     break
+                            # If not found in dynasty, check other IDs
+                            if not self.datatype:
+                                for dtype, identifiers in self.other_id.items():
+                                    if token[1] in identifiers:
+                                        self.datatype = dtype
+                                        self.isDynasty = False
+                                        break
 
-                        if not self.datatype:
-                            return (False, f"Undefined identifier: '{token[1]}'")
+                            if not self.datatype:
+                                return (False, f"Undefined identifier: '{token[1]}'", None)
 
-                        # Retrieve the actual value from whichever set it belongs to
-                        if self.isDynasty:
-                            self.actual_value = self.dynasty_values[(self.datatype, token[1])]
-                        else:
-                            self.actual_value = self.other_values[(self.datatype, token[1])]
-
-                        # Now decide if we can convert self.datatype -> ocean.
-                        if self.datatype == "ocean":
-                            # Already ocean
-                            return (True, "")
-                        elif self.datatype == "treasures":
-                            # For example, interpret integer treasures as a float by appending .0
-                            return (True, "")
-                        elif self.datatype == "scroll":
-                             # Check if string is numeric
-                            if self.actual_value is None:  # phantom
-                                return (False, "Cannot convert phantom scroll to treasures")
-                            string_value = self.actual_value.strip('"')
-                            if string_value.isdigit() or (string_value.startswith('-') and string_value[1:].isdigit()):
-                                return (True, "")
+                            # Retrieve the actual value from whichever set it belongs to
+                            if self.isDynasty:
+                                self.actual_value = self.dynasty_values[(self.datatype, token[1])]
                             else:
-                                return (False, f"Cannot convert non-numeric scroll '{string_value}' to ocean")
-                        elif self.datatype == "rose":
-                            # Check if string is numeric
-                            if self.actual_value is None:  # phantom
-                                return (False, "Cannot convert phantom scroll to treasures")
-                            string_value = self.actual_value.strip("'")
-                            if string_value.isdigit():
-                                return (True, "")
+                                self.actual_value = self.other_values[(self.datatype, token[1])]
+
+                            # Now decide if we can convert self.datatype -> ocean.
+                            if self.datatype == "ocean":
+                                # Already ocean
+                                return (True, "", None)
+                            elif self.datatype == "treasures":
+                                # For example, interpret integer treasures as a float by appending .0
+                                return (True, "", None)
+                            elif self.datatype == "scroll":
+                                # Check if string is numeric
+                                if self.actual_value is None:  # phantom
+                                    return (False, "Cannot convert phantom scroll to treasures")
+                                string_value = self.actual_value.strip('"')
+                                if string_value.isdigit() or (string_value.startswith('-') and string_value[1:].isdigit()):
+                                    return (True, "", None)
+                                else:
+                                    return (False, f"Cannot convert non-numeric scroll '{string_value}' to ocean", None)
+                            elif self.datatype == "rose":
+                                # Check if string is numeric
+                                if self.actual_value is None:  # phantom
+                                    return (False, "Cannot convert phantom scroll to treasures", None)
+                                string_value = self.actual_value.strip("'")
+                                if string_value.isdigit():
+                                    return (True, "",None)
+                                else:
+                                    return (False, f"Cannot convert non-numeric rose '{string_value}' to treasures", None)
+                            elif self.datatype == "mirror":
+                                # Could treat mirror (true/false) as 1.0 or 0.0
+                                return (True, "", None)
                             else:
-                                return (False, f"Cannot convert non-numeric rose '{string_value}' to treasures")
-                        elif self.datatype == "mirror":
-                            # Could treat mirror (true/false) as 1.0 or 0.0
-                            return (True, "")
-                        else:
-                            return (False, f"Cannot convert {self.datatype} to ocean.")
+                                return (False, f"Cannot convert {self.datatype} to ocean.", None)
 
                     # (B) If it's a literal token
                     elif token[0] == 'treasures_lit':
                         # Possibly treat numeric literal as float by appending .0
-                        return (True, "")
+                        return (True, "", None)
                     elif token[0] in ['1', '0']:
                         # Mirror-likes => ocean? Sure, treat as "1.0" or "0.0"
-                        return (True, "")
+                        return (True, "", None)
                     elif token[0] == 'ocean_lit':
                         # Already ocean
-                        return (True, "")
+                        return (True, "", None)
                     elif token[0] == 'scroll_lit':
                         # Check if string is numeric
                         if token[1] is None:  # phantom
-                            return (False, "Cannot convert phantom scroll to treasures")
+                            return (False, "Cannot convert phantom scroll to treasures", None)
                         string_value= token[1].strip('"')
                         try:
                             float(string_value)
                             if '.' in string_value:
-                                return (True, "")
-                            return (False, f"'{string_value}' lacks a decimal point required for ocean type.")
+                                return (True, "", None)
+                            return (False, f"'{string_value}' lacks a decimal point required for ocean type.", None)
                         except ValueError:
-                                return (False, f"Cannot convert non-numeric scroll '{string_value}' to ocean")
+                                return (False, f"Cannot convert non-numeric scroll '{string_value}' to ocean", None)
                     elif token[0] == 'rose_lit':
                         if token[1] is None:  # phantom
-                            return (False, "Cannot convert phantom scroll to treasures")
+                            return (False, "Cannot convert phantom scroll to treasures", None)
                         string_value= token[1].strip("'")
                         try:
                             float(string_value)
                             if '.' in string_value:
-                                return (True, "")
-                            return (False, f"'{string_value}' lacks a decimal point required for ocean type.")
+                                return (True, "", None)
+                            return (False, f"'{string_value}' lacks a decimal point required for ocean type.", None)
                         except ValueError:
-                                return (False, f"Cannot convert non-numeric rose '{string_value}' to ocean")
+                                return (False, f"Cannot convert non-numeric rose '{string_value}' to ocean", None)
                     elif token[0] == 'mirror_lit':
                         # e.g. "true"/"false" => "1.0" / "0.0"
-                        return (True, "")
+                        return (True, "", None)
                     else:
-                        return (False, f"Unexpected token '{token[0]}' when converting to ocean.")
+                        return (False, f"Unexpected token '{token[0]}' when converting to ocean.", None)
 
                 # 3) Otherwise, do the normal "ocean" validation (float + decimal point).
                 else:
                     try:
                         float(value)
                         if '.' in value:
-                            return (True, "")
-                        return (False, f"'{value}' lacks a decimal point required for ocean type.")
+                            return (True, "", None)
+                        return (False, f"'{value}' lacks a decimal point required for ocean type.", None)
                     except ValueError:
-                        return (False, f"'{value}' is not a valid float (ocean).")
+                        return (False, f"'{value}' is not a valid float (ocean).", None)
 
 
             elif data_type == "scroll":
                 if value.startswith('\"') and value.endswith('\"'):
-                    return (True, "")
+                    return (True, "", None)
                 elif value == 'phantom':
-                    return (True, "")
+                    return (True, "", None)
                 
                 elif value == "wish":
                     self.advance()
@@ -754,7 +837,7 @@ class RoyalScriptSemanticAnalyzer:
                         token = self.current()
 
                     if token[0] == ')':
-                        return (True, "")
+                        return (True, "", None)
                     
 
                 elif value == 'toscroll':
@@ -767,67 +850,104 @@ class RoyalScriptSemanticAnalyzer:
                             self.datatype = None
                             self.actual_value = None
                             self.isDynasty = False
+
+                            # First check if we have a next token at all
+                            peeked_token = self.peek()
+
+                            if peeked_token is None:
+                                return self.check_identifier_type(token[1], data_type, name)
+                            
+                            if any (token[1] in s for s in self.dynasty_array_id.values()) or any (token[1] in s for s in self.other_array_id.values()):
+                                self.isArray = True
+
+                            if self.isArray:
+                                print("it is -------- an array")
+                                is_OneDim, row, col = self.array_element(token[1], data_type, True, peeked_token)
+
+                                if row is None or (not is_OneDim and col is None):
+                                    # An error has already been recorded inside array_element, just return now.
+                                    return (False, "", None)
+
+                                array_elements = self.one_dim.get(token[1])
+
+                                if array_elements is None:
+                                    self.errors.append(f"Array '{token[1]}' is not declared.")
+                                    return (False, f"Array '{token[1]}' not declared.", None)
+
+                                try:
+                                    if is_OneDim:
+                                        element_value = array_elements[row]
+                                    else:
+                                        element_value = array_elements[row][col]
+
+                                    return self.check_array_element(element_value, "scroll")
+
+                                except IndexError:
+                                    self.errors.append(f"Index out of bounds for array '{token[1]}'.")
+                                    return (False, f"Index out of bounds for '{token[1]}'.", None)
+                            else:
+                                print("------ it is not an array ------- ")
                         
-                            for dtype, identifiers in self.dynasty_id.items():
-                                if token[1] in identifiers:
-                                    self.datatype = dtype
-                                    self.isDynasty = True
-                                    break
-                            if not self.datatype:
-                                for dtype, identifiers in self.other_id.items():
+                                for dtype, identifiers in self.dynasty_id.items():
                                     if token[1] in identifiers:
                                         self.datatype = dtype
-                                        self.isDynasty = False
+                                        self.isDynasty = True
                                         break
+                                if not self.datatype:
+                                    for dtype, identifiers in self.other_id.items():
+                                        if token[1] in identifiers:
+                                            self.datatype = dtype
+                                            self.isDynasty = False
+                                            break
 
-                            if not self.datatype:
-                                return (False, f"Undefined identifier: '{token[1]}'")
+                                if not self.datatype:
+                                    return (False, f"Undefined identifier: '{token[1]}'", None)
+                                
+                                if self.isDynasty:
+                                    self.actual_value = self.dynasty_values[(self.datatype, token[1])]
+                                else:
+                                    self.actual_value = self.other_values[(self.datatype, token[1])]
                             
-                            if self.isDynasty:
-                                self.actual_value = self.dynasty_values[(self.datatype, token[1])]
-                            else:
-                                self.actual_value = self.other_values[(self.datatype, token[1])]
-                        
-                            # Check if the value can be converted to treasures
-                            if self.datatype == "treasures":
-                                # Already a treasures value
-                                return (True, "")
-                            elif self.datatype == "ocean":
-                                # Can convert ocean to treasures
-                                return (True, "")
-                            elif self.datatype == "scroll":
-                                return (True, "")
-                            elif self.datatype == "rose":
-                                return (True, "")
-                            elif self.datatype == "mirror":
-                                # Can convert boolean to 0/1
-                                return (True, "")
-                            else:
-                                return (False, f"Cannot convert {self.datatype} to scroll")
+                                # Check if the value can be converted to treasures
+                                if self.datatype == "treasures":
+                                    # Already a treasures value
+                                    return (True, "", None)
+                                elif self.datatype == "ocean":
+                                    # Can convert ocean to treasures
+                                    return (True, "", None)
+                                elif self.datatype == "scroll":
+                                    return (True, "", None)
+                                elif self.datatype == "rose":
+                                    return (True, "", None)
+                                elif self.datatype == "mirror":
+                                    # Can convert boolean to 0/1
+                                    return (True, "", None)
+                                else:
+                                    return (False, f"Cannot convert {self.datatype} to scroll", None)
 
                             
                         elif token[0] == 'treasures_lit':
-                            return (True, "")
+                            return (True, "", None)
                         elif token[0] in  ['1', '0']:
-                            return (True, "")
+                            return (True, "", None)
                         elif token[0] == 'ocean_lit':
-                            return (True, "")
+                            return (True, "", None)
                         elif token[0] == 'scroll_lit':
-                            return (True, "")
+                            return (True, "", None)
                         elif token[0] == 'rose_lit':
-                            return (True, "")
+                            return (True, "", None)
                         elif token[0] == 'mirror_lit':
-                            return (True, "")
+                            return (True, "", None)
                         else:
-                            return (False, f"Unexpected token '{token[0]}' when converting to scroll.")
+                            return (False, f"Unexpected token '{token[0]}' when converting to scroll.", None)
                 else:
-                    return (False, f"'{value}' is not properly quoted for scroll strings.")
+                    return (False, f"'{value}' is not properly quoted for scroll strings.", None)
 
             elif data_type == "rose":
                 if len(value) == 3 and value.startswith("'") and value.endswith("'"):
-                    return (True, "")
+                    return (True, "", None)
                 elif value == 'phantom':
-                    return (True, "")
+                    return (True, "", None)
                 
                 elif value == "wish":
                     self.advance()
@@ -842,7 +962,7 @@ class RoyalScriptSemanticAnalyzer:
                         token = self.current()
 
                     if token[0] == ')':
-                        return (True, "")
+                        return (True, "", None)
                     
 
                 elif value == 'torose':
@@ -855,63 +975,97 @@ class RoyalScriptSemanticAnalyzer:
                             self.datatype = None
                             self.actual_value = None
                             self.isDynasty = False
+                            
+                            # First check if we have a next token at all
+                            peeked_token = self.peek()
+
+                            if peeked_token is None:
+                                return self.check_identifier_type(token[1], data_type, name)
+                            
+                            if any (token[1] in s for s in self.dynasty_array_id.values()) or any (token[1] in s for s in self.other_array_id.values()):
+                                self.isArray = True
+
+                            if self.isArray:
+                                print("it is -------- an array")
+                                is_OneDim, row, col = self.array_element(token[1], data_type, True, peeked_token)
+
+                                if row is None or (not is_OneDim and col is None):
+                                    # An error has already been recorded inside array_element, just return now.
+                                    return (False, "", None)
+
+                                array_elements = self.one_dim.get(token[1])
+
+                                if array_elements is None:
+                                    self.errors.append(f"Array '{token[1]}' is not declared.")
+                                    return (False, f"Array '{token[1]}' not declared.", None)
+
+                                try:
+                                    if is_OneDim:
+                                        element_value = array_elements[row]
+                                    else:
+                                        element_value = array_elements[row][col]
+
+                                    return self.check_array_element(element_value, "rose")
+
+                                except IndexError:
+                                    self.errors.append(f"Index out of bounds for array '{token[1]}'.")
+                                    return (False, f"Index out of bounds for '{token[1]}'.", None)
+                            else:
+                                print("------ it is not an array ------- ")
                         
-                            for dtype, identifiers in self.dynasty_id.items():
-                                if token[1] in identifiers:
-                                    self.datatype = dtype
-                                    self.isDynasty = True
-                                    break
-                            if not self.datatype:
-                                for dtype, identifiers in self.other_id.items():
+                                for dtype, identifiers in self.dynasty_id.items():
                                     if token[1] in identifiers:
                                         self.datatype = dtype
-                                        self.isDynasty = False
+                                        self.isDynasty = True
                                         break
+                                if not self.datatype:
+                                    for dtype, identifiers in self.other_id.items():
+                                        if token[1] in identifiers:
+                                            self.datatype = dtype
+                                            self.isDynasty = False
+                                            break
 
-                            if not self.datatype:
-                                return (False, f"Undefined identifier: '{token[1]}'")
-                            
-                            if self.isDynasty:
-                                self.actual_value = self.dynasty_values[(self.datatype, token[1])]
-                            else:
-                                self.actual_value = self.other_values[(self.datatype, token[1])]
-                        
-                            # Check if the value can be converted to rose
-                            if self.datatype in ['treasures', 'ocean', 'scroll', 'mirror']:
-                                val_str = self.actual_value.strip('"').strip("'")
-                                # Now check if it’s exactly one character
-                                if len(val_str) == 1:
-                                    return (True, "")
+                                if not self.datatype:
+                                    return (False, f"Undefined identifier: '{token[1]}'", None)
+                                
+                                if self.isDynasty:
+                                    self.actual_value = self.dynasty_values[(self.datatype, token[1])]
                                 else:
-                                    return (False, f"Invalid length of '{val_str}' for rose value")
-
-                            elif self.datatype == "rose":
-                                return (True, "")
-                            else:
-                                return (False, f"Cannot convert {self.datatype} to rose")
-
+                                    self.actual_value = self.other_values[(self.datatype, token[1])]
                             
+                                # Check if the value can be converted to rose
+                                if self.datatype in ['treasures', 'ocean', 'scroll', 'mirror']:
+                                    val_str = self.actual_value.strip('"').strip("'")
+                                    # Now check if it’s exactly one character
+                                    if len(val_str) == 1:
+                                        return (True, "", None)
+                                    else:
+                                        return (False, f"Invalid length of '{val_str}' for rose value", None)
 
+                                elif self.datatype == "rose":
+                                    return (True, "", None)
+                                else:
+                                    return (False, f"Cannot convert {self.datatype} to rose", None)
                         
                         elif token[0] in ['treasures_lit', 'ocean_lit', 'scroll_lit', 'mirror_lit']:
                             val_str = token[1].strip('"').strip("'")
                             # Now check if it’s exactly one character
                             if len(val_str) == 1:
-                                return (True, "")
+                                return (True, "", None)
                             else:
-                                return (False, f"Invalid length of '{val_str}' for rose value")
+                                return (False, f"Invalid length of '{val_str}' for rose value", None)
                         elif token[0] in  ['1', '0']:
-                            return (True, "")
+                            return (True, "", None)
                         elif token[0] == 'rose_lit':
-                            return (True, "")
+                            return (True, "", None)
                         else:
-                            return (False, f"Unexpected token '{token[0]}' when converting to rose.")
+                            return (False, f"Unexpected token '{token[0]}' when converting to rose.", None)
                 else:
-                    return (False, f"'{value}' is not a valid single-character (rose).")
+                    return (False, f"'{value}' is not a valid single-character (rose).", None)
 
             elif data_type == "mirror":
                 if value.lower() in ["true", "false", "0", "1"]:
-                    return (True, "")
+                    return (True, "", None)
                 
                 elif value == "wish":
                     self.advance()
@@ -926,7 +1080,7 @@ class RoyalScriptSemanticAnalyzer:
                         token = self.current()
 
                     if token[0] == ')':
-                        return (True, "")
+                        return (True, "", None)
                     
 
                 elif value == 'tomirror':
@@ -939,100 +1093,308 @@ class RoyalScriptSemanticAnalyzer:
                             self.datatype = None
                             self.actual_value = None
                             self.isDynasty = False
+
+                            # First check if we have a next token at all
+                            peeked_token = self.peek()
+
+                            if peeked_token is None:
+                                return self.check_identifier_type(token[1], data_type, name)
+                            
+                            if any (token[1] in s for s in self.dynasty_array_id.values()) or any (token[1] in s for s in self.other_array_id.values()):
+                                self.isArray = True
+
+                            if self.isArray:
+                                print("it is -------- an array")
+                                is_OneDim, row, col = self.array_element(token[1], data_type, True, peeked_token)
+
+                                if row is None or (not is_OneDim and col is None):
+                                    # An error has already been recorded inside array_element, just return now.
+                                    return (False, "", None)
+
+                                array_elements = self.one_dim.get(token[1])
+
+                                if array_elements is None:
+                                    self.errors.append(f"Array '{token[1]}' is not declared.")
+                                    return (False, f"Array '{token[1]}' not declared.", None)
+
+                                try:
+                                    if is_OneDim:
+                                        element_value = array_elements[row]
+                                    else:
+                                        element_value = array_elements[row][col]
+
+                                    return self.check_array_element(element_value, "mirror")
+
+                                except IndexError:
+                                    self.errors.append(f"Index out of bounds for array '{token[1]}'.")
+                                    return (False, f"Index out of bounds for '{token[1]}'.", None)
+                            else:
+                                print("------ it is not an array ------- ")
                         
-                            for dtype, identifiers in self.dynasty_id.items():
-                                if token[1] in identifiers:
-                                    self.datatype = dtype
-                                    self.isDynasty = True
-                                    break
-                            if not self.datatype:
-                                for dtype, identifiers in self.other_id.items():
+                                for dtype, identifiers in self.dynasty_id.items():
                                     if token[1] in identifiers:
                                         self.datatype = dtype
-                                        self.isDynasty = False
+                                        self.isDynasty = True
                                         break
+                                if not self.datatype:
+                                    for dtype, identifiers in self.other_id.items():
+                                        if token[1] in identifiers:
+                                            self.datatype = dtype
+                                            self.isDynasty = False
+                                            break
 
-                            if not self.datatype:
-                                return (False, f"Undefined identifier: '{token[1]}'")
+                                if not self.datatype:
+                                    return (False, f"Undefined identifier: '{token[1]}'", None)
+                                
+                                if self.isDynasty:
+                                    self.actual_value = self.dynasty_values[(self.datatype, token[1])]
+                                else:
+                                    self.actual_value = self.other_values[(self.datatype, token[1])]
                             
-                            if self.isDynasty:
-                                self.actual_value = self.dynasty_values[(self.datatype, token[1])]
-                            else:
-                                self.actual_value = self.other_values[(self.datatype, token[1])]
-                        
-                            # Check if the value can be converted to treasures
-                            if self.datatype in ["treasures", "ocean"]:
-                                val_str = self.actual_value.strip('"').strip("'")
-                                if val_str in ["1", "0"]:
-                                    return (True, "")
-                                return (False, f"'{value}' is not a valid boolean (mirror).")
-                            elif self.datatype == "scroll":
-                                val_str = self.actual_value.strip('"').strip("'")
-                                if val_str in ["1", "0", "true", "false"]:
-                                    return (True, "")
-                                return (False, f"'{value}' is not a valid boolean (mirror).")
-                            elif self.datatype == "rose":
-                                val_str = self.actual_value.strip('"').strip("'")
-                                if val_str in ["1", "0"]:
-                                    return (True, "")
-                                return (False, f"'{value}' is not a valid boolean (mirror).")
-                            elif self.datatype == "mirror":
-                                # Can convert boolean to 0/1
-                                return (True, "")
-                            else:
-                                return (False, f"Cannot convert {self.datatype} to scroll")
+                                # Check if the value can be converted to treasures
+                                if self.datatype in ["treasures", "ocean"]:
+                                    val_str = self.actual_value.strip('"').strip("'")
+                                    if val_str in ["1", "0"]:
+                                        return (True, "", None)
+                                    return (False, f"'{value}' is not a valid boolean (mirror).", None)
+                                elif self.datatype == "scroll":
+                                    val_str = self.actual_value.strip('"').strip("'")
+                                    if val_str in ["1", "0", "true", "false"]:
+                                        return (True, "", None)
+                                    return (False, f"'{value}' is not a valid boolean (mirror).", None)
+                                elif self.datatype == "rose":
+                                    val_str = self.actual_value.strip('"').strip("'")
+                                    if val_str in ["1", "0"]:
+                                        return (True, "", None)
+                                    return (False, f"'{value}' is not a valid boolean (mirror).", None)
+                                elif self.datatype == "mirror":
+                                    # Can convert boolean to 0/1
+                                    return (True, "", None)
+                                else:
+                                    return (False, f"Cannot convert {self.datatype} to scroll", None)
 
                             
                         elif token[0] in ['treasures_lit', 'ocean_lit']:
                             val_str = token[1].strip('"').strip("'")
                             if val_str in ["1", "0"]:
-                                return (True, "")
-                            return (False, f"'{value}' is not a valid boolean (mirror).")
+                                return (True, "", None)
+                            return (False, f"'{value}' is not a valid boolean (mirror).", None)
                         elif token[0] in  ['1', '0']:
-                            return (True, "")
+                            return (True, "", None)
                         elif token[0] == 'scroll_lit':
                             val_str = token[1].strip('"').strip("'")
                             if val_str in ["1", "0", "true", "false"]:
-                                return (True, "")
-                            return (False, f"'{value}' is not a valid boolean (mirror).")
+                                return (True, "",  None)
+                            return (False, f"'{value}' is not a valid boolean (mirror).", None)
                         elif token[0] == 'rose_lit':
                             val_str = token[1].strip('"').strip("'")
                             if val_str in ["1", "0"]:
-                                return (True, "")
-                            return (False, f"'{value}' is not a valid boolean (mirror).")
+                                return (True, "", None)
+                            return (False, f"'{value}' is not a valid boolean (mirror).", None)
                         elif token[0] == 'mirror_lit':
-                            return (True, "")
+                            return (True, "", None)
                         else:
-                            return (False, f"Unexpected token '{token[0]}' when converting to scroll.")
+                            return (False, f"Unexpected token '{token[0]}' when converting to scroll.", None)
                 else:
-                    return (False, f"'{value}' is not a valid boolean (mirror).")
+                    return (False, f"'{value}' is not a valid boolean (mirror).", None)
 
             # else:
             #     # Unknown data type
             #     return (False, f"Unknown data type '{data_type}'.")
-    def check_identifier_type(self, identifier: str, expected_type: str) -> tuple[bool, str]:
+
+    def check_array_element(self, token, datatype) -> tuple[bool, str, any]:
+        val_str = token.strip('"').strip("'")
+        if datatype == "treasures":
+            if val_str.isdigit() or (val_str.startswith('-') and val_str[1:].isdigit()):
+                    return (True, "", None)
+            else:
+                return (False, f"Cannot intialize non-numeric '{val_str}' to treasures", None)
+        elif datatype == "ocean":
+            try:
+                float(val_str)
+                if '.' in val_str:
+                    return (True, "", None)
+                return (False, f"'{val_str}' lacks a decimal point required for ocean type.", None)
+            except ValueError:
+                    return (False, f"Cannot intialize non-numeric '{val_str}' to oceans", None)
+        elif datatype == "scroll":
+            return (True, "", None)
+        elif datatype == "rose":
+            if len(val_str) < 1:
+                return (False, f"Cannot intialize '{val_str}'with a lengtho of {len(val_str)} to rose", None)
+            else:
+                return (True, "", None)
+        elif datatype == "mirror":
+            if val_str in ['1', '0', 'true', 'false']:
+                return (True, "", None)
+            else:
+                return (False, f"Cannot intialize non-boolean '{val_str}' to oceans", None)
+            
+    
+    def array_element(self, value, data_type, isTypeConvert, peeked_token) -> tuple[bool, int, int]:
+        token = self.current()
+        if peeked_token[0] == '[':
+            print("Array access detected for:", value)
+
+            is_one_dim = value in self.one_dim
+            is_two_dim = value in self.two_dim
+
+            if not (is_one_dim or is_two_dim):
+                self.errors.append(f"Array '{value}' is not defined.")
+                return (False, None, None)
+
+            # No type mismatch check for simplicity, but you can add if needed
+
+            self.advance()  # move to '['
+            token = self.current()
+
+            if is_one_dim:
+                array_elements = self.one_dim[value]
+                expected_size = len(array_elements)  # correct way to get size
+                print(f"1D array '{value}' size is {expected_size}")
+
+                if token[0] == '[':
+                    self.advance()
+                    token = self.current()
+
+                    try:
+                        index = int(token[1])
+                    except ValueError:
+                        self.errors.append(f"Invalid index '{token[1]}'")
+                        return (False, None, None)
+
+                    print(f"Checking index {index} against max {expected_size - 1}")
+
+                    if index < 0 or index >= expected_size:
+                        self.errors.append(f"Array index {index} out of bounds; max is {expected_size - 1}.")
+                        return (False, None, None)
+
+                    self.advance()  # move past index
+                    token = self.current()
+
+                    if token[0] != ']':
+                        self.errors.append(f"Expected ']' after array index, got '{token[0]}'.")
+                        return (False, None, None)
+
+                    return (True, index, None)
+
+            elif is_two_dim:
+                array_elements = self.two_dim[value]
+                expected_rows, expected_cols = len(array_elements), len(array_elements[0])
+                print(f"2D array '{value}' size is [{expected_rows}][{expected_cols}]")
+
+                if token[0] == '[':
+                    self.advance()
+                    token = self.current()
+
+                    try:
+                        row_index = int(token[1])
+                    except ValueError:
+                        self.errors.append(f"Invalid row index '{token[1]}'")
+                        return (False, None, None)
+
+                    print(f"Checking row index {row_index} against max {expected_rows - 1}")
+                    if row_index < 0 or row_index >= expected_rows:
+                        self.errors.append(f"Row index {row_index} out of bounds; max is {expected_rows - 1}.")
+                        return (False, None, None)
+
+                    self.advance()  # move past row index
+                    token = self.current()
+
+                    if token[0] != ']':
+                        self.errors.append(f"Expected ']' after row index, got '{token[0]}'.")
+                        return (False, None, None)
+
+                    self.advance()
+                    token = self.current()
+
+                    if token[0] == '[':
+                        self.advance()
+                        token = self.current()
+
+                        try:
+                            col_index = int(token[1])
+                        except ValueError:
+                            self.errors.append(f"Invalid column index '{token[1]}'")
+                            return (False, None, None)
+
+                        print(f"Checking col index {col_index} against max {expected_cols - 1}")
+                        if col_index < 0 or col_index >= expected_cols:
+                            self.errors.append(f"Column index {col_index} out of bounds; max is {expected_cols - 1}.")
+                            return (False, None, None)
+
+                        self.advance()
+                        token = self.current()
+
+                        if token[0] != ']':
+                            self.errors.append(f"Expected ']' after column index, got '{token[0]}'.")
+                            return (False, None, None)
+
+                        return (False, row_index, col_index)
+
+            self.errors.append(f"Invalid array indexing for '{value}'")
+            return (False, None, None)
+
+        elif peeked_token[0] == '~':
+            self.errors.append(f"{value} is an array and must have an index.")
+            return (False, None, None)
+
+        self.errors.append(f"Unexpected token '{peeked_token[0]}'")
+        return (False, None, None)
+
+    def check_identifier_type(self, identifier: str, expected_type: str, name) -> tuple[bool, str, any]:
         """
         Checks if an identifier exists and has the expected data type.
         Returns (is_valid, error_message) tuple.
         """
-        # Check if identifier exists in dynasty_id dictionaries
+        print(f"Checking identifier: {identifier}, expected type: {expected_type}, target name: {name}")
+        
+        # Try to find identifier in dynasty variables
         for data_type, identifiers in self.dynasty_id.items():
             if identifier in identifiers:
+                print(f"Found {identifier} in dynasty {data_type}")
+                
                 if data_type == expected_type:
-                    return (True, "")
+                    # Get the actual value using the correct key
+                    value = self.dynasty_values.get((data_type, identifier))
+                    print(f"Value of {identifier} is: {value}")
+                    
+                    # Store value in the appropriate dictionary with the correct key structure
+                    if self.isDynasty:
+                        self.dynasty_values[(expected_type, name)] = value
+                        print(f"Set dynasty value: {(expected_type, name)} = {value}")
+                    else:
+                        self.other_values[(expected_type, name)] = value
+                        print(f"Set other value: {(expected_type, name)} = {value}")
+                    
+                    return (True, "", value)
                 else:
-                    return (False, f"Type mismatch: '{identifier}' is '{data_type}', not '{expected_type}'")
+                    return (False, f"Type mismatch: '{identifier}' is '{data_type}', not '{expected_type}'", None)
         
-        # Check if identifier exists in other_id dictionaries
+        # Try to find identifier in regular variables
         for data_type, identifiers in self.other_id.items():
             if identifier in identifiers:
+                print(f"Found {identifier} in other {data_type}")
+                
                 if data_type == expected_type:
-                    return (True, "")
+                    # Get the actual value using the correct key
+                    value = self.other_values.get((data_type, identifier))
+                    print(f"Value of {identifier} is: {value}")
+                    
+                    # Store value in the appropriate dictionary with the correct key structure
+                    if self.isDynasty:
+                        self.dynasty_values[(expected_type, name)] = value
+                        print(f"Set dynasty value: {(expected_type, name)} = {value}")
+                    else:
+                        self.other_values[(expected_type, name)] = value
+                        print(f"Set other value: {(expected_type, name)} = {value}")
+                    
+                    return (True, "", value)
                 else:
-                    return (False, f"Type mismatch: '{identifier}' is '{data_type}', not '{expected_type}'")
+                    return (False, f"Type mismatch: '{identifier}' is '{data_type}', not '{expected_type}'", None)
         
-        # Identifier not found in any dictionary
-        return (False, f"Undefined identifier: '{identifier}'")
+        print(f"Identifier {identifier} not found in any variable list")
+        return (False, f"Undefined identifier: '{identifier}'", None)
     
 
     #--------------------------------------------------------------------------------
@@ -1193,6 +1555,8 @@ class RoyalScriptSemanticAnalyzer:
 
         self.row_num = 0
         self.column_num = 0
+        self.row_elements = []
+        self.column_elements = []
 
         # ---------------------------------------------------------
         # 1) 1D array initialization
@@ -1217,17 +1581,19 @@ class RoyalScriptSemanticAnalyzer:
                         return
 
                     # Otherwise, it should be an element
-                    is_valid, error_message = self.is_value_compatible_with_type(token[1], datatype, token[0])
+                    is_valid, error_message, _ = self.is_value_compatible_with_type(token[1], datatype, token[0])
                     if not is_valid:
                         self.errors.append(error_message)
                         return
                     self.row_num += 1
-
+                    self.row_elements.append(token[1])
                     self.advance()  # consume this element
                     token = self.current()
 
                 # Now we expect '}'
                 if token and token[0] == '}':
+                    print(name, "---------------->")
+                    self.one_dim[name] = self.row_elements
                     self.advance()  # skip '}'
                 else:
                     self.errors.append("Expected '}' at the end of 1D array initializer.")
@@ -1288,18 +1654,20 @@ class RoyalScriptSemanticAnalyzer:
                         continue
 
                     # Otherwise, it should be an element
-                    is_valid, error_msg = self.is_value_compatible_with_type(token[1], datatype, token[0])
+                    is_valid, error_msg, _ = self.is_value_compatible_with_type(token[1], datatype, token[0])
                     if not is_valid:
                         self.errors.append(
                             f"Initializer error at row {actual_rows}, col {parsed_cols}: {error_msg}"
                         )
                         return
+                    self.column_elements.append(self.row_elements.copy())
                     parsed_cols += 1
                     self.advance()
                     token = self.current()
 
                 # We should have ended on '}' that closes the row
                 if token and token[0] == '}':
+                    self.two_dim[name] = self.column_elements
                     self.advance()  # skip '}'
                     token = self.current()
                 else:
