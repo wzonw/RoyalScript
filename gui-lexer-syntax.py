@@ -5,7 +5,7 @@ from lexer2 import RoyalScriptLexer
 from lexer2 import Token
 from pygame import mixer
 from syntax5 import RoyalScriptParser
-from semantic_copy import RoyalScriptSemanticAnalyzer 
+#from semantic_copy import RoyalScriptSemanticAnalyzer 
 
 
 class RoyalScriptLexerGUI(tk.Tk):
@@ -288,7 +288,7 @@ class RoyalScriptLexerGUI(tk.Tk):
 
         # Create syntax button using Canvas
         self.syntax_button = tk.Canvas(
-            self.button_frame, height=30, width=100, highlightthickness=0,
+            self.button_frame, height=30, width=100, highlightthickness=0,  relief="raised", bd=3
         )
         self.syntax_button.grid(row=1, column=2, sticky="sew", pady=10, padx=30)
 
@@ -299,8 +299,8 @@ class RoyalScriptLexerGUI(tk.Tk):
 
         # Bind button events
         self.syntax_button.bind("<Button-2>", self.syntax_button)
-        self.syntax_button("<Enter>", self.on_hover)
-        self.syntax_button("<Leave>", self.on_leave)
+        self.syntax_button.bind("<Enter>", self.on_hover_syntax)
+        self.syntax_button.bind("<Leave>", self.on_leave_syntax)
        
 
         # Create semantic button using Canvas
@@ -651,6 +651,14 @@ class RoyalScriptLexerGUI(tk.Tk):
     def on_hover(self, event):
         """Change button appearance on hover"""
         self.analyze_button.config(bg="#f0a6ca")
+    
+    def on_hover_syntax(self, event):
+        """Change button appearance on hover"""
+        self.syntax_button.config(bg="#f0a6ca")
+
+    def on_leave_syntax(self, event):
+        """Change button appearance on hover"""
+        self.syntax_button.config(bg="#fdd9e5")
 
     def on_leave(self, event):
         """Reset button appearance when mouse leaves"""
