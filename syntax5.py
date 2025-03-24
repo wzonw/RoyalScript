@@ -1,4 +1,4 @@
-from lexer import RoyalScriptLexer, Token
+from lexer2 import RoyalScriptLexer, Token
 from RS_RegDef import Delims, RegDef
 import traceback    
 
@@ -1360,8 +1360,6 @@ class RoyalScriptParser:
             if not self.ret_statement():
                 return False
             if not self.match('}'):
-                return False
-            if not self.user_defined_func():
                 return False
             if not self.user_defined_func():
                 return False

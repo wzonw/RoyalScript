@@ -174,7 +174,7 @@ Delims = {
 
     'id_delim': {' ', '(', ')', ',', '[', ']', '=', '~', *RegDef['arithmetic_op'], *RegDef['assignment_op'], *RegDef['relational_op'], *RegDef['unary_op'], '&', '|', '}', '!', '?'},
 
-    'logical_operator_delim': {' ', '(', *RegDef['alphanum'], '?'},
+    'logical_operator_delim': {' ', '(', *RegDef['alphanum'], '?', },
 
     'mirror-lit_delim': {' ', ')', '~', ',', '}', '?'},
 

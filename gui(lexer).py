@@ -13,10 +13,10 @@ class RoyalScriptLexerGUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.tokens = [] 
-        def intro_music():
-            mixer.music.load("fairytale_intro.mp3")
-            mixer.music.play(-1) 
-        intro_music()
+        # def intro_music():
+        #     mixer.music.load("fairytale_intro.mp3")
+        #     mixer.music.play(-1) 
+        # intro_music()
             
         self.title("RoyalScript Lexer")
         self.geometry("1050x700")
@@ -295,11 +295,13 @@ class RoyalScriptLexerGUI(tk.Tk):
                 else:
                     for token in line_tokens:
                         if isinstance(token, Token):
+                        
                             self.output_listbox.insert(tk.END, f"{token.value}")
                             
                             if hasattr(token, 'token_type'):
                                 definition = token.token_type.replace("_", " ")
                                 self.token_listbox.insert(tk.END, f"{definition}")
+                                print(f"({definition}, {token.value})")
             
             # Update line numbers after adding all tokens
             self.update_lexer_token_line_numbers()

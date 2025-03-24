@@ -1,4 +1,4 @@
-from lexer import RoyalScriptLexer, Token
+from other.lexer import RoyalScriptLexer, Token
 from RS_RegDef import Delims, RegDef
 
 class RoyalScriptParser:

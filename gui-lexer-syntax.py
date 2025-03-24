@@ -4,7 +4,8 @@ from PIL import Image, ImageTk
 from lexer2 import RoyalScriptLexer
 from lexer2 import Token
 from pygame import mixer
-from syntax5 import RoyalScriptParser
+from syntax5_new import RoyalScriptParser
+from ast_builder import RoyalScriptASTBuilder
 #from semantic_copy import RoyalScriptSemanticAnalyzer 
 
 
@@ -15,10 +16,10 @@ class RoyalScriptLexerGUI(tk.Tk):
         super().__init__()
         self.tokens = [] 
 
-        def intro_music():
-            mixer.music.load("fairytale_intro.mp3")
-            mixer.music.play(-1) 
-        intro_music()
+        # def intro_music():
+        #     mixer.music.load("fairytale_intro.mp3")
+        #     mixer.music.play(-1) 
+        # intro_music()
             
         self.title("RoyalScript")
         self.iconphoto(False, PhotoImage(file="crown_logo2.png")) 
@@ -592,6 +593,26 @@ class RoyalScriptLexerGUI(tk.Tk):
             self.errors_listbox.insert(tk.END, f"Details: {traceback.format_exc()}")
 
                 
+    # def run_syntax_analyzer(self, tokens):
+    #     """Run the syntax analyzer with tokens and build AST if successful."""
+    #     parser = RoyalScriptParser(tokens)
+
+    #     try:
+    #         parser.parse()  # Run the syntax analysis
+    #         self.errors_listbox.insert(tk.END, parser.get_parsing_result())
+
+    #         # Syntax analysis successful; build the AST
+    #         ast_builder = RoyalScriptASTBuilder(tokens)
+    #         ast_root = ast_builder.build_ast()
+
+    #         self.errors_listbox.insert(tk.END, "AST successfully built.")
+    #         # Optionally, handle ast_root (e.g., display or use it for further analysis)
+
+    #     except SyntaxError as e:
+    #         self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
+
+    #     except Exception as e:
+    #         self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
 
     def run_syntax_analyzer(self, tokens):
         """Run the syntax analyzer with tokens"""

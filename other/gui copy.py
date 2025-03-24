@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import scrolledtext
 from PIL import Image, ImageTk 
-from lexer import RoyalScriptLexer
-from lexer import TokenType
+from other.lexer import RoyalScriptLexer
+from other.lexer import TokenType
 
 # Token class to represent individual tokens
 class Token:
