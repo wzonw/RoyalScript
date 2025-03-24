@@ -2069,13 +2069,8 @@ class RoyalScriptParser:
                 return  False
             return True
         
-        # 226	<val>	→	(<logical_op2_ext> <more_log>
-        elif self.match('('):
-            print({self.current_token()}, '( --------------------- ')
-            if not self.logical_op2_ext():
-                return False
-            if not self.more_log():
-                return False
+        # 226	<val>	→	(<val_paren_ext>
+        elif self.val_paren_ext():
             return True
         
         # 227	<val>	→	id_lit <granted_id_ext>
@@ -2095,6 +2090,47 @@ class RoyalScriptParser:
         
         return False
     
+    # def val_paren_ext(self):
+    #     # <val_paren_ext>	→	<logical_op2_ext> <more_log>
+    #     current_pos = self.current_index()
+    #     if self.logical_op2_ext():
+    #         if self.more_log():
+    #             return True
+    #         else:
+    #             self.current_index = current_pos
+
+    #     # <val_paren_ext>	→	<arithmetic_exp>)
+    #     elif self.arithmetic_exp():
+    #         if not self.match(')'):
+    #             return False
+    #         return True
+        
+    #     return False
+    
+    def val_paren_ext(self):
+        # Save parser state before trying the first alternative.
+        saved_index = self.current_index
+        saved_line = self.current_line
+
+        # First alternative: <logical_op2_ext> <more_log>
+        if self.logical_op2_ext():
+            if self.more_log():
+                return True
+            else:
+                # Backtrack: Restore the saved state if more_log() fails.
+                self.current_index = saved_index
+                self.current_line = saved_line
+
+        # Second alternative: <arithmetic_exp> followed by ')'
+        if self.arithmetic_exp():
+            if self.match(')'):
+                return True
+            else:
+                return False
+
+        return False
+
+
     def val4(self):
         # 228	<val4>	→	<val>
         token = self.current_token()
