@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import PhotoImage, scrolledtext
-from PIL import Image, ImageTk 
+from PIL import Image, ImageTk, ImageSequence
 from lexer2 import RoyalScriptLexer
 from lexer2 import Token
 from pygame import mixer
-from syntax5 import RoyalScriptParser
+from syntax5_new import RoyalScriptParser
+from ast_builder import RoyalScriptASTBuilder
 #from semantic_copy import RoyalScriptSemanticAnalyzer 
 
 
@@ -15,10 +16,10 @@ class RoyalScriptLexerGUI(tk.Tk):
         super().__init__()
         self.tokens = [] 
 
-        def intro_music():
-            mixer.music.load("fairytale_intro.mp3")
-            mixer.music.play(-1) 
-        intro_music()
+        # def intro_music():
+        #     mixer.music.load("fairytale_intro.mp3")
+        #     mixer.music.play(-1) 
+        # intro_music()
             
         self.title("RoyalScript")
         self.iconphoto(False, PhotoImage(file="crown_logo2.png")) 
@@ -27,11 +28,16 @@ class RoyalScriptLexerGUI(tk.Tk):
         
 
         # Load and set background image
-        self.bg_image = Image.open("4.png")
-        self.bg_image = self.bg_image.resize((self.winfo_screenwidth(),self.winfo_screenheight()), Image.Resampling.LANCZOS)
-        self.bg_photo = ImageTk.PhotoImage(self.bg_image)
-        
-        self.bg_label = tk.Label(self, bg="#f883aa")
+        self.bg_image = Image.open("images/rsbg.gif")
+        self.frames = []
+        self.durations = []
+
+        # Extract frames and durations
+        for frame in ImageSequence.Iterator(self.bg_image):
+            self.frames.append(ImageTk.PhotoImage(frame.copy()))
+            self.durations.append(frame.info.get('duration', 100))
+
+        self.bg_label = tk.Label(self, image=self.frames[0])
         self.bg_label.place(relwidth=1, relheight=1)
 
         # Allow frames to expand dynamically
@@ -51,6 +57,14 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.setup_input_section()
         self.setup_lexer_tokens_section()
         self.setup_errors_section()
+        
+        self.animate(0)
+
+    def animate(self, frame):
+        next_frame = (frame + 1) % len(self.frames)  # Loop through frames
+        self.bg_label.config(image=self.frames[next_frame])
+        self.after(25, self.animate, next_frame)  # Adjust delay if needed (e.g., 100ms)
+
         
     def setup_frames(self):
 
@@ -91,7 +105,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.logo_pic = self.logo_pic.resize((200,200), Image.Resampling.LANCZOS)
         self.logo_pic = ImageTk.PhotoImage(self.logo_pic)
 
-        self.logo_label = tk.Label(self.logo_frame, image=self.logo_pic, bg="#f883aa")
+        self.logo_label = tk.Label(self.logo_frame, image=self.logo_pic, bg="#E53888")
         self.logo_label.pack(pady=10)  
 
 
@@ -592,6 +606,26 @@ class RoyalScriptLexerGUI(tk.Tk):
             self.errors_listbox.insert(tk.END, f"Details: {traceback.format_exc()}")
 
                 
+    # def run_syntax_analyzer(self, tokens):
+    #     """Run the syntax analyzer with tokens and build AST if successful."""
+    #     parser = RoyalScriptParser(tokens)
+
+    #     try:
+    #         parser.parse()  # Run the syntax analysis
+    #         self.errors_listbox.insert(tk.END, parser.get_parsing_result())
+
+    #         # Syntax analysis successful; build the AST
+    #         ast_builder = RoyalScriptASTBuilder(tokens)
+    #         ast_root = ast_builder.build_ast()
+
+    #         self.errors_listbox.insert(tk.END, "AST successfully built.")
+    #         # Optionally, handle ast_root (e.g., display or use it for further analysis)
+
+    #     except SyntaxError as e:
+    #         self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
+
+    #     except Exception as e:
+    #         self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
 
     def run_syntax_analyzer(self, tokens):
         """Run the syntax analyzer with tokens"""

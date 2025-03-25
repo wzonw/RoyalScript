@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import PhotoImage, scrolledtext
-from PIL import Image, ImageTk 
+from PIL import Image, ImageTk, ImageSequence
 from lexer2 import RoyalScriptLexer
 from lexer2 import Token
 from pygame import mixer
@@ -28,11 +28,16 @@ class RoyalScriptLexerGUI(tk.Tk):
         
 
         # Load and set background image
-        self.bg_image = Image.open("4.png")
-        self.bg_image = self.bg_image.resize((self.winfo_screenwidth(),self.winfo_screenheight()), Image.Resampling.LANCZOS)
-        self.bg_photo = ImageTk.PhotoImage(self.bg_image)
-        
-        self.bg_label = tk.Label(self, bg="#f883aa")
+        self.bg_image = Image.open("images/rsbg.gif")
+        self.frames = []
+        self.durations = []
+
+        # Extract frames and durations
+        for frame in ImageSequence.Iterator(self.bg_image):
+            self.frames.append(ImageTk.PhotoImage(frame.copy()))
+            self.durations.append(frame.info.get('duration', 100))
+
+        self.bg_label = tk.Label(self, image=self.frames[0])
         self.bg_label.place(relwidth=1, relheight=1)
 
         # Allow frames to expand dynamically
@@ -52,6 +57,14 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.setup_input_section()
         self.setup_lexer_tokens_section()
         self.setup_errors_section()
+        
+        self.animate(0)
+
+    def animate(self, frame):
+        next_frame = (frame + 1) % len(self.frames)  # Loop through frames
+        self.bg_label.config(image=self.frames[next_frame])
+        self.after(25, self.animate, next_frame)  # Adjust delay if needed (e.g., 100ms)
+
         
     def setup_frames(self):
 
@@ -92,7 +105,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.logo_pic = self.logo_pic.resize((200,200), Image.Resampling.LANCZOS)
         self.logo_pic = ImageTk.PhotoImage(self.logo_pic)
 
-        self.logo_label = tk.Label(self.logo_frame, image=self.logo_pic, bg="#f883aa")
+        self.logo_label = tk.Label(self.logo_frame, image=self.logo_pic, bg="#E53888")
         self.logo_label.pack(pady=10)  
 
 
