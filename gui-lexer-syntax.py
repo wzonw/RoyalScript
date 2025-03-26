@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import PhotoImage, scrolledtext
-from PIL import Image, ImageTk 
+from PIL import Image, ImageTk, ImageSequence
 from lexer2 import RoyalScriptLexer
 from lexer2 import Token
 from pygame import mixer
@@ -28,11 +28,16 @@ class RoyalScriptLexerGUI(tk.Tk):
         
 
         # Load and set background image
-        self.bg_image = Image.open("4.png")
-        self.bg_image = self.bg_image.resize((self.winfo_screenwidth(),self.winfo_screenheight()), Image.Resampling.LANCZOS)
-        self.bg_photo = ImageTk.PhotoImage(self.bg_image)
-        
-        self.bg_label = tk.Label(self, bg="#f883aa")
+        self.bg_image = Image.open("images/rsbg.gif")
+        self.frames = []
+        self.durations = []
+
+        # Extract frames and durations
+        for frame in ImageSequence.Iterator(self.bg_image):
+            self.frames.append(ImageTk.PhotoImage(frame.copy()))
+            self.durations.append(frame.info.get('duration', 100))
+
+        self.bg_label = tk.Label(self, image=self.frames[0])
         self.bg_label.place(relwidth=1, relheight=1)
 
         # Allow frames to expand dynamically
@@ -52,6 +57,33 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.setup_input_section()
         self.setup_lexer_tokens_section()
         self.setup_errors_section()
+        
+        self.animate(0)
+
+    def animate(self, frame):
+        next_frame = (frame + 1) % len(self.frames)  # Loop through frames
+        self.bg_label.config(image=self.frames[next_frame])
+        self.after(25, self.animate, next_frame)  # Adjust delay if needed (e.g., 100ms)
+    
+    def start_typing_effect(self, full_text):
+        """Start the typing animation for parser output."""
+        self.typing_text = full_text
+        self.current_index = 0
+        self.errors_listbox.insert(tk.END, "")  # Clear any previous content
+        self.animate_text()
+
+    def animate_text(self):
+        """Animate the text appearing in the listbox letter by letter."""
+        if self.current_index < len(self.typing_text):
+            # Get current text and append the next character
+            current_text = self.errors_listbox.get(tk.END)
+            self.errors_listbox.delete(tk.END)  # Remove last entry
+            self.errors_listbox.insert(tk.END, current_text + self.typing_text[self.current_index])
+
+            self.current_index += 1
+            self.after(10, self.animate_text)  # Adjust speed (50ms per letter)
+
+
         
     def setup_frames(self):
 
@@ -92,7 +124,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.logo_pic = self.logo_pic.resize((200,200), Image.Resampling.LANCZOS)
         self.logo_pic = ImageTk.PhotoImage(self.logo_pic)
 
-        self.logo_label = tk.Label(self.logo_frame, image=self.logo_pic, bg="#f883aa")
+        self.logo_label = tk.Label(self.logo_frame, image=self.logo_pic, bg="#E53888")
         self.logo_label.pack(pady=10)  
 
 
@@ -620,16 +652,46 @@ class RoyalScriptLexerGUI(tk.Tk):
 
         try:
             parser.parse()  # Run the syntax analysis
-            # self.errors_listbox.insert(tk.END, "\n─── Parser Output ───")
-            self.errors_listbox.insert(tk.END, parser.get_parsing_result())
+            result_text = parser.get_parsing_result()
+
+            # Clear previous output and start the typing effect
+            self.errors_listbox.delete(0, tk.END)
+            self.start_typing_effect(result_text)
+
+#               try:
+        #            parser.parse()  # Run the syntax analysis
+        #            # self.errors_listbox.insert(tk.END, "\n─── Parser Output ───")
+        #            self.errors_listbox.insert(tk.END, parser.get_parsing_result())
+        #
+        #        except SyntaxError as e:
+        #            # self.errors_listbox.insert(tk.END, "\n─── Parser Error ───")
+        #            self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
+        #            
+        #        except Exception as e:
+        #            # self.errors_listbox.insert(tk.END, "\n─── Parser Error ───")
+        #            self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
+#
+            #parser.parse()  # Run the syntax analysis
+            #result_text = parser.get_parsing_result()
+#
+            ## Clear previous output and start the typing effect
+            #self.errors_listbox.delete(0, tk.END)
+            #self.start_typing_effect(result_text)   
+
 
         except SyntaxError as e:
-            # self.errors_listbox.insert(tk.END, "\n─── Parser Error ───")
-            self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
-            
+            #self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
+            syntax = f"Syntax Error: {str(e)}"
+            self.start_typing_effect(syntax)
+
+
         except Exception as e:
-            # self.errors_listbox.insert(tk.END, "\n─── Parser Error ───")
-            self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
+            #self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
+            unexpected = f"Unexpected Error: {str(e)}"
+            self.start_typing_effect(unexpected)
+
+        except Exception as e:
+            self.errors_listbox.insert(tk.END, f"⚠️ Unexpected Error in Semantic Analysis: {str(e)}")
 
 
     # def run_syntax_analyzer(self, tokens):
@@ -666,8 +728,6 @@ class RoyalScriptLexerGUI(tk.Tk):
     #                     self.errors_listbox.insert(tk.END, f"   ➤ {error}")
 
 
-        except Exception as e:
-            self.errors_listbox.insert(tk.END, f"⚠️ Unexpected Error in Semantic Analysis: {str(e)}")
 
     def on_hover(self, event):
         """Change button appearance on hover"""
