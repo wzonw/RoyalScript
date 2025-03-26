@@ -4,7 +4,7 @@ from PIL import Image, ImageTk
 from lexer2 import RoyalScriptLexer
 from lexer2 import Token
 from pygame import mixer
-from syntax5_new import RoyalScriptParser
+from parser import RoyalScriptParser
 from ast_builder import RoyalScriptASTBuilder
 #from semantic_copy import RoyalScriptSemanticAnalyzer 
 
@@ -433,7 +433,7 @@ class RoyalScriptLexerGUI(tk.Tk):
     #     self.output_listbox.delete(0, tk.END)
     #     self.token_listbox.delete(0, tk.END)
     #     self.errors_listbox.delete(0, tk.END)
-    #     self.tokens = []  # Reset tokens list
+    #            = []  # Reset tokens list
 
     #     try:
     #         token_lines = lexer.get_tokens() or []

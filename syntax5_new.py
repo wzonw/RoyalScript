@@ -140,6 +140,7 @@ class RoyalScriptParser:
     def global_dec(self):
         #2	<global_dec>	→	<var_dec> <global_dec>
         if self.var_dec():
+            print('enter global dec ------------------', self.current_token())
             token = self.current_token()
             if token in ['dynasty', 'scroll', 'mirror', 'ocean', 'treasures', 'rose']:
                 return self.global_dec()
@@ -147,6 +148,7 @@ class RoyalScriptParser:
         
         # 3	<global_dec>	→	λ
         token = self.current_token()
+        print('enter castle ------------------', self.current_token())
         return token in ['castle', 'spell']
 
     def var_dec(self):
@@ -158,6 +160,7 @@ class RoyalScriptParser:
             return False
         self.advance()
         if not self.match('identifier'):
+            print('enter id ------------------', self.current_token())
             self.error_message = f"Syntax Error: Missing variable name at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         
@@ -166,6 +169,7 @@ class RoyalScriptParser:
     def dynasty(self):
         # 5	<dynasty>	→	dynasty
         if self.match('dynasty'):
+            print('enter dynasty ------------------', self.current_token())
             return True
         # 6	<dynasty>	→	λ
         elif self.data_type():
@@ -177,12 +181,16 @@ class RoyalScriptParser:
 
     def vardec_def(self):
         token = self.current_token()
-        print({self.current_token()}, "ente vardec_def  -----------------------------", self.current_token())
+        print("ente vardec_def  -----------------------------", self.current_token())
         # 7	<vardec_def>	→	<initialization> <vardec_more>~
         if self.initialization():
+            print('pass init ------------------', self.current_token())
             if not self.vardec_more():
+                print('enter vardec more ------------------', self.current_token())
                 return False
+            print('pass vardec more------------------', self.current_token())
             if not self.match("~"):
+                print('enter ~ ------------------', self.current_token())
                 return False
             return True
 
@@ -235,14 +243,14 @@ class RoyalScriptParser:
 
     def initialization(self):
         # 11	<initialization>	→	= <val>
-        print({self.current_token()}, "init ---------------- ")
+        print('enter init ------------------', self.current_token())
         if self.match('='):
             return self.val()
         # 12	<initialization>	→	λ 
         return self.current_token() in ['~', ',']
 
     def vardec_more(self):
-        print({self.current_token()}, "vardec more", self.current_token())
+        print('enter vardec more ------------------', self.current_token())
         # 13	<vardec_more>	→	, id_lit <initialization> <vardec_more>
         if self.match(','):
             if not self.match('identifier') or not self.initialization():
@@ -250,6 +258,7 @@ class RoyalScriptParser:
                 return False
             return self.vardec_more()
         # 14	<vardec_more>	→	λ
+        print('enter null------------------', self.current_token())
         return self.current_token() == '~'
 
     def column(self):
@@ -1914,6 +1923,7 @@ class RoyalScriptParser:
         
         # 202	<granted_lit_ext_1>	→	λ
         elif token in [',', '~']:
+            print('enter null ------------------', self.current_token())
             return True
 
         return False
@@ -1983,6 +1993,7 @@ class RoyalScriptParser:
         # 202	<data_type>	→	mirror
         # 203	<data_type>	→	ocean
         # 204	<data_type>	→	rose
+        print('enter data type ------------------', self.current_token())
         if token in {'scroll', 'treasures', 'mirror', 'ocean', 'rose'}:
             # self.advance()  # Consume the data_type token
             return True
@@ -1991,6 +2002,7 @@ class RoyalScriptParser:
     
     def val(self):
         token = self.current_token()
+        print('enter val ------------------', self.current_token())
         # 215	<val>	→	lengthof(<id_lit>)
         if self.match('lengthof'):
             if not self.match('('):
@@ -2027,6 +2039,7 @@ class RoyalScriptParser:
         
         # 220	<val>	→	treasures_lit  <granted_lit_ext_2>
         elif self.match('treasures_lit') or self.match('1') or self.match('0'):
+            print('enter treasures lit ------------------', self.current_token())
             if not self.granted_lit_ext_2():
                 return False
             return True
