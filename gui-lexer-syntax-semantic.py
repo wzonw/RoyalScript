@@ -4,8 +4,8 @@ from PIL import Image, ImageTk
 from lexer2 import RoyalScriptLexer
 from lexer2 import Token
 from pygame import mixer
-from syntax5 import RoyalScriptParser
-from semantic_copy import RoyalScriptSemanticAnalyzer 
+# from syntax5 import RoyalScriptParser
+# from semantic_copy import RoyalScriptSemanticAnalyzer 
 
 
 class RoyalScriptLexerGUI(tk.Tk):

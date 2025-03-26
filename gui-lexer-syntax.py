@@ -143,14 +143,14 @@ class RoyalScriptLexerGUI(tk.Tk):
         #self.left_frame.grid_columnconfigure(2, weight=0)  # Scrollbar
 
         self.line_numbers = tk.Text(
-            self.left_frame, width=2, height=25, wrap=tk.NONE,
-            fg="white", bg="#E53888", state="disabled"
+            self.left_frame, width=6, height=25, wrap=tk.NONE,
+            fg="white", bg="#E53888", state="disabled", borderwidth=5
         )
         self.line_numbers.grid(row=1, column=0, sticky="nsew", padx=(10, 0), pady=(3,20))
         
         # Main text widget
         self.input_text = tk.Text(
-            self.left_frame, width=90, height=25,
+            self.left_frame, width=85, height=25,
             wrap=tk.WORD, fg="#d60083", relief="sunken", bd=5
         )
         self.input_text.grid(row=1, column=1, padx=(0, 0), pady=(3,20))
@@ -213,7 +213,7 @@ class RoyalScriptLexerGUI(tk.Tk):
 
         # Line numbers for lexer only
         self.lexer_line_numbers = tk.Text(
-            lexer_frame, width=2, height=25, wrap=tk.NONE,
+            lexer_frame, width=3, height=24, wrap=tk.NONE,
             fg="white", bg="#E53888", state="disabled"
         )
         self.lexer_line_numbers.grid(row=0, column=0, sticky="ns", padx=(5, 0), pady=0)
@@ -564,6 +564,8 @@ class RoyalScriptLexerGUI(tk.Tk):
     def run_button(self, event=None):
         return
 
+    
+    
     def analyze_code(self, event=None):
         """Analyze the code and display results"""
         code = self.input_text.get("1.0", tk.END)
@@ -579,7 +581,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         try:
             token_lines = lexer.get_tokens() or []
             self.tokens = token_lines  # Store the token lines
-            
+
             # Check if we have valid tokens
             if not token_lines:
                 self.errors_listbox.insert(tk.END, "Lexer Error: No tokens detected")
@@ -599,7 +601,6 @@ class RoyalScriptLexerGUI(tk.Tk):
                             
                             # Create a display string for the token type and value.
                             if hasattr(token, 'token_type'):
-                                # definition = token.token_type.replace("_", " ")``
                                 display = f"{token.token_type}"
                                 self.token_listbox.insert(tk.END, display)
                                 
@@ -610,107 +611,45 @@ class RoyalScriptLexerGUI(tk.Tk):
             # Update line numbers after adding all tokens (if you have such a function).
             self.update_lexer_token_line_numbers()
             
+            # If the lexer found errors, list them
             if lexer.errors:
                 for error in lexer.errors:
-                    self.errors_listbox.insert(tk.END, error)
-            else:   
-                # No lexer errors, proceed to syntax analysis with both full tokens and token info.
+                    self.errors_listbox.insert(tk.END, f"❌ Lexical Error: {error}")
+            
+            # Show lexical success message in its own listbox item, AFTER error checking
+            else:
+                self.errors_listbox.insert(tk.END, "✅ Lexical Analysis Successful.")
+                
+                # Now run syntax analysis
                 self.run_syntax_analyzer(all_tokens)
         
         except SyntaxError as e:
             self.errors_listbox.insert(tk.END, f"Lexical Error: {str(e)}")
         except Exception as e:
-            self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
             import traceback
+            self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
             self.errors_listbox.insert(tk.END, f"Details: {traceback.format_exc()}")
 
-                
-    # def run_syntax_analyzer(self, tokens):
-    #     """Run the syntax analyzer with tokens and build AST if successful."""
-    #     parser = RoyalScriptParser(tokens)
-
-    #     try:
-    #         parser.parse()  # Run the syntax analysis
-    #         self.errors_listbox.insert(tk.END, parser.get_parsing_result())
-
-    #         # Syntax analysis successful; build the AST
-    #         ast_builder = RoyalScriptASTBuilder(tokens)
-    #         ast_root = ast_builder.build_ast()
-
-    #         self.errors_listbox.insert(tk.END, "AST successfully built.")
-    #         # Optionally, handle ast_root (e.g., display or use it for further analysis)
-
-    #     except SyntaxError as e:
-    #         self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
-
-    #     except Exception as e:
-    #         self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
-
     def run_syntax_analyzer(self, tokens):
-        """Run the syntax analyzer with tokens"""
+        """Run the syntax analyzer with tokens."""
         parser = RoyalScriptParser(tokens)
 
         try:
-            parser.parse()  # Run the syntax analysis
-            result_text = parser.get_parsing_result()
+            syntax_result = parser.parse()  # Run the syntax analysis
 
-            # Clear previous output and start the typing effect
-            self.errors_listbox.delete(0, tk.END)
-            self.start_typing_effect(result_text)
-
-#               try:
-        #            parser.parse()  # Run the syntax analysis
-        #            # self.errors_listbox.insert(tk.END, "\n─── Parser Output ───")
-        #            self.errors_listbox.insert(tk.END, parser.get_parsing_result())
-        #
-        #        except SyntaxError as e:
-        #            # self.errors_listbox.insert(tk.END, "\n─── Parser Error ───")
-        #            self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
-        #            
-        #        except Exception as e:
-        #            # self.errors_listbox.insert(tk.END, "\n─── Parser Error ───")
-        #            self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
-#
-            #parser.parse()  # Run the syntax analysis
-            #result_text = parser.get_parsing_result()
-#
-            ## Clear previous output and start the typing effect
-            #self.errors_listbox.delete(0, tk.END)
-            #self.start_typing_effect(result_text)   
-
+            if syntax_result:
+                # Insert success message on a new line
+                self.errors_listbox.insert(tk.END, "✅ Syntax Analysis Successful!")
+            else:
+                # Insert failure message on its own line
+                self.errors_listbox.insert(tk.END, "❌ Syntax Analysis Failed.")
 
         except SyntaxError as e:
-            #self.errors_listbox.insert(tk.END, f"Syntax Error: {str(e)}")
-            syntax = f"Syntax Error: {str(e)}"
-            self.start_typing_effect(syntax)
-
-
+            # Insert the syntax error message as a separate item
+            self.errors_listbox.insert(tk.END, f"❌ {str(e)}")
         except Exception as e:
-            #self.errors_listbox.insert(tk.END, f"Unexpected Error: {str(e)}")
-            unexpected = f"Unexpected Error: {str(e)}"
-            self.start_typing_effect(unexpected)
-
-        except Exception as e:
-            self.errors_listbox.insert(tk.END, f"⚠️ Unexpected Error in Semantic Analysis: {str(e)}")
-
-
-    # def run_syntax_analyzer(self, tokens):
-    #     """Run the syntax analyzer with tokens."""
-    #     parser = RoyalScriptParser(tokens)
-
-    #     try:
-    #         syntax_result = parser.parse()  # Run syntax analysis
-
-    #         if syntax_result:  # ✅ If syntax analysis succeeds, proceed to semantic analysis
-    #             self.errors_listbox.insert(tk.END, "✅ Syntax Analysis Successful!")
-    #             self.run_semantic_analyzer(parser.final_statements_list)  # ✅ Pass parsed statements
-    #         else:
-    #             self.errors_listbox.insert(tk.END, "❌ Syntax Analysis Failed.")
-
-    #     except SyntaxError as e:
-    #         self.errors_listbox.insert(tk.END, f"❌ Syntax Error: {str(e)}")
-    #     except Exception as e:
-    #         self.errors_listbox.insert(tk.END, f"⚠️ Unexpected Error in Syntax Analysis: {str(e)}")
+            self.errors_listbox.insert(tk.END, f" ❌ Unexpected Error in Syntax Analysis: {str(e)}")
+        
 
     # def run_semantic_analyzer(self, final_statements_list):
     #     """Run the semantic analyzer if syntax is correct."""
