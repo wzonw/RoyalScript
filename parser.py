@@ -509,28 +509,27 @@ class RoyalScriptParser:
         return False
 
     def logical_exp(self):
-        # 40	<logical_exp>	→	<logical_operand> <logical_operator> <logical_operand> <more_log>
-        if self.logical_operand():
-            if not self.logical_operator():
-                return False
-            if not self.logical_operand():
-                return False
-            print('logical_operand')
-            if not self.more_log():
-                return False
-            return True
-        
-        # 41	<logical_exp>	→	<logical_operator1> <logical_operand> <more_log> 
-        elif self.logical_operator1():
-            if not self.logical_operand():
-                return False
-            if not self.more_log():
-                return False
-            return True
-        
-        return False
+        # 40	<logical_exp>	→	<logical_operator1> <logical_operand> <logical_operator> <logical_operator1> <logical_operand> <more_log>
+        print("entered logical expression", self.current_token())
+        if not self.logical_operator1():
+            return False
+        if not self.logical_operand():
+            return False
+        if not self.logical_operator():
+            return False
+        print('logical_operator')
+        if not self.logical_operator1():
+            return False
+        if not self.logical_operand():
+            return False
+        print('logical_operand')
+        if not self.more_log():
+            return False
+        return True
+ 
     
     def logical_operand(self):
+        print("entered logical operand", self.current_token())
         # 42	<logical_operand>	→	id_lit <id_ext> <logical_operand_ext>
         if self.match('identifier'):
             if not self.id_ext():
@@ -625,8 +624,13 @@ class RoyalScriptParser:
         return False
     
     def logical_operator1(self):
+        token = self.current_token()
         # 56	<logical_operator1>	→	!
         if self.match('!'):
+            return True
+        
+        # 55 <logical_operator1>	→	λ
+        elif token in ['identifier','ocean_lit', 'treasures_lit', 'scroll_lit', 'mirror_lit', '1','0', '(']:
             return True
         
         self.error_message = f"Syntax Error: Invalid Logical Operator '{repr(self.tokens[self.current_line][self.current_index][1])}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
@@ -1955,13 +1959,14 @@ class RoyalScriptParser:
         print('enter granted lit3 ext --------------------', self.current_token())
         token = self.current_token()
 
-        # 202	<granted_lit3_ext>	→	<arithmetic_operator> <arithmetic_operand> <more_arith>
-        if self.arithmetic_operator() and self.arithmetic_operand() and self.more_arith():
-            return True
-        
         # 203	<granted_lit3_ext>	→	<more_arith> <relational_operator> <relational_operand> <relational_more> <more_log>
-        elif self.more_arith() and self.relational_operator() and self.relational_operand() and self.relational_more() and self.more_log():
+        if self.more_arith() and self.relational_operator() and self.relational_operand() and self.relational_more() and self.more_log():
             return True
+
+        # 202	<granted_lit3_ext>	→	<arithmetic_operator> <arithmetic_operand> <more_arith>
+        elif self.arithmetic_operator() and self.arithmetic_operand() and self.more_arith():
+            return True
+    
         
         # 204	<granted_lit3_ext>	→	λ
         elif token in [',', ')', '~']:
@@ -2001,14 +2006,10 @@ class RoyalScriptParser:
         return False
     
     def val(self):
-        # 217	<val>	→	<granted_content_2>
-        print('enter val')
-        if self.granted_content_2():
-            print('passed granted_content_2 --------------------', self.current_token())
-            return True
         
+        print('enter val')
         # 218	<val>	→	id_lit <granted_id_ext>
-        elif self.match('identifier'):
+        if self.match('identifier'):
             print('enter val id')
             if not self.granted_id_ext():
                 return False
@@ -2018,18 +2019,25 @@ class RoyalScriptParser:
         elif self.input():
             return True
         
+        # 217	<val>	→	<granted_content_2>
+        elif self.granted_content_2():
+            print('passed granted_content_2 --------------------', self.current_token())
+            return True
+        
         return False
     
     def val1(self):
-        # 220	<val1>	→	<granted_content_2>
-        if self.granted_content_2():
-            return True
-        
+
         # 221	<val1>	→	id_lit <val1_ext>
-        elif self.match('identifier'):
+        if self.match('identifier'):
             if not self.val1_ext():
                 return False
             return True
+
+        # 220	<val1>	→	<granted_content_2>
+        elif self.granted_content_2():
+            return True
+    
         
         return False
     
