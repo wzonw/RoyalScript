@@ -1958,13 +1958,15 @@ class RoyalScriptParser:
     def granted_lit3_ext(self):
         print('enter granted lit3 ext --------------------', self.current_token())
         token = self.current_token()
+        current_pos = self.current_index
 
         # 203	<granted_lit3_ext>	→	<more_arith> <relational_operator> <relational_operand> <relational_more> <more_log>
         if self.more_arith() and self.relational_operator() and self.relational_operand() and self.relational_more() and self.more_log():
             return True
 
+        self.current_index = current_pos
         # 202	<granted_lit3_ext>	→	<arithmetic_operator> <arithmetic_operand> <more_arith>
-        elif self.arithmetic_operator() and self.arithmetic_operand() and self.more_arith():
+        if self.arithmetic_operator() and self.arithmetic_operand() and self.more_arith():
             return True
     
         

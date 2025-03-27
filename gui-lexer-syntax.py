@@ -585,12 +585,12 @@ class RoyalScriptLexerGUI(tk.Tk):
                 try:
                     ast_builder = RoyalScriptASTBuilder(tokens)
                     ast = ast_builder.build_ast()
-                    # self.errors_listbox.insert(tk.END, "✅ AST Building Successful!")
+                    self.errors_listbox.insert(tk.END, "✅ AST Building Successful!")
 
                     # Print the AST structure
-                    # print("\n=== AST Structure ===")
-                    # print_ast(ast)
-                    # Optionally, further process or display the AST here.
+                    print("\n=== AST Structure ===")
+                    print_ast(ast)
+                    #Optionally, further process or display the AST here.
                 except Exception as e:
                     self.errors_listbox.insert(tk.END, f"❌ AST Building Failed: {e}")
             else:

@@ -183,13 +183,17 @@ class RoyalScriptASTBuilder:
     def advance(self):
         """Move to the next token."""
         # If we've already gone past the token list, do nothing.
-        if self.current_line >= len(self.tokens):
-            return
-        if self.current_index + 1 < len(self.tokens[self.current_line]):
-            self.current_index += 1
-        else:
-            self.current_line += 1
-            self.current_index = 0
+        while True:
+            if self.current_line >= len(self.tokens):
+                return
+            if self.current_index + 1 < len(self.tokens[self.current_line]):
+                self.current_index += 1
+            else:
+                self.current_line += 1
+                self.current_index = 0
+
+            if self.current_token() not in ["single_comment", "multi_comment"]:
+                break
 
     def match(self, expected):
         """
@@ -249,11 +253,15 @@ class RoyalScriptASTBuilder:
         token = self.current_token()
         array_dimensions = []
 
+        print('it is a dynasty--------------------------------------------------------', token)
+
         # Check for optional 'dynasty' token
         if token and token[0] == 'dynasty':
             is_dynasty = True
             self.advance()
             token = self.current_token()
+        
+        print('it is a dynasty--------------------------------------------------------')
 
         # Expect a data type next
         datatype = token  # use the literal value for the type
