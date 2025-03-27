@@ -4,6 +4,7 @@ GLOBAL_SCOPE = 0
 LOCAL_SCOPE = 1
 
 class Node:
+    """Base class for all AST nodes"""
     pass
 
 class ProgramNode(Node):
@@ -20,7 +21,6 @@ class VariableDeclarationNode(Node):
         self.is_dynasty = is_dynasty
         self.scope_level = scope_level
         self.array_dimensions = array_dimensions if array_dimensions is not None else []
-
 
 class VariableReassignmentNode(Node):
     def __init__(self, identifier, operator, expression):
@@ -42,7 +42,6 @@ class FunctionCallNode(Node):
     def __init__(self, name, arguments):
         self.name = name  # Function name
         self.arguments = arguments  # List of argument expressions
-
 
 class DoWhileNode(Node):
     def __init__(self, loop_body, condition):
@@ -112,23 +111,77 @@ class MainFunctionNode(Node):
         self.body = body
         self.return_val = return_val
 
+class ArrayAssignmentNode(Node):
+    def __init__(self, identifier, indices, operator, expression):
+        self.identifier = identifier      # Array name
+        self.indices = indices            # List of index expressions
+        self.operator = operator          # Assignment operator
+        self.expression = expression      # Expression being assigned
+
+class UnaryOperationNode(Node):
+    def __init__(self, identifier, operator):
+        self.identifier = identifier  # Variable name
+        self.operator = operator      # ++ or --
+
+class OutputNode(Node):
+    def __init__(self, expressions):
+        self.expressions = expressions
 
 class RoyalScriptASTBuilder:
     def __init__(self, tokens):
         self.tokens = tokens
         self.current_line = 0
         self.current_index = 0
+        self.current_position = (0, 0)  # (line, index) for better error messages
 
     def current_token(self):
+        """Get the current token without advancing."""
         while self.current_line < len(self.tokens):
             if self.tokens[self.current_line]:
                 if self.current_index < len(self.tokens[self.current_line]):
+                    # Update current position for error reporting
+                    self.current_position = (self.current_line, self.current_index)
                     return self.tokens[self.current_line][self.current_index]
             self.current_line += 1
             self.current_index = 0
         return None
 
+    def peek_next_token(self):
+        """Look ahead to the next token without advancing."""
+        current_line = self.current_line
+        current_index = self.current_index
+        
+        # Save current position
+        saved_line = self.current_line
+        saved_index = self.current_index
+        
+        # Advance once
+        if current_index + 1 < len(self.tokens[current_line]):
+            current_index += 1
+        else:
+            current_line += 1
+            current_index = 0
+            # Check if we've gone past the end of tokens
+            if current_line >= len(self.tokens):
+                # Restore position
+                self.current_line = saved_line
+                self.current_index = saved_index
+                return None
+        
+        # Get the next token
+        next_token = None
+        if current_line < len(self.tokens) and self.tokens[current_line]:
+            if current_index < len(self.tokens[current_line]):
+                next_token = self.tokens[current_line][current_index]
+        
+        # Restore position
+        self.current_line = saved_line
+        self.current_index = saved_index
+        
+        return next_token
+
     def advance(self):
+        """Move to the next token."""
         # If we've already gone past the token list, do nothing.
         if self.current_line >= len(self.tokens):
             return
@@ -138,23 +191,50 @@ class RoyalScriptASTBuilder:
             self.current_line += 1
             self.current_index = 0
 
-
     def match(self, expected):
+        """
+        Check if the current token matches the expected type, advance if it does,
+        raise an error if it doesn't.
+        """
         token = self.current_token()
         if token and token[0] == expected:
             self.advance()
             return True
-        raise SyntaxError(f"Expected {expected}, got {token}")
+        raise SyntaxError(f"Expected {expected}, got {token} at line {self.current_position[0]+1}, position {self.current_position[1]+1}")
+
+    def try_match(self, expected):
+        """
+        Try to match the expected token type, return True and advance if matched,
+        return False without advancing if not matched.
+        """
+        token = self.current_token()
+        if token and token[0] == expected:
+            self.advance()
+            return True
+        return False
+
+    def current_token_position(self):
+        """Returns a string representation of the current token position for error messages."""
+        return f"line {self.current_position[0]+1}, position {self.current_position[1]+1}"
 
     def build_ast(self):
-        return self.build_program()
+        """Entry point for AST building."""
+        try:
+            return self.build_program()
+        except SyntaxError as e:
+            # Enhance the error message with position information
+            raise SyntaxError(f"{str(e)} at {self.current_token_position()}")
+        except Exception as e:
+            # Catch other exceptions and provide context
+            raise Exception(f"Error building AST: {str(e)} at {self.current_token_position()}")
 
     def build_program(self):
+        """Build the root program node."""
         self.match('crown')
         self.match('~')
 
         global_declarations = self.build_global_declarations()
-        functions = self.build_function()
+        functions = self.build_global_functions()
         main_function = self.build_main_function()
 
         self.match('reign')
@@ -164,7 +244,10 @@ class RoyalScriptASTBuilder:
 
     def build_declaration(self, scope_level):
         is_dynasty = False
+        self.is_array = False
+        self.is_2d = False
         token = self.current_token()
+        array_dimensions = []
 
         # Check for optional 'dynasty' token
         if token and token[0] == 'dynasty':
@@ -173,150 +256,136 @@ class RoyalScriptASTBuilder:
             token = self.current_token()
 
         # Expect a data type next
-        if token is None:
-            raise SyntaxError("Unexpected end of input, expected data type")
-        datatype = token[1]  # use the literal value for the type
+        datatype = token  # use the literal value for the type
         self.advance()
+        token = self.current_token()
 
         # Expect an identifier
-        identifier_token = self.current_token()
-        if identifier_token is None or identifier_token[0] != 'identifier':
-            raise SyntaxError("Expected variable name")
-        identifier = identifier_token[1]  # extract the identifier's name
+        identifier = token  # extract the identifier's name
         self.advance()
-
-        # Check for array declaration (only 1D and 2D allowed)
-        array_dimensions = []
         token = self.current_token()
+        
+        value = None
+        declarations = []
+
+        # Array handling
         if token and token[0] == '[':
+            self.is_array = True
             self.match('[')
-            # Parse first dimension expression
-            dim_expr = self.current_token()
-            if dim_expr is None:
-                raise SyntaxError("Expected expression for array dimension")
-            array_dimensions.append(dim_expr[1])
+            token = self.current_token()
+            array_dimensions.append(token)
             self.advance()
             self.match(']')
-
-            # Optionally check for a second dimension
             token = self.current_token()
+
             if token and token[0] == '[':
+                self.is_2d = True
                 self.match('[')
-                dim_expr = self.current_token()
-                if dim_expr is None:
-                    raise SyntaxError("Expected expression for second array dimension")
-                array_dimensions.append(dim_expr[1])
+                token = self.current_token()
+                array_dimensions.append(token)
                 self.advance()
                 self.match(']')
+                token = self.current_token()
+                
             
-            # Disallow more than 2 dimensions
-            token = self.current_token()
-            if token and token[0] == '[':
-                raise SyntaxError("Only 1D and 2D arrays are allowed")
-
-        # Check for initialization for the first variable
-        value = None
-        token = self.current_token()
-        declarations = None
+        # with initialization
         if token and token[0] == '=':
             self.match('=')
-            value_node = self.build_expression()
-            if value_node is None:
-                raise SyntaxError("Expected value after '='")
-            value = value_node
-            declarations = [VariableDeclarationNode(datatype, identifier, value, is_dynasty, scope_level, array_dimensions)]
-        elif token and token[0] == ',':
-            # Create declaration without initialization, then parse additional declarations
-            declarations = [VariableDeclarationNode(datatype, identifier, value, is_dynasty, scope_level, array_dimensions)]
-            declarations.extend(self.build_vardec_more(datatype, is_dynasty, scope_level))
-        elif token and token[0] == '~':
-            declarations = [VariableDeclarationNode(datatype, identifier, value, is_dynasty, scope_level, array_dimensions)]
-        else:
-            raise SyntaxError(f"Unexpected token {token} in declaration")
-        
-        # Consume the '~' at the end of the declaration
-        self.advance()
-        
-        return declarations
-
-
-    def build_vardec_more(self, datatype, is_dynasty, scope_level):
-        """
-        Handles additional variable declarations separated by commas.
-        Each additional variable may have its own optional initialization and array dimensions.
-        """
-        additional_declarations = []
-        # Continue while the current token is a comma
-        while self.current_token() and self.current_token()[0] == ',':
-            self.match(',')  # Consume the comma
-
-            # Expect an identifier after the comma
-            identifier_token = self.current_token()
-            if identifier_token is None or identifier_token[0] != 'identifier':
-                raise SyntaxError("Expected variable name after ','")
-            identifier = identifier_token[1]
-            self.advance()
-
-            # Check for array declaration (only 1D and 2D allowed)
-            array_dimensions = []
+            if self.is_array:
+                value = self.build_array(self.is_2d)
+            else:
+                value = self.build_expression()
             token = self.current_token()
+            
+            # Create the declaration node
+            decl = VariableDeclarationNode(datatype, identifier, value, is_dynasty, scope_level, array_dimensions)
+            declarations.append(decl)
+        
+        # Multiple declarations
+        while True:
+            self.is_array = False
+            self.is_2d = False
+            token = self.current_token()
+            if not token or token[0] != ',':
+                break
+                
+            self.match(',')
+            
+            # Get the identifier
+            token = self.current_token()
+            if not token:
+                break
+                
+            identifier = token
+            self.advance()
+            
+            value = None
+            array_dimensions = []
+            
+            token = self.current_token()
+            
+            # Array handling
             if token and token[0] == '[':
+                self.is_array = True
                 self.match('[')
-                # Parse first dimension expression
-                dim_expr = self.current_token()
-                if dim_expr is None:
-                    raise SyntaxError("Expected expression for array dimension")
-                array_dimensions.append(dim_expr[1])
+                token = self.current_token()
+                array_dimensions.append(token)
                 self.advance()
                 self.match(']')
-                
-                # Optionally check for a second dimension
                 token = self.current_token()
+
                 if token and token[0] == '[':
+                    self.is_2d = True
                     self.match('[')
-                    dim_expr = self.current_token()
-                    if dim_expr is None:
-                        raise SyntaxError("Expected expression for second array dimension")
-                    array_dimensions.append(dim_expr[1])
+                    token = self.current_token()
+                    array_dimensions.append(token)
                     self.advance()
                     self.match(']')
+                    token = self.current_token()
+                    
                 
-                # Disallow more than 2 dimensions
-                token = self.current_token()
-                if token and token[0] == '[':
-                    raise SyntaxError("Only 1D and 2D arrays are allowed")
-            
-            # Check for initialization for this variable
-            value = None
-            token = self.current_token()
+            # with initialization
             if token and token[0] == '=':
                 self.match('=')
-                value = self.build_expression()
-            
-            # Create the declaration node and append it to the list
+                if self.is_array:
+                    value = self.build_array(self.is_2d)
+                else:
+                    value = self.build_expression()
+                token = self.current_token()
+                
+                # Create the declaration node
+                decl = VariableDeclarationNode(datatype, identifier, value, is_dynasty, scope_level, array_dimensions)
+                declarations.append(decl)
+
+             # End of declaration
+            token = self.current_token()
+            if token and token[0] == '~':
+                self.match('~')
+
+        # Single declaration without initialization
+        if token and token[0] == '~':
+            self.match('~')
             decl = VariableDeclarationNode(datatype, identifier, value, is_dynasty, scope_level, array_dimensions)
-            additional_declarations.append(decl)
-        
-        return additional_declarations
+            declarations.append(decl)
 
-
+        return declarations
 
     def build_global_declarations(self):
         declarations = []
-
+        
         while True:
             token = self.current_token()
-
+            
             # End parsing if we encounter function or main program
             if token is None or token[0] in ['spell', 'castle']:
                 break
-
-            declarations.append(self.build_declaration(scope_level=GLOBAL_SCOPE))
-
+                
+            declarations.extend(self.build_declaration(scope_level=GLOBAL_SCOPE))
+            
         return declarations
 
-
     def build_global_functions(self):
+        """Build all global functions."""
         functions = []
 
         while True:
@@ -336,17 +405,21 @@ class RoyalScriptASTBuilder:
         return functions
 
     def build_function(self, is_global, scope_level):
+        """Build a function definition node."""
         self.match('spell')
 
         # Parse return type
-        return_type = self.current_token()
+        return_type_token = self.current_token()
+        if return_type_token is None:
+            raise SyntaxError("Expected return type for function")
+        return_type = return_type_token
         self.advance()
 
         # Parse function identifier
-        identifier_token = self.current_token()
-        if identifier_token[0] != 'identifier':
-            raise SyntaxError("Expected function name identifier.")
-        identifier = identifier_token
+        token = self.current_token()
+        if token is None or token[0] != 'identifier':
+            raise SyntaxError(f"Expected function name identifier, got {token}")
+        identifier = token
         self.advance()
 
         # Parse parameters
@@ -358,38 +431,57 @@ class RoyalScriptASTBuilder:
         self.match('{')
         body = self.build_body()
 
+        # Parse optional return value
         return_val = None
-        if self.current_token()[0] == 'return':
+        if self.current_token() and self.current_token()[0] == 'return':
             self.match('return')
             return_expr_token = self.current_token()
-            return_val = LiteralNode(return_expr_token[1], return_expr_token[0])
-            self.advance()
+            if return_expr_token is None:
+                raise SyntaxError("Expected expression after 'return'")
+            return_val = self.build_val()
             self.match('~')
 
         self.match('}')
 
         return FunctionNode(return_type, identifier, params, body, return_val, is_global, scope_level)
 
-
     def build_main_function(self):
+        """Build the main function node."""
         self.match('castle')
         self.match('treasures')
+        
+        identifier = None
         if self.current_token() and self.current_token()[0] == 'identifier':
             identifier = self.current_token()
             self.advance()
+        else:
+            raise SyntaxError("Expected identifier for main function")
+            
         self.match('(')
         self.match(')')
         self.match('{')
+        
         body = self.build_body()
+        
         self.match('return')
-        if self.current_token() and self.current_token()[1] == '0':
-            return_value= self.current_token()
-            self.advance()
+        
+        return_value = None
+        if self.current_token():
+            if self.current_token()[1] == '0':
+                return_value = self.current_token()
+                self.advance()
+            else:
+                raise SyntaxError("Main function must return 0")
+        else:
+            raise SyntaxError("Expected return value for main function")
+            
         self.match('~')
         self.match('}')
+        
         return MainFunctionNode(identifier, body, return_value)
 
     def build_body(self):
+        """Build the body of a function or control structure."""
         body_nodes = []
 
         while True:
@@ -399,21 +491,22 @@ class RoyalScriptASTBuilder:
                 break
 
             if token[0] in ['dynasty', 'scroll', 'mirror', 'ocean', 'treasures', 'rose']:
-                declaration = self.build_declaration(scope_level=LOCAL_SCOPE)
-                body_nodes.append(declaration)
+                declarations = self.build_declaration(scope_level=LOCAL_SCOPE)
+                body_nodes.extend(declarations)
 
             elif token[0] == 'spell':
                 function = self.build_function(is_global=False, scope_level=LOCAL_SCOPE)
                 body_nodes.append(function)
 
             elif token[0] == 'granted':
+                self.match('granted')
                 output = self.build_output()
-                body_nodes.append(output)
+                body_nodes.append(OutputNode(output))
 
             elif token[0] == 'identifier':
                 next_token = self.peek_next_token()
 
-                if next_token and next_token[0] in ['=', '+=', '-=', '*=', '/=']:  
+                if next_token and next_token[0] in ['=', '+=', '-=', '*=', '/=', '%=']:  
                     # Variable reassignment case: x = 5~, x += 2~, etc.
                     var_reassign = self.build_var_reassign()
                     body_nodes.append(var_reassign)
@@ -425,12 +518,12 @@ class RoyalScriptASTBuilder:
 
                 elif next_token and next_token[0] == '[':
                     # Array access case: arr[2] = 10~
-                    array_access = self.build_array_assignment()
-                    body_nodes.append(array_access)
+                    array_assignment = self.build_array_assignment()
+                    body_nodes.append(array_assignment)
                 
                 elif next_token and next_token[0] in ['++', '--']:
-                    # Unary
-                    unary = self.build_loop_unary()
+                    # Unary operation: i++~, count--~
+                    unary = self.build_unary_operation()
                     body_nodes.append(unary)
 
                 else:
@@ -452,13 +545,21 @@ class RoyalScriptASTBuilder:
                 for_loop = self.build_for_loop()
                 body_nodes.append(for_loop)
 
+            elif token[0] == 'break':
+                break_node = self.build_break()
+                body_nodes.append(break_node)
+
+            elif token[0] == 'continue':
+                continue_node = self.build_continue()
+                body_nodes.append(continue_node)
+
             else:
                 raise SyntaxError(f"Unexpected token '{token[0]}' in body")
 
         return body_nodes
 
-
     def build_output(self):
+        """Build an output statement."""
         output = []
 
         while True:
@@ -477,112 +578,217 @@ class RoyalScriptASTBuilder:
         return output
 
     def build_var_reassign(self):
+        """Build a variable reassignment node."""
         # Capture the variable being reassigned
-        identifier = self.current_token()
+        token = self.current_token()
+        identifier = token
         self.match('identifier')  # Consume the variable name
 
         # Capture the assignment operator
-        operator = self.current_token()
-        if operator[1] not in ['=', '+=', '-=', '*=', '/=']:
-            raise SyntaxError(f"Invalid assignment operator '{operator[1]}' for variable reassignment")
-        self.match(operator)  # Consume the assignment operator
+        operator_token = self.current_token()
+        if operator_token[0] not in ['=', '+=', '-=', '*=', '/=', '%=']:
+            raise SyntaxError(f"Invalid assignment operator '{operator_token[0]}' for variable reassignment")
+        operator = operator_token
+        self.advance()  # Consume the assignment operator
 
         # Capture the expression being assigned
-        expression = self.build_expression()
+        expression = self.build_val()
 
         # Ensure '~' at the end
-        if not self.match('~'):
-            raise SyntaxError("Expected '~' at the end of variable reassignment")
+        self.match('~')
 
         return VariableReassignmentNode(identifier, operator, expression)
 
     def build_expression(self):
+        """Build an expression node."""
         token = self.current_token()  # Get the current token
-        expression = []
         if token is None:
             raise SyntaxError("Unexpected end of input while parsing expression")
-        
-        # Loop until we hit a terminator ('~' or ',')
-        while token is not None and token[0] not in ['~', ',']:
+
+        expression = []
+        # Loop until we hit a terminator ('~', ',', or ')')
+        while token is not None and token[0] not in ['~', ',', ')', ']']:
             expression.append(token)
             self.advance()
             token = self.current_token()  # update token
         
-        # Consume the terminator if present
-        if token is not None:
+        return expression
+    
+    def build_val(self):
+        """Build an expression node."""
+        token = self.current_token()  # Get the current token
+        if token is None:
+            raise SyntaxError("Unexpected end of input while parsing expression")
+
+        expression = []
+        # Loop until we hit a terminator ('~', ',', or ')')
+        while token is not None and token[0] not in ['~']:
+            expression.append(token)
             self.advance()
+            token = self.current_token()  # update token
         
         return expression
-
-
-
+    
+    def build_array(self, is_2d):
+        """Build an array expression node for both 1D and 2D arrays."""
+        token = self.current_token()
+        if token is None:
+            raise SyntaxError("Unexpected end of input while parsing array")
+        
+        # Expect opening brace
+        if token[0] != '{':
+            raise SyntaxError(f"Expected '{{' at start of array, found {token}")
+        
+        self.advance()  # Move past the opening brace
+        token = self.current_token()
+        
+        array_values = []
+        
+        if is_2d:
+            # Handle 2D array: array of arrays
+            while token is not None and token[0] != '}':
+                # Skip commas between inner arrays
+                if token[0] == ',':
+                    self.advance()
+                    token = self.current_token()
+                    continue
+                    
+                # Each inner array should start with '{'
+                if token[0] != '{':
+                    raise SyntaxError(f"Expected '{{' for inner array, found {token}")
+                    
+                self.advance()  # Move past the inner opening brace
+                
+                # Parse inner array elements
+                inner_array = []
+                token = self.current_token()
+                
+                while token is not None and token[0] != '}':
+                    # Skip commas between elements
+                    if token[0] == ',':
+                        self.advance()
+                        token = self.current_token()
+                        continue
+                        
+                    # Add the element to the inner array
+                    inner_array.append(token)
+                    self.advance()
+                    token = self.current_token()
+                
+                # Make sure we found the closing brace for inner array
+                if token is None or token[0] != '}':
+                    raise SyntaxError("Unexpected end of input while parsing inner array")
+                    
+                # Add completed inner array to our 2D array
+                array_values.append(inner_array)
+                self.advance()  # Move past inner closing brace
+                token = self.current_token()
+        else:
+            # Handle 1D array: simpler case
+            while token is not None and token[0] != '}':
+                # Skip commas between elements
+                if token[0] == ',':
+                    self.advance()
+                    token = self.current_token()
+                    continue
+                    
+                # Add the element
+                array_values.append(token)
+                self.advance()
+                token = self.current_token()
+        
+        # Make sure we found the closing brace
+        if token is None or token[0] != '}':
+            raise SyntaxError("Unexpected end of input while parsing array")
+            
+        self.advance()  # Move past the closing brace
+        return array_values
 
     def build_function_call(self):
-        function_name = self.current_token()  # Store function identifier
+        """Build a function call node."""
+        function_name_token = self.current_token()  # Store function identifier
+        function_name = function_name_token[1]
         self.match('identifier')  # Consume function name
         self.match('(')  # Consume '('
 
         arguments = []
-        current_arg = []
-
-        while True:
-            token = self.current_token()
-
-            if token is None:
-                raise SyntaxError("Unexpected end of input while parsing function arguments")
-
-            if token[0] == ')':  # End of function call
-                if current_arg:
-                    arguments.append(current_arg)  # Append last argument if exists
-                self.advance()  # Consume ')'
-                break
-
-            elif token[0] == ',':  # Argument separator
-                if not current_arg:
-                    raise SyntaxError("Unexpected ',' without preceding argument")
+        
+        # Check for empty argument list
+        if self.current_token() and self.current_token()[0] == ')':
+            self.match(')')
+        else:
+            # Parse arguments
+            while True:
+                current_arg = self.build_expression()
                 arguments.append(current_arg)
-                current_arg = []
-                self.advance()  # Consume ','
+                
+                # Check for more arguments or end of arguments
+                if self.current_token() and self.current_token()[0] == ',':
+                    self.match(',')
+                elif self.current_token() and self.current_token()[0] == ')':
+                    self.match(')')
+                    break
+                else:
+                    raise SyntaxError("Expected ',' or ')' in function call arguments")
 
-            else:
-                current_arg.append(token)
-                self.advance()
-
-        if not self.match('~'):  # Ensure '~' at the end
-            raise SyntaxError("Expected '~' at the end of function call")
+        # Ensure '~' at the end
+        self.match('~')
 
         return FunctionCallNode(function_name, arguments)
     
     def build_array_assignment(self):
+        """Build an array assignment node."""
+        # Get array identifier
         token = self.current_token()
-        array_assignment = []
-        self.match('[')
-        self.match('treasures_lit') or self.match('0') or self.match('1')
-        self.match(']')
-        if token in ['=', '+=', '-=', '*=', '/=']:
-            self.advance()
+        identifier = token
+        self.match('identifier')
+        
+        # Parse indices (can be multiple for multi-dimensional arrays)
+        indices = []
+        while self.current_token() and self.current_token()[0] == '[':
+            self.match('[')
+            index_expr = self.build_expression()
+            indices.append(index_expr)
+            self.match(']')
+            
+        # Get assignment operator
+        operator_token = self.current_token()
+        if operator_token[0] not in ['=', '+=', '-=', '*=', '/=']:
+            raise SyntaxError(f"Invalid assignment operator '{operator_token[0]}' for array assignment")
+        operator = operator_token[0]
+        self.advance()
+        
+        # Get the expression being assigned
+        expression = self.build_expression()
+        
+        # Ensure '~' at the end
+        self.match('~')
+        
+        return ArrayAssignmentNode(identifier, indices, operator, expression)
 
-        while True:
-            token = self.current_token()
-
-            if token is None:
-                raise SyntaxError("Unexpected end of input while parsing output statement")
-
-            if token[0] == '~':
-                self.advance()  # consume the '~' token
-                break
-
-            array_assignment.append(token)
-            self.advance()
-
-        return array_assignment
-
+    def build_unary_operation(self):
+        """Build a unary operation node (++ or --)."""
+        identifier_token = self.current_token()
+        identifier = identifier_token[1]
+        self.match('identifier')
+        
+        operator_token = self.current_token()
+        if operator_token[0] not in ['++', '--']:
+            raise SyntaxError(f"Expected '++' or '--', got {operator_token[0]}")
+        operator = operator_token[0]
+        self.advance()
+        
+        # Ensure '~' at the end
+        self.match('~')
+        
+        return UnaryOperationNode(identifier, operator)
     
     def build_do_while(self):
+        """Build a do-while loop node."""
         self.match('believe')
         self.match('{')
 
-        loop_body = self.build_loop_body()
+        loop_body = self.build_body()
 
         self.match('}')
         self.match('forever')
@@ -595,8 +801,8 @@ class RoyalScriptASTBuilder:
 
         return DoWhileNode(loop_body, condition)
 
-
     def build_while(self):
+        """Build a while loop node."""
         self.match('forever')
         self.match('(')
 
@@ -605,13 +811,14 @@ class RoyalScriptASTBuilder:
         self.match(')')
         self.match('{')
 
-        loop_body = self.build_loop_body()
+        loop_body = self.build_body()
 
         self.match('}')
 
         return WhileNode(loop_body, condition)
     
     def build_if(self):
+        """Build an if statement node with optional elif and else branches."""
         self.match('cast')
         self.match('(')
         condition = self.build_condition()
@@ -622,239 +829,141 @@ class RoyalScriptASTBuilder:
 
         # Collect optional 'twist' (elif) statements
         elif_nodes = []
-        while True:
-            token = self.current_token()
-            if token and token[0] == 'twist':
-                self.match('twist')
-                self.match('(')
-                twist_condition = self.build_condition()
-                self.match(')')
-                self.match('{')
-                twist_body = self.build_body()
-                elif_nodes.append(ElifNode(twist_condition, twist_body))
-            else:
-                break
+        while self.current_token() and self.current_token()[0] == 'twist':
+            self.match('twist')
+            self.match('(')
+            twist_condition = self.build_condition()
+            self.match(')')
+            self.match('{')
+            twist_body = self.build_body()
+            self.match('}')
+            elif_nodes.append(ElifNode(twist_condition, twist_body))
 
-        
         # Optional 'curse' (else) statement
         else_node = None
-        token = self.current_token()
-        if token and token[0] == 'curse':
+        if self.current_token() and self.current_token()[0] == 'curse':
             self.match('curse')
             self.match('{')
             else_body = self.build_body()
             self.match('}')
             else_node = ElseNode(else_body)
 
-        return IfBreakNode(condition, body, elif_nodes, else_node)
-
-    def build_if_break(self):
-        self.match('cast')
-        self.match('(')
-        condition = self.build_condition()
-        self.match(')')
-        self.match('{')
-        body = self.build_body()
-        # Optional break/continue
-        token = self.current_token()
-        if token and token[0] == 'break':
-            self.match('break')
-            self.match('~')
-            else_body.append(BreakNode())
-        elif token and token[0] == 'continue':
-            self.match('continue')
-            self.match('~')
-            else_body.append(ContinueNode())
-        self.match('}')
-
-        # Collect optional 'twist' (elif) statements
-        elif_nodes = []
-        while True:
-            token = self.current_token()
-            if token and token[0] == 'twist':
-                self.match('twist')
-                self.match('(')
-                twist_condition = self.build_condition()
-                self.match(')')
-                self.match('{')
-                twist_body = self.build_body()
-                # Optional break/continue
-                token = self.current_token()
-                if token and token[0] == 'break':
-                    self.match('break')
-                    self.match('~')
-                    else_body.append(BreakNode())
-                elif token and token[0] == 'continue':
-                    self.match('continue')
-                    self.match('~')
-                    else_body.append(ContinueNode())
-                elif_nodes.append(ElifBreakNode(twist_condition, twist_body))
-            else:
-                break
-
-        
-        # Optional 'curse' (else) statement
-        else_node = None
-        token = self.current_token()
-        if token and token[0] == 'curse':
-            self.match('curse')
-            self.match('{')
-            else_body = self.build_body()
-            # Optional break/continue
-            token = self.current_token()
-            if token and token[0] == 'break':
-                self.match('break')
-                self.match('~')
-                else_body.append(BreakNode())
-            elif token and token[0] == 'continue':
-                self.match('continue')
-                self.match('~')
-                else_body.append(ContinueNode())
-            self.match('}')
-            else_node = ElseBreakNode(else_body)
-
         return IfNode(condition, body, elif_nodes, else_node)
-    
+
     def build_for_loop(self):
+        """Build a for loop node."""
         self.match('tale')
         self.match('(')
 
+        # Parse initialization
         loop_var = self.build_loop_var()
         self.match('~')
 
+        # Parse condition
         loop_exp = self.build_loop_exp()
         self.match('~')
 
+        # Parse update expression
         loop_unary = self.build_loop_unary()
         self.match(')')
 
+        # Parse loop body
         self.match('{')
-        loop_body = self.build_loop_body()
+        loop_body = self.build_body()
         self.match('}')
 
         return ForLoopNode(loop_var, loop_exp, loop_unary, loop_body)
 
     def build_loop_var(self):
-        token = self.current_token()
+        """Build the initialization part of a for loop."""
         loop_var = []
-
-        while token[0] != '~':
-            loop_var.append(token)
         
-
+        while self.current_token() and self.current_token()[0] != '~':
+            loop_var.append(self.current_token())
+            self.advance()
+        
         return loop_var
     
     def build_loop_exp(self):
-        token = self.current_token()
+        """Build the condition part of a for loop."""
         loop_exp = []
-
-        while token[0] != '~':
-            loop_exp.append(token)
         
-
+        while self.current_token() and self.current_token()[0] != '~':
+            loop_exp.append(self.current_token())
+            self.advance()
+        
         return loop_exp
     
     def build_loop_unary(self):
-        token = self.current_token()
+        """Build the update part of a for loop."""
         loop_unary = []
-
-        while token[0] not in [')', '~']:
-            loop_unary.append(token)
         
-
+        while self.current_token() and self.current_token()[0] not in [')', '~']:
+            loop_unary.append(self.current_token())
+            self.advance()
+        
         return loop_unary
 
+    def build_break(self):
+        """Build a break statement node."""
+        self.match('break')
+        self.match('~')
+        return BreakNode()
+    
+    def build_continue(self):
+        """Build a continue statement node."""
+        self.match('continue')
+        self.match('~')
+        return ContinueNode()
 
     def build_parameters(self):
+        """Build function parameters."""
         parameters = []
-        current_param = []
-
+        
+        # Handle empty parameter list
+        if self.current_token() and self.current_token()[0] == ')':
+            return parameters
+            
+        # Parse parameters separated by commas
         while True:
-            token = self.current_token()
-
-            if token is None:
-                raise SyntaxError("Unexpected end of input while parsing parameters")
-
-            if token[0] == ')':
-                if current_param:
-                    parameters.append(current_param)
-                break
-
-            elif token[0] == ',':
-                if not current_param:
-                    raise SyntaxError("Unexpected ',' without preceding parameter")
-                parameters.append(current_param)
-                current_param = []
-                self.advance()
-
+            # Parse data type
+            datatype_token = self.current_token()
+            if datatype_token is None:
+                raise SyntaxError("Unexpected end of input in parameter list")
+            datatype = datatype_token
+            self.advance()
+            
+            # Parse parameter name
+            identifier_token = self.current_token()
+            if identifier_token is None or identifier_token[0] != 'identifier':
+                raise SyntaxError(f"Expected parameter name, got {identifier_token}")
+            identifier = identifier_token
+            self.advance()
+            
+            # Create parameter and add to list
+            parameters.append((datatype, identifier))
+            
+            # Check for more parameters
+            if self.current_token() and self.current_token()[0] == ',':
+                self.match(',')
             else:
-                current_param.append(token)
-                self.advance()
-
+                break
+                
         return parameters
     
-    def build_loop_body(self):
-        loop_body_nodes = []
-
-        while True:
-            token = self.current_token()
-
-            if token is None or token[0] in ['return', '}']:
-                break
-
-            if token[0] in ['dynasty', 'scroll', 'mirror', 'ocean', 'treasures', 'rose']:
-                declaration = self.build_declaration(scope_level=LOCAL_SCOPE)
-                loop_body_nodes.append(declaration)
-
-            elif token[0] == 'spell':
-                function = self.build_function(is_global=False, scope_level=LOCAL_SCOPE)
-                loop_body_nodes.append(function)
-
-            elif token[0] == 'granted':
-                output = self.build_output()
-                loop_body_nodes.append(output)
-
-            elif token[0] == 'identifier':
-                var_reassign = self.build_var_reassign()
-                loop_body_nodes.append(var_reassign)
-
-            elif token[0] == 'believe':
-                do_while = self.build_do_while()
-                loop_body_nodes.append(do_while)
-
-            elif token[0] == 'forever':
-                while_stmt = self.build_while()
-                loop_body_nodes.append(while_stmt)
-
-            elif token[0] == 'cast':
-                if_stmt = self.build_if_break()
-                loop_body_nodes.append(if_stmt)
-
-            elif token[0] == 'tale':
-                for_loop = self.build_for_loop()
-                loop_body_nodes.append(for_loop)
-
-            else:
-                raise SyntaxError(f"Unexpected token '{token[0]}' in body")
-
-        return loop_body_nodes
-
-
     def build_condition(self):
-        conditions = []
-        
-        token = self.current_token()
-        # Loop until we find the closing parenthesis or run out of tokens
-        while token is not None and token[0] != ')':
-            conditions.append(token)
-            self.advance()  # Consume the current token and move to the next
+        condition = []
+        nest = 0
+        while self.current_token():
             token = self.current_token()
-        
-        # Ensure that we found a closing ')'
-        if token is None:
-            raise SyntaxError("Expected ')' to close the condition")
-        
-        # Consume the closing ')'
-        self.advance()
-        
-        return conditions
+            if token[0] == '(':
+                nest += 1
+            elif token[0] == ')':
+                if nest == 0:
+                    # This ')' is the matching one for the caller's '('; stop here.
+                    break
+                else:
+                    nest -= 1
+            condition.append(token)
+            self.advance()
+        return condition

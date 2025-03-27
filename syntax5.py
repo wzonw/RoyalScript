@@ -28,11 +28,11 @@ class RoyalScriptParser:
             self.current_index = 0
         return None  # End of tokens
 
-    def current_token_tuple(self):
-        """Return the entire token tuple (type, value) of the current token (if any)."""
-        if self.current_line < len(self.tokens) and self.current_index < len(self.tokens[self.current_line]):
-            return self.tokens[self.current_line][self.current_index]
-        return None
+    # def current_token_tuple(self):
+    #     """Return the entire token tuple (type, value) of the current token (if any)."""
+    #     if self.current_line < len(self.tokens) and self.current_index < len(self.tokens[self.current_line]):
+    #         return self.tokens[self.current_line][self.current_index]
+    #     return None
 
     def peek_next_token(self):
         """Peek at the next token type without advancing the position."""
@@ -47,9 +47,9 @@ class RoyalScriptParser:
     def advance(self):
         """Move to the next token, automatically skipping comments and empty lines."""
         # token = self.current_token()
-        token_tuple = self.current_token_tuple()  # Get the full (type, value) tuple.
-        if token_tuple:
-            self.current_statement_tokens.append(token_tuple)  # Store full tuple.
+        # token_tuple = self.current_token_tuple()  # Get the full (type, value) tuple.
+        # if token_tuple:
+        #     self.current_statement_tokens.append(token_tuple)  # Store full tuple.
         while True:
             if self.current_index + 1 < len(self.tokens[self.current_line]):
                 self.current_index += 1
@@ -64,67 +64,67 @@ class RoyalScriptParser:
             if self.current_token() not in ["single_comment", "multi_comment"]:
                 break
 
-    def current_token_tuple(self):
-        """Return the entire token tuple (type, value) of the current token (if any)."""
-        if self.current_line < len(self.tokens) and self.current_index < len(self.tokens[self.current_line]):
-            return self.tokens[self.current_line][self.current_index]
-        return None
+    # def current_token_tuple(self):
+    #     """Return the entire token tuple (type, value) of the current token (if any)."""
+    #     if self.current_line < len(self.tokens) and self.current_index < len(self.tokens[self.current_line]):
+    #         return self.tokens[self.current_line][self.current_index]
+    #     return None
 
-    def store_completed_statement(self, statement_type):
-        """Store the completed statement with its type and reset tracking.
-        Only filters out specific special tokens (crown~, reign~, EOF) before storing.
-        Prints the final tokens for debugging."""
-        if self.current_statement_tokens:
-            # Initialize a filtered list to hold clean tokens
-            filtered_tokens = []
+    # def store_completed_statement(self, statement_type):
+    #     """Store the completed statement with its type and reset tracking.
+    #     Only filters out specific special tokens (crown~, reign~, EOF) before storing.
+    #     Prints the final tokens for debugging."""
+    #     if self.current_statement_tokens:
+    #         # Initialize a filtered list to hold clean tokens
+    #         filtered_tokens = []
             
-            # Process tokens to remove only specific special markers
-            i = 0
-            while i < len(self.current_statement_tokens):
-                current_token = self.current_statement_tokens[i]
+    #         # Process tokens to remove only specific special markers
+    #         i = 0
+    #         while i < len(self.current_statement_tokens):
+    #             current_token = self.current_statement_tokens[i]
                 
-                # Check for the exact "crown~" pattern
-                if (i + 1 < len(self.current_statement_tokens) and 
-                    isinstance(current_token, tuple) and len(current_token) >= 2 and 
-                    current_token[0] == "crown" and current_token[1] == "crown" and
-                    isinstance(self.current_statement_tokens[i+1], tuple) and 
-                    self.current_statement_tokens[i+1][0] == "~" and self.current_statement_tokens[i+1][1] == "~"):
-                    i += 2  # Skip both tokens
-                    continue
+    #             # Check for the exact "crown~" pattern
+    #             if (i + 1 < len(self.current_statement_tokens) and 
+    #                 isinstance(current_token, tuple) and len(current_token) >= 2 and 
+    #                 current_token[0] == "crown" and current_token[1] == "crown" and
+    #                 isinstance(self.current_statement_tokens[i+1], tuple) and 
+    #                 self.current_statement_tokens[i+1][0] == "~" and self.current_statement_tokens[i+1][1] == "~"):
+    #                 i += 2  # Skip both tokens
+    #                 continue
                     
-                # Check for the exact "reign~" pattern
-                if (i + 1 < len(self.current_statement_tokens) and 
-                    isinstance(current_token, tuple) and len(current_token) >= 2 and 
-                    current_token[0] == "reign" and current_token[1] == "reign" and
-                    isinstance(self.current_statement_tokens[i+1], tuple) and 
-                    self.current_statement_tokens[i+1][0] == "~" and self.current_statement_tokens[i+1][1] == "~"):
-                    i += 2  # Skip both tokens
-                    continue
+    #             # Check for the exact "reign~" pattern
+    #             if (i + 1 < len(self.current_statement_tokens) and 
+    #                 isinstance(current_token, tuple) and len(current_token) >= 2 and 
+    #                 current_token[0] == "reign" and current_token[1] == "reign" and
+    #                 isinstance(self.current_statement_tokens[i+1], tuple) and 
+    #                 self.current_statement_tokens[i+1][0] == "~" and self.current_statement_tokens[i+1][1] == "~"):
+    #                 i += 2  # Skip both tokens
+    #                 continue
                     
-                # Skip only exact EOF token
-                if (isinstance(current_token, tuple) and 
-                    ((len(current_token) == 1 and current_token[0] == "EOF") or 
-                    (len(current_token) >= 2 and current_token[0] == "EOF" and current_token[1] == "EOF"))):
-                    i += 1  # Skip this token
-                    continue
+    #             # Skip only exact EOF token
+    #             if (isinstance(current_token, tuple) and 
+    #                 ((len(current_token) == 1 and current_token[0] == "EOF") or 
+    #                 (len(current_token) >= 2 and current_token[0] == "EOF" and current_token[1] == "EOF"))):
+    #                 i += 1  # Skip this token
+    #                 continue
                     
-                # If not one of the specific special tokens, add it to the filtered list
-                filtered_tokens.append(current_token)
-                i += 1
+    #             # If not one of the specific special tokens, add it to the filtered list
+    #             filtered_tokens.append(current_token)
+    #             i += 1
             
-            # Create the labeled statement with the filtered tokens
-            labeled_statement = [statement_type] + filtered_tokens
-            self.final_statements_list.append(labeled_statement)
+    #         # Create the labeled statement with the filtered tokens
+    #         labeled_statement = [statement_type] + filtered_tokens
+    #         self.final_statements_list.append(labeled_statement)
             
-            # Print the original and filtered tokens for debugging
-            print(f"[DEBUG] Original tokens: {self.current_statement_tokens}")
-            print(f"[DEBUG] Filtered tokens: {filtered_tokens}")
-            print(f"[DEBUG] Final labeled statement: {labeled_statement}")
+    #         # Print the original and filtered tokens for debugging
+    #         print(f"[DEBUG] Original tokens: {self.current_statement_tokens}")
+    #         print(f"[DEBUG] Filtered tokens: {filtered_tokens}")
+    #         print(f"[DEBUG] Final labeled statement: {labeled_statement}")
             
-            # Reset tracking for the next statement
-            self.current_statement_tokens = []
+    #         # Reset tracking for the next statement
+    #         self.current_statement_tokens = []
             
-            print(f"[DEBUG] Stored statement: {statement_type} with {len(filtered_tokens)} tokens (removed special tokens)")
+    #         print(f"[DEBUG] Stored statement: {statement_type} with {len(filtered_tokens)} tokens (removed special tokens)")
 
     def match(self, expected):
         """Match the current token type against the expected value while ignoring comments."""
@@ -166,7 +166,7 @@ class RoyalScriptParser:
                 self.error_message = f"Syntax Error: Expected treasures literal, but got '{full_token}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             # else:
             #     self.error_message = f"Syntax Error: Expected {expected}, but got {full_token} at Line {self.current_line + 1}, Index {self.current_index + 1}"
-        print(f"Matching expected: {repr(expected)} | Current token: {self.current_token_tuple()}")
+        # print(f"Matching expected: {repr(expected)} | Current token: {self.current_token_tuple()}")
         return False
 
     def program(self):
@@ -258,14 +258,14 @@ class RoyalScriptParser:
                 return False
             if not self.match("~"):
                 return False
-            self.store_completed_statement("VARIABLE_DECLARATION")
+            #self.store_completed_statement("VARIABLE_DECLARATION")
             return True
 
         # 8	<vardec_def>	→	[treasures_lit] <column> <array_initialization> <array_more>~
         elif self.match('['):
             # Handle the first dimension (e.g., `identifier[2]`)
-            if not (self.match('treasures_lit') or self.match('1')) :  
-                self.error_message = f"Syntax Error: Invalid array size '{repr(self.current_token())}' at Line {self.current_line + 1}"
+            if not self.array_size() :  
+                self.error_message = f"Syntax Error: Invalid array size '{repr(self.tokens[self.current_line][self.current_index][1])}' at Line {self.current_line + 1}"
                 return False
             if not self.match(']'): 
                 return False
@@ -286,7 +286,7 @@ class RoyalScriptParser:
             if not self.match('~'):
                 return False
             
-            self.store_completed_statement("ARRAY_DECLARATION")
+            #self.store_completed_statement("ARRAY_DECLARATION")
             return True
 
         # self.error_message = f"Syntax Error: Expected '=', but got '{repr(self.current_token())}' at Line {self.current_line + 1}"
@@ -317,8 +317,8 @@ class RoyalScriptParser:
         token = self.current_token()
 
         if self.match('['):
-            if not (self.match('treasures_lit') or self.match('1')):
-                self.error_message = f"Syntax Error: Expected treasures literals but got '{repr(self.current_token())}, at Line {self.current_line + 1}, Index {self.current_index + 1}"
+            if not self.array_size() :  
+                self.error_message = f"Syntax Error: Invalid array size '{repr(self.tokens[self.current_line][self.current_index][1])}' at Line {self.current_line + 1}"
                 return False
             if not self.match(']'):
                 return False
@@ -368,25 +368,26 @@ class RoyalScriptParser:
 
 
     def array_content(self):
-        # 18	<array_content>	→	<array_lit> <lit_more> 
-
-        if self.array_lit():
-            if not self.lit_more():
-                return False
+        current_pos = self.current_index
+        print('entered array content', self.current_token())
+        # 20	<array_content>	→	<array_lit> <lit_more> 
+        if self.array_lit() and self.lit_more():
             return True
 
-        # 19	<array_content>	→	{<array_row>} <row_more>
-        elif self.match('{'):
-            if not self.array_row():
-                return False
-            if not self.match('}'):
-                return False
+        self.current_index = current_pos
+        # 21	<array_content>	→	{<array_row>} <row_more>
+        if self.match('{') and  self.array_row() and self.match('}') and self.row_more():
+            return True
+        
+        # 22	<array_content>	→	id_lit <row_more>
+        elif self.match('identifier'):
+            print('entered array content - matched id')
             if not self.row_more():
                 return False
             return True
 
         else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
+            self.error_message = f"Syntax Error: Invalid input '{repr(self.tokens[self.current_line][self.current_index][1])}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
 
@@ -403,12 +404,27 @@ class RoyalScriptParser:
 
 
     def row_more(self):
-        # 21	<row_more>	→	, {array_row} <row_more>
+        print('entered row more', self.current_token())
         token = self.current_token()
-
+        # 24	<row_more>	→	, <row_more_ext>
         if self.match(','):
-            if not self.match('{'):
+            print('entered matched ,')
+            if not self.row_more_ext():
                 return False
+            return True
+        
+        # 25	<row_more>	→	λ
+        elif token == '}':
+            return True  # If no more rows, end with closing bracket
+
+        return False
+
+    
+    def row_more_ext(self):
+        print('entered row more ext')
+        # 25	<row_more_ext>	→	{<array_row>} <row_more>
+        if self.match('{'):
+            print('entered matched {')
             if not self.array_row():
                 return False
             if not self.match('}'):
@@ -416,14 +432,14 @@ class RoyalScriptParser:
             if not self.row_more():
                 return False
             return True
-
-        # 22	<row_more>	→	λ
-        elif token == '}':
-            return True  # If no more rows, end with closing bracket
-
-        else:
-            self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
-            return False
+        
+        # 26	<row_more_ext>	→	id_lit <row_more>
+        elif self.match('identifier'):
+            if not self.row_more():
+                return False
+            return True
+        
+        return False
 
 
     def lit_more(self):
@@ -457,7 +473,8 @@ class RoyalScriptParser:
                 return False
             if not self.match('['):
                 return False
-            if not (self.match('treasures_lit') or self.match('1')):
+            if not self.array_size() :  
+                self.error_message = f"Syntax Error: Invalid array size '{repr(self.tokens[self.current_line][self.current_index][1])}' at Line {self.current_line + 1}"
                 return False
             if not self.match(']'):
                 return False
@@ -526,7 +543,7 @@ class RoyalScriptParser:
             self.error_message = f"Syntax Error: Invalid assignment operand '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
         
-        self.store_completed_statement("ASSIGNMENT_EXP")
+        #self.store_completed_statement("ASSIGNMENT_EXP")
         return True
 
 
@@ -661,7 +678,7 @@ class RoyalScriptParser:
             self.error_message = f"Syntax Error: Invalid array index '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
 
-        self.store_completed_statement("ARRAY_ELEMENT")
+        #self.store_completed_statement("ARRAY_ELEMENT")
         return True
 
 
@@ -681,7 +698,7 @@ class RoyalScriptParser:
             print(f"passed log_operand {token}")
             if not self.more_log():
                 return False
-            self.store_completed_statement("LOGICAL_EXP")
+            #self.store_completed_statement("LOGICAL_EXP")
             return True
         
         # 47	<logical_exp>	→	<logical_operator1> <logical_operand> <more_log> 
@@ -692,7 +709,7 @@ class RoyalScriptParser:
                 return False
             if not self.more_log():
                 return False
-            self.store_completed_statement("LOGICAL_EXP")
+            #self.store_completed_statement("LOGICAL_EXP")
             return True
         
         else:
@@ -735,7 +752,7 @@ class RoyalScriptParser:
 
         elif self.treasures_mirror():
             return True
-        # 52	<logical_operand>	→	(<relational_exp>)
+        # 52	<logical_operand>	→	(<expression>)
         elif self.current_token() == '(':
             print("parenthesis detected")
             saved_position = self.current_index
@@ -875,7 +892,7 @@ class RoyalScriptParser:
             return False
         
         print("pass func_call")
-        self.store_completed_statement("FUNC_CALL")
+        #self.store_completed_statement("FUNC_CALL")
         return True
     
 
@@ -983,7 +1000,7 @@ class RoyalScriptParser:
         if not self.more_arith():
             return False
         
-        self.store_completed_statement("ARITHMETIC_EXP")
+        #self.store_completed_statement("ARITHMETIC_EXP")
         return True
     
     def arithmetic_operand(self):
@@ -1122,7 +1139,7 @@ class RoyalScriptParser:
             return False
         if not self.relational_more():
             return False
-        self.store_completed_statement("RELATIONAL_EXP")
+        #self.store_completed_statement("RELATIONAL_EXP")
         return True
     
     def relational_operand(self):
@@ -1253,7 +1270,7 @@ class RoyalScriptParser:
         if not self.unary_operator():
             self.error_message = f"Syntax Error: Invalid unary operator '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
             return False
-        self.store_completed_statement("UNARY_EXP")
+        #self.store_completed_statement("UNARY_EXP")
         return True
     
     def unary_operator(self):
@@ -1282,7 +1299,7 @@ class RoyalScriptParser:
             return False
         if not self.string_more():
             return False
-        self.store_completed_statement("CONCATENATION")
+        #self.store_completed_statement("CONCATENATION")
         return True
 
     def string_operand(self):
@@ -1363,7 +1380,7 @@ class RoyalScriptParser:
                 return False
             if not self.user_defined_func():
                 return False
-            self.store_completed_statement("CONCATENATION")
+            #self.store_completed_statement("CONCATENATION")
             return True
 
         # 120	<user-defined_func>	→	λ
@@ -1567,7 +1584,7 @@ class RoyalScriptParser:
         if not self.match('~'):
             return False
         
-        self.store_completed_statement("VAR_REASSIGN")
+        #self.store_completed_statement("VAR_REASSIGN")
         return True
     
     def condi_statement(self):
@@ -1612,7 +1629,7 @@ class RoyalScriptParser:
             return False
         if not self.match('}'):
             return False
-        self.store_completed_statement("FOR_LOOP")
+        #self.store_completed_statement("FOR_LOOP")
         return True
 
     def loop_var(self):
@@ -1784,7 +1801,7 @@ class RoyalScriptParser:
             return False
         if not self.else_break():
             return False
-        self.store_completed_statement("IF_BREAK")
+        #self.store_completed_statement("IF_BREAK")
         return True
     
     def elif_break(self):
@@ -1816,7 +1833,7 @@ class RoyalScriptParser:
             if not self.elif_break():
                 self.error_message = f"Syntax Error: Invalid input '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
                 return False
-            self.store_completed_statement("ELIF_BREAK")
+            #self.store_completed_statement("ELIF_BREAK")
             return True
 
         # 158	<elif_break>	→	λ
@@ -1841,7 +1858,7 @@ class RoyalScriptParser:
                 return False
             if not self.match('}'):
                 return False
-            self.store_completed_statement("ELSE_BREAK")
+            #self.store_completed_statement("ELSE_BREAK")
             return True
 
         # 160	<else_break>	→	λ
@@ -1897,7 +1914,7 @@ class RoyalScriptParser:
             return False
         if not self.match('~'):
             return False
-        self.store_completed_statement("DO_WHILE")
+        #self.store_completed_statement("DO_WHILE")
         return True
     
     def condition(self):
@@ -2034,7 +2051,7 @@ class RoyalScriptParser:
         if not self.match('}'):
             return False
         print(f"passed close curly {token}")
-        self.store_completed_statement("WHILE_STATEMENT")
+        #self.store_completed_statement("WHILE_STATEMENT")
         return True
         
     
@@ -2058,7 +2075,7 @@ class RoyalScriptParser:
             return False
         if not self.else_statement():
             return False
-        self.store_completed_statement("IF_STATEMENT")
+        #self.store_completed_statement("IF_STATEMENT")
         return True
     
     def elif_statement(self):
@@ -2080,7 +2097,7 @@ class RoyalScriptParser:
                 return False
             if not self.elif_statement():
                 return False
-            self.store_completed_statement("ELIF_STATEMENT")
+            #self.store_completed_statement("ELIF_STATEMENT")
             return True
 
         # 177	<elif>	→	λ
@@ -2102,7 +2119,7 @@ class RoyalScriptParser:
                 return False
             if not self.match('}'):
                 return False
-            self.store_completed_statement("ELSE_STATEMENT")
+            #self.store_completed_statement("ELSE_STATEMENT")
             return True
         
         # 179	<else>	→	λ
@@ -2129,7 +2146,7 @@ class RoyalScriptParser:
             return False
         if not self.match('~'):
             return False
-        self.store_completed_statement("ELSE_STATEMENT")
+        #self.store_completed_statement("ELSE_STATEMENT")
         return True
     
 
@@ -2212,6 +2229,8 @@ class RoyalScriptParser:
                 return self.relational_exp()
             else:
                 return self.match(token)
+        elif self.match('setprecision'):
+            return True
         # 184	<granted_content>	→	treasures_lit
         elif token == 'treasures_lit' or token == '1' or token == '0':
             next_token = self.peek_next_token()
@@ -2960,8 +2979,8 @@ class RoyalScriptParser:
 
         # 236	<index>	→	[treasures_lit] <column1>
         if self.match('['):
-            if not (self.match('treasures_lit') or self.match('1') or self.match('0')):
-                self.error_message = f"Syntax Error: Invalid array index '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
+            if not self.array_size() :  
+                self.error_message = f"Syntax Error: Invalid array size '{repr(self.tokens[self.current_line][self.current_index][1])}' at Line {self.current_line + 1}"
                 return False
             if not self.match(']'):
                return False
@@ -2985,8 +3004,8 @@ class RoyalScriptParser:
 
         # 238	<column1>	→	[treasures_lit]
         if self.match('['):
-            if not (self.match('treasures_lit') or self.match('1') or self.match('0')):
-                self.error_message = f"Syntax Error: Invalid array index '{repr(self.current_token())}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
+            if not self.array_size() :  
+                self.error_message = f"Syntax Error: Invalid array size '{repr(self.tokens[self.current_line][self.current_index][1])}' at Line {self.current_line + 1}"
                 return False
             if not self.match(']'):
                 return False
@@ -3012,6 +3031,19 @@ class RoyalScriptParser:
         if not self.match(')'):
             return False
         return True
+    
+    def array_size(self):
+        size = int(self.tokens[self.current_line][self.current_index][1])
+
+        # 261	<array_size>	→	id_lit
+        if self.match("identifier"):
+            return True
+        # 262	<array_size>	→	positive_treasures_lit
+        elif size >=0 :
+            self.advance()
+            return True
+    
+        return False
     
     def determine_operation_type(self, content):
         """Analyze the content inside parentheses to determine operation type."""

@@ -569,7 +569,7 @@ class RoyalScriptParser:
         elif self.treasures_mirror():
             return True
         
-        # 47	<logical_operand>	→	(<expression>
+        # 47	<logical_operand>	→	(<expression>)
         elif self.match('('):
             print('enter epxression', self.current_token())
             if not self.expression():
@@ -581,28 +581,17 @@ class RoyalScriptParser:
     
     def expression(self):
         print('entered epxression ----------------------??', self.current_token())
-        # 50	<expression>	→	id_lit <id_ext> <logical_operand_ext> <more_log>)
-        if self.match('identifier') and self.id_ext() and self.logical_operand_ext() and self.more_log() and self.match(')'):
+        current_pos = self.current_index
+        if self.relational_exp():
+            if self.match(')'):
+                return True
+            print('passed epxression ----------------------??', self.current_token())
             return True
-        
-        # 51	<expression>	→	<lit3> <more_arith> <relational_operator> <relational_operand><relational_more> <more_log)
-        elif self.lit3() and self.more_arith() and self.relational_operator() and self.relational_operand() and self.relational_more() and self.more_log() and self.match(')'):
-            return True
-        
-        # 52	<expression>	→	scroll_lit <relational_operator> <relational_operand><relational_more> <more_log>)
-        elif self.match('scroll_lit') and self.relational_operator() and self.relational_operand() and self.relational_more() and self.more_log and self.match(')'):
-            return True
-        
-        # 53	<expression>	→	mirror_lit <more_log>)
-        elif self.match('mirror_lit') and self.more_log() and self.match(')'):
-            return True
-        
-        # 54	<expression>	→	<treasures_mirror> <more_log>)
-        elif self.treasures_mirror() and self.more_log() and self.match(')'):
-            return True
-        
-        # 55	<expression>	→	(<expression> <more_log>)
-        elif self.match('(') and self.expression() and self.more_log() and self.match(')'):
+        self.current_index = current_pos
+        if self.logical_exp():
+            if self.match(')'):
+                return True
+            print('passed epxression ----------------------??', self.current_token())
             return True
         
         return False
@@ -799,7 +788,7 @@ class RoyalScriptParser:
                 return False
             print('passed relational more')
             return True
-        
+        print('not pass relational exp', self.current_index)
         return False
 
     def relational_operand(self):
@@ -824,28 +813,37 @@ class RoyalScriptParser:
         elif self.match('scroll_lit'):
             return True
          
-        # 80	<relational_operand>	→	(<relational_op_ext>
+        # 78	<relational_operand>	→	(<expression_2>
         elif self.match('('):
-            if not self.relational_op_ext():
+            if not self.expression_2():
                 return False
             return True
         
         self.error_message = f"Syntax Error: Invalid Relational Operand'{repr(self.tokens[self.current_line][self.current_index][1])}' at Line {self.current_line + 1}, Index {self.current_index + 1}"
         return False
     
-    def relational_op_ext(self):
-        # 81	<relational_op_ext>	→	<arithmetic_exp>) <more_arith>
-        if self.arithmetic_exp():
-            if not self.match(')'):
-                return False
-            if not self.more_arith():
-                return False
+    def expression_2(self):
+        current_pos = self.current_index
+        # content = []
+        # current_pos = self.current_index
+        # token = self.current_token()
+        
+        # while token != '~':
+        #     token = self.current_token()
+        #     content.append(token)
+        #     self.advance()
+        
+        # expr = self.determine_operation_type(content)
+        # self.current_index = current_pos
+
+        # 79	<expression_2>	→	<arithmetic_exp> ) <more_arith>
+        if self.arithmetic_exp() and self.match(')') and self.more_arith():
             return True
         
-        # 82	<relational_op_ext>	→	<relational_exp>)
-        elif self.relational_exp():
-            if not self.match(')'):
-                return False
+        self.current_index = current_pos
+        # print("-------------------------------------",self.current_token() )
+        # 80	<expression_2>	→	<relational_exp>  )
+        if self.relational_exp() and self.match(')'):
             return True
         
         return False
@@ -1471,13 +1469,9 @@ class RoyalScriptParser:
             print('passed condi_id_ext')
             return True
         
-        # 147	<condition>	→	<logical_operator1> (<condition>)
+        # 146	<condition>	→	<logical_operator1> <log_op1_ext>
         elif self.logical_operator1():
-            if not self.match('('):
-                return False
-            if not self.condition():
-                return False
-            if not self.match(')'):
+            if not self.log_op1_ext():
                 return False
             return True
         
@@ -1487,46 +1481,41 @@ class RoyalScriptParser:
                 return False
             return True
         
-        # 149	<condition>	→	<lit3> <lit3_ext>
+        # 149	148	<condition>	→	<lit3> <more_arith> <relational_operator> <relational_operand><relational_more> <more_log>
         elif self.lit3():
-            if not self.granted_lit3_ext():
+            if not self.more_arith():
                 return False
-            return True
-        
-        # 150	<condition>	→	scroll_lit <scroll_ext>
-        elif self.match('scroll_lit'):
-            if not self.granted_scroll_ext():
-                return False
-            return True
-
-        # 151	<condition>	→	( <rel_log_ext>
-        elif self.match('('):
-            if not self.rel_log_ext():
-                return False
-            return True
-        
-        self.error_message = f"Syntax Error: Invalid condition at Line {self.current_line + 1}, Index {self.current_index + 1}"
-        return False
-    
-    def rel_log_ext(self):
-        # 152	<rel_log_ext>	→	<expression> <logical_operator> <more_log_ext>
-        if self.expression():
-            if not self.logical_operator():
-                return False
-            if not self.more_log_ext():
-                return False
-            return True
-        
-        # 153	<rel_log_ext>	→	<relational_op_ext> <relational_operator> <relational_operand><relational_more>
-        elif self.relational_op_ext():
             if not self.relational_operator():
                 return False
             if not self.relational_operand():
                 return False
             if not self.relational_more():
                 return False
+            if not self.more_log():
+                return False
             return True
         
+        # 149	<condition>	→	scroll_lit <relational_operator> <relational_operand><relational_more> <more_log>
+        elif self.match('scroll_lit'):
+            if not self.relational_operator():
+                return False
+            if not self.relational_operand():
+                return False
+            if not self.relational_more():
+                return False
+            if not self.more_log():
+                return False
+            return True
+
+        # 150	<condition>	→	(<expression>)
+        elif self.match('('):
+            if not self.expression():
+                return False
+            if not self.match(')'):
+                return False
+            return True
+        
+        self.error_message = f"Syntax Error: Invalid condition at Line {self.current_line + 1}, Index {self.current_index + 1}"
         return False
     
     def condi_id_ext(self):
@@ -1584,6 +1573,23 @@ class RoyalScriptParser:
         elif token in [')']:
             return True
 
+        return False
+    
+    def log_op1_ext(self):
+        # 159	<log_op1_ext>	→	 (<condition>)
+        if self.match('('):
+            if not self.condition():
+                return False
+            if not self.match(')'):
+                return False
+            return True
+        
+        # 160	<log_op1_ext>	→	<logical_operand> <more_log>
+        elif self.logical_operand():
+            if not self.more_log():
+                return False
+            return True
+        
         return False
 
     def mirror_init(self):
@@ -1733,8 +1739,8 @@ class RoyalScriptParser:
         if self.match('phantom'):
             return True
         
-        # 173	<granted_content_2>	→	<conversion_func_2> (<conversion_value>)
-        elif self.conversion_func_2():
+        # 173	<granted_content_2>	→	<conversion_func> (<conversion_value>)
+        elif self.conversion_func():
             if not self.match('('):
                 return False
             if not self.conversion_value():
@@ -1743,7 +1749,7 @@ class RoyalScriptParser:
                 return False
             return True
         
-        # 174	<granted_content_2>	→	toscroll(<conversion_value>) <to_scroll_ext>
+        # 175	<granted_content_2>	→	toscroll (<conversion_value>) <string_more>
         elif self.match('toscroll'):
             if not self.match('('):
                 return False
@@ -1751,25 +1757,25 @@ class RoyalScriptParser:
                 return False
             if not self.match(')'):
                 return False
-            if not self.to_scroll_ext():
+            if not self.string_more():
                 return False
             return True
         
         
         elif self.match('1') or self.match('0'):
-            # 175	<granted_content_2>	→	<treasures_mirror>  <granted_treasures_mirror_ext>
-            if self.granted_treasures_mirror_ext():
+            # 176	<granted_content_2>	→	<treasures_mirror> <more_log>
+            if self.more_log():
                 return True
             
-            # 179	<granted_content_2>	→	<lit3> <granted_lit3_ext>
+            # 180	<granted_content_2>	→	<lit3>  <granted_lit3_ext>
             elif self.granted_lit3_ext():
                 print('passed granted lit 3 ext --------------------', self.current_token())
                 return True
             
         
-        # 176	<granted_content_2>	→	mirror_lit <granted_mirror_ext>
+        # 177	<granted_content_2>	→	mirror_lit <more_log>
         elif self.match('mirror_lit'):
-            if not self.granted_mirror_ext():
+            if not self.more_log():
                 return False
             return True
         
@@ -1801,9 +1807,6 @@ class RoyalScriptParser:
             print('granted_content_2 matched ( -------------------')
             if self.granted_open_paren_ext():
                 return True
-            # print('passed granted_open_paren_ex -------------------')
-            elif self.more_arith():
-                return True
             
         # <granted_content_2>	→	<logical_operator1> <logical_operand> <more_log> 
         elif self.logical_operator1() and self.logical_operand() and self.more_log():
@@ -1825,139 +1828,88 @@ class RoyalScriptParser:
         return False
     
     def granted_open_paren_ext(self):
+        content = []
         current_pos = self.current_index
-        print('entered granted_open_paren_ext---------', self.current_token())
+        print(f'Initial current_pos: {current_pos}, current_index: {self.current_index}')
         
-        # 190	<granted_open_paren_ext>	→	id_lit <id_ext> <granted_paren_id_ext> 
-        if self.match('identifier') and self.id_ext() and self.granted_paren_id_ext():
-            return True
+        while self.current_token() != '~':
+            print(f'Current token: {self.current_token()}, current_index: {self.current_index}')
+            content.append(self.current_token())
+            self.advance()
         
-        # 191	<granted_open_paren_ext>	→	<lit3> <more_arith> <granted_paren_lit3_ext> 
-        elif self.lit3() and self.more_arith() and self.granted_paren_lit3_ext():
-            return True
+        expr = self.determine_operation_type(content)
+        print(f'Determined expression type: {expr}, content: {content}')
         
-        # 192	<granted_open_paren_ext>	→	scroll_lit <granted_paren_scroll_ext> 
-        elif self.match('scroll_lit') and self.granted_paren_scroll_ext():
-            return True
+        # Reset to original position
+        self.current_index = current_pos
+        print(f'Reset current_index: {self.current_index}')
+
+ 
+        if expr == 'arithmetic':
+            # 185	<granted_open_paren_ext>	→	<arithmetic_exp>) <more_arith>
+            if self.arithmetic_exp():
+                if not self.match(')'):
+                    return False
+                if not self.more_arith():
+                    False
+                return True
         
-        # 193	<granted_open_paren_ext>	→	mirror_lit <more_log>) <more_log>
-        elif self.match('mirror_lit') and self.more_log() and self.match(')') and self.more_log():
-            return True
-        
-        # 194	<granted_open_paren_ext>	→	<treasures_mirror> <more_log>) <more_log>
-        elif self.treasures_mirror() and self.more_log() and self.match(')') and self.more_log():
-            return True
-        
-        # 195	<granted_open_paren_ext>	→	(<expression> <more_log>) <more_log>
-        elif self.match('(') and self.expression() and self.more_log() and self.match(')') and self.more_log():
-            return True
+        elif expr == 'logical':
+            # 186	<granted_open_paren_ext>	→	<expression> <more_log>
+            if self.expression():
+                if not self.more_log():
+                    return True
+                print('passeddddddddddddddddd')
+                return True
+            
+        elif expr == 'relational':
+            # 187	<granted_open_paren_ext>	→	<expression_2> <relational_more>
+            if self.expression_2(): 
+                if not self.relational_more():
+                    return False
+                print('passeddddddddddddddddd')
+                return True
 
         return False
     
-
-    def granted_paren_id_ext(self):
+    def granted_id_ext(self):
         token = self.current_token()
-        # 196	<granted_paren_id_ext>	→	<logical_operand_ext> <more_log> ) <more_log>
-        if self.logical_operand_ext() and self.more_log() and self.match(')') and self.more_log():
+        # 188	<granted_id_ext>	→	<unary_operator>
+        if self.unary_operator():
             return True
         
-        # 197	<granted_paren_id_ext>	→	<more_arith> <relational_more> ) <more_arith> <relational_more>
-        elif self.more_arith() and self.relational_more() and self.match(')') and self.more_arith() and self.relational_more():
+        # 189	<granted_id_ext>	→	<id_ext> <granted_other_id_ext>
+        elif self.id_ext() and self.granted_other_id_ext():
             return True
         
-        # 198	<granted_paren_id_ext>	→	λ
-        elif token in [',', ')', '~']:
-            return True
-        
-        return False
-    
-    def granted_paren_lit3_ext(self):
-        print('entered granted_paren_lit3_ext -----------------', self.current_token())
-        token = self.current_token()
-        # 200	<granted_paren_lit3_ext>	→	<more_arith> <granted_paren_lit3_ext_1>
-        if self.more_arith() and self.granted_paren_lit3_ext_1():
-            print('not null granted_paren_id_ext -----------------', self.current_token())
-            return True
-        
-        # 198	<granted_paren_lit3_ext>	→	λ
-        elif token in [',', ')', '~']:
-            print('null granted_paren_lit3_ext -----------------', self.current_token())
-            return True
-        
-        return False
-
-    def granted_paren_lit3_ext_1(self):
-        print('entered granted_paren_lit3_ext_1 -----------------', self.current_token())
-        # 201	<granted_paren_lit3_ext_1>	→	<relational_operator> <relational_operand><relational_more> <more_log> ) <more_log>
-        if self.relational_operator() and self.relational_operand() and self.relational_more() and self.more_log() and self.match(')') and self.more_log():
-            return True
-        
-        # 202	<granted_paren_lit3_ext_1>	→	<relational_more> ) <more_arith> <relational_more>
-        elif (self.relational_more() and self.match(')') and self.more_arith() and self.relational_more()):
-            print('entered granted_paren_lit3_ext_1 passed -----------------', self.current_token())
-            return True
-        
-        return False
-    
-    def granted_paren_scroll_ext(self):
-        token = self.current_token()
-        # 203	<granted_paren_scroll_ext>	→	<relational_operator> <relational_operand><relational_more> <more_log>) <more_log>
-        if self.relational_operator() and self.relational_operand() and self.relational_more() and self.more_log() and self.match(')') and self.more_log():
-            return True
-        
-        # 204	<granted_paren_scroll_ext>	→	<relational_more> ) <relational_more>
-        elif self.relational_more() and self.match(')') and self.relational_more():
-            return True
-        
-        # 205	<granted_paren_scroll_ext>	→	λ
-        elif token in [',', ')', '~']:
-            return True
-        
-        return False
-
-    def rel_arith_ext(self):
-        print('entered rel_arith_ext')
-        token = self.current_token()
-        # 186	<rel_arith_ext>	→	<more_arith> <relational_operator> <relational_operand><relational_more>
-        if self.more_arith():
-            if not self.relational_operator():
-                return False
-            if not self.relational_operand():
-                return False
-            if not self.relational_more():
-                return False
-            return True
-        
-        # 187	<rel_arith_ext>	→	λ
+        # 190	<granted_id_ext>	→	λ
         elif token in [',', ')', '~']:
             return True
 
         return False
     
-    def granted_lit3_ext(self):
-        print('enter granted lit3 ext --------------------', self.current_token())
+    def granted_other_id_ext(self):
+        print('enter granted_other_ext ---------', self.current_token())
         token = self.current_token()
-
-        # 188	<granted_lit3_ext>	→	<more_arith> <granted_lit3_ext_1>
-        if self.more_arith() and self.granted_lit3_ext_1():
-            return True
         
-        # 190	<granted_lit3_ext>	→	λ
-        elif token in [',', ')', '~']:
-            print('enter null --------------------', self.current_token())
-            return True
-
-        return False
-    
-    def granted_lit3_ext_1(self):
-        token = self.current_token()
-        #	<granted_lit3_ext_1>	→	<relational_operator> <relational_operand><relational_more> <more_log>
-        if self.relational_operator() and self.relational_operand() and self.relational_more() and self.more_log():
-            return True
+        # 191	<granted_other_id_ext>	→	+ <string_operand> <string_more>
+        if self.match('+') and self.string_operand() and self.string_more():
+                return True
         
-        # 190	<granted_lit3_ext_1>	→	λ
+         # 192	<granted_other_id_ext>	→	<arithmetic_operator> <arithmetic_operand> <more_arith>
+        elif self.arithmetic_operator() and self.arithmetic_operand() and self.more_arith():
+                return True
+        
+        # 207	193	<granted_other_id_ext>	→	<more_arith> <relational_operator> <relational_operand> <relational_more> 
+        elif self.more_arith() and self.relational_operator() and self.relational_operand() and self.relational_more():
+                return True
+        
+        # 208	<granted_other_id_ext>	→	<logical_operand_ext> <logical_operator> <more_log_ext>
+        elif self.logical_operand_ext() and self.logical_operator() and self.more_log_ext():
+                return True
+        
+        # 195	<granted_other_id_ext>	→	λ
         elif token in [',', ')', '~']:
-            print('enter null --------------------', self.current_token())
             return True
 
         return False
@@ -1999,96 +1951,21 @@ class RoyalScriptParser:
 
         return False
     
-    def granted_mirror_ext(self):
-        token = self.current_token()
-        # 196	 <granted_mirror_ext>	→	<logical_operator> <more_log_ext>
-        if self.logical_operator():
-            if not self.more_log_ext():
-                return False
-            return True
-        
-        # 197	 <granted_mirror_ext>	→	λ
-        elif token in [',', ')', '~']:
-            return True
-
-        return False
-    
-    def granted_treasures_mirror_ext(self):
+    def granted_lit3_ext(self):
+        print('enter granted lit3 ext --------------------', self.current_token())
         token = self.current_token()
 
-        # 198	<granted_treasures_mirror_ext>	→	<logical_operator> <more_log_ext>
-        if self.logical_operator():
-            if self.more_log_ext():
-                raise False
+        # 202	<granted_lit3_ext>	→	<arithmetic_operator> <arithmetic_operand> <more_arith>
+        if self.arithmetic_operator() and self.arithmetic_operand() and self.more_arith():
             return True
         
-        # 199	<granted_treasures_mirror_ext>	→	λ
+        # 203	<granted_lit3_ext>	→	<more_arith> <relational_operator> <relational_operand> <relational_more> <more_log>
+        elif self.more_arith() and self.relational_operator() and self.relational_operand() and self.relational_more() and self.more_log():
+            return True
+        
+        # 204	<granted_lit3_ext>	→	λ
         elif token in [',', ')', '~']:
-            return True
-
-        return False
-    
-    def to_scroll_ext(self):
-        token = self.current_token()
-        # 200	<to_scroll_ext>	→	+ <string_operand> <string_more>
-        if self.match('+'):
-            if not self.string_operand():
-                return False
-            if not self.string_more():
-                return False
-            return True
-        
-        # 201	<to_scroll_ext>	→	λ
-        elif token in [',', ')', '~']:
-            return True
-
-        return False
-    
-    def granted_id_ext(self):
-        print('enter  granted_id_ext')
-        token = self.current_token()
-
-        # 202	<granted_id_ext>	→	<id_ext> <granted_other_id_ext>
-        print('enter granted_id_ext')
-        if self.id_ext():
-            print('passed id ext')
-            if not self.granted_other_id_ext():
-                return False
-            print('passed granted_other_id_ext')
-            return True
-        
-        # 203	<granted_id_ext>	→	<unary_operator>
-        elif self.unary_operator():
-            return True
-        
-        # 204	<granted_id_ext>	→	λ
-        elif token in [',', ')', '~']:
-            return True
-
-        return False
-    
-    def granted_other_id_ext(self):
-        print('enter granted_other_ext ---------', self.current_token())
-        token = self.current_token()
-        
-        # 205	<granted_other_id_ext>	→	+ <string_operand> <string_more>
-        if self.match('+') and self.string_operand() and self.string_more():
-                return True
-        
-         # 206	<granted_other_id_ext>	→	<arithmetic_operator> <arithmetic_operand> <more_arith>
-        elif self.arithmetic_operator() and self.arithmetic_operand() and self.more_arith():
-                return True
-        
-        # 207	<granted_other_id_ext>	→	<more_arith> <relational_operator> <relational_operand><relational_more>
-        elif self.more_arith() and self.relational_operator() and self.relational_operand() and self.relational_more():
-                return True
-        
-        # 208	<granted_other_id_ext>	→	<logical_operand_ext> <logical_operator> <more_log_ext>
-        elif self.logical_operand_ext() and self.logical_operator() and self.more_log_ext():
-                return True
-        
-        # 209	<granted_other_id_ext>	→	λ
-        elif token in [',', ')', '~']:
+            print('enter null --------------------', self.current_token())
             return True
 
         return False
@@ -2192,14 +2069,8 @@ class RoyalScriptParser:
 
         return False
     
-    def conversion_func_1(self):
-        # 228	<conversion_func_1>	→	toscroll
-        if self.match('toscroll'):
-            return True
-        
-        return False
     
-    def conversion_func_2(self):
+    def conversion_func(self):
         # 229	<conversion_func_2>	→	torose
         if self.match('torose'):
             return True
@@ -2420,6 +2291,43 @@ class RoyalScriptParser:
             return True
     
         return False
+    
+     
+    def determine_operation_type(self, content):
+        """
+        Analyze the content to determine operation type with complex combination rules.
+        
+        Args:
+            content (list): A list of tokens to analyze
+        
+        Returns:
+            str: The type of operation
+        """
+        # Remove closing parentheses and '~' if present
+        content = [token for token in content if token not in [')', '~']]
+        
+        # Define operator types
+        relational_ops = ['>', '<', '>=', '<=', '==', '!=']
+        arithmetic_ops = ['+', '-', '*', '/', '%']
+        logical_ops = ['&&', '||', 'and', 'or']
+        
+        # Check for the presence of each operator type
+        has_relational = any(op in content for op in relational_ops)
+        has_arithmetic = any(op in content for op in arithmetic_ops)
+        has_logical = any(op in content for op in logical_ops)
+        
+        # Determine operation type based on rules
+        if has_logical:
+            return 'logical'
+        
+        if has_relational:
+            return 'relational'
+        
+        if not has_relational and not has_logical and has_arithmetic:
+            return 'arithmetic'
+        
+        # Invalid operation case
+        return 'Not Valid'
 
     def parse(self):
         """Parse the program starting from the 'crown' keyword."""

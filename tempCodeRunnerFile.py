@@ -5,7 +5,7 @@ from lexer2 import RoyalScriptLexer
 from lexer2 import Token
 from pygame import mixer
 from syntax5_new import RoyalScriptParser
-from ast_builder import RoyalScriptASTBuilder
+from other.ast_builder import RoyalScriptASTBuilder
 #from semantic_copy import RoyalScriptSemanticAnalyzer 
 
 

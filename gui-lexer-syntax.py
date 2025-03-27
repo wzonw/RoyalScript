@@ -6,6 +6,7 @@ from lexer2 import Token
 from pygame import mixer
 from parser import RoyalScriptParser
 from ast_builder import RoyalScriptASTBuilder
+from test_ast import print_ast
 #from semantic_copy import RoyalScriptSemanticAnalyzer 
 
 
@@ -640,6 +641,17 @@ class RoyalScriptLexerGUI(tk.Tk):
             if syntax_result:
                 # Insert success message on a new line
                 self.errors_listbox.insert(tk.END, "✅ Syntax Analysis Successful!")
+                try:
+                    ast_builder = RoyalScriptASTBuilder(tokens)
+                    ast = ast_builder.build_ast()
+                    self.errors_listbox.insert(tk.END, "✅ AST Building Successful!")
+
+                    # Print the AST structure
+                    # print("\n=== AST Structure ===")
+                    # print_ast(ast)
+                    # Optionally, further process or display the AST here.
+                except Exception as e:
+                    self.errors_listbox.insert(tk.END, f"❌ AST Building Failed: {e}")
             else:
                 # Insert failure message on its own line
                 self.errors_listbox.insert(tk.END, "❌ Syntax Analysis Failed.")

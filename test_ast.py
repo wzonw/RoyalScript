@@ -1,5 +1,5 @@
 import unittest
-from ast_builder_copy2 import *
+from ast_builder import *
 
 def print_ast(node, indent=0):
     """Pretty print the AST starting from the given node with proper indentation."""
