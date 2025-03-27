@@ -183,17 +183,13 @@ class RoyalScriptASTBuilder:
     def advance(self):
         """Move to the next token."""
         # If we've already gone past the token list, do nothing.
-        while True:
-            if self.current_line >= len(self.tokens):
-                return
-            if self.current_index + 1 < len(self.tokens[self.current_line]):
-                self.current_index += 1
-            else:
-                self.current_line += 1
-                self.current_index = 0
-
-            if self.current_token() not in ["single_comment", "multi_comment"]:
-                break
+        if self.current_line >= len(self.tokens):
+            return
+        if self.current_index + 1 < len(self.tokens[self.current_line]):
+            self.current_index += 1
+        else:
+            self.current_line += 1
+            self.current_index = 0
 
     def match(self, expected):
         """
