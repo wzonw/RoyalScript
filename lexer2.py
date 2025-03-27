@@ -4079,7 +4079,7 @@ class RoyalScriptLexer:
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() not in ['\n', '*'] and self.current_char() in RegDef['ascii'] or self.current_char() in [' ', '\t', '~']:
+        if self.current_char() not in ['\n', '*'] and self.current_char() in RegDef['ascii'] or self.current_char() in [' ', '\t', '~', '_']:
             return self.state282(input_str)   
         elif self.current_char() == '\n':
             return self.state283(input_str)  

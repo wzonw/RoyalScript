@@ -509,23 +509,18 @@ class RoyalScriptParser:
         return False
 
     def logical_exp(self):
+        current_pos = self.current_index
         # 40	<logical_exp>	→	<logical_operator1> <logical_operand> <logical_operator> <logical_operator1> <logical_operand> <more_log>
         print("entered logical expression", self.current_token())
-        if not self.logical_operator1():
-            return False
-        if not self.logical_operand():
-            return False
-        if not self.logical_operator():
-            return False
-        print('logical_operator')
-        if not self.logical_operator1():
-            return False
-        if not self.logical_operand():
-            return False
-        print('logical_operand')
-        if not self.more_log():
-            return False
-        return True
+        if self.logical_operator1() and self.logical_operand() and self.logical_operator() and self.logical_operator1() and self.logical_operand() and self.more_log():
+            return True
+
+        self.current_index = current_pos
+        # 41	<logical_exp>	→	! <logical_operand> <more_log>
+        if self.match('!') and self.logical_operand() and self.more_log():
+            return True
+        
+        return False
  
     
     def logical_operand(self):
@@ -2290,13 +2285,14 @@ class RoyalScriptParser:
         return False
 
     def array_size(self):
-        size = int(self.tokens[self.current_line][self.current_index][1])
+        
 
         # 261	<array_size>	→	id_lit
         if self.match("identifier"):
             return True
         # 262	<array_size>	→	positive_treasures_lit
-        elif size >=0 :
+        size = int(self.tokens[self.current_line][self.current_index][1])
+        if size >=0 :
             self.advance()
             return True
     
