@@ -66,11 +66,11 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.bg_label.config(image=self.frames[next_frame])
         self.after(25, self.animate, next_frame)  # Adjust delay if needed (e.g., 100ms)
     
-    def start_typing_effect(self, full_text):
+    def start_typing_effect(self, full_text): #Typing effect in Output box
         """Start the typing animation for parser output."""
         self.typing_text = full_text
         self.current_index = 0
-        self.errors_listbox.insert(tk.END, "")  # Clear any previous content
+        #self.errors_listbox.insert(tk.END, "")  # Clear any previous content
         self.animate_text()
 
     def animate_text(self):
@@ -78,7 +78,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         if self.current_index < len(self.typing_text):
             # Get current text and append the next character
             current_text = self.errors_listbox.get(tk.END)
-            self.errors_listbox.delete(tk.END)  # Remove last entry
+            #self.errors_listbox.delete(tk.END)  # Remove last entry
             self.errors_listbox.insert(tk.END, current_text + self.typing_text[self.current_index])
 
             self.current_index += 1
@@ -144,7 +144,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         #self.left_frame.grid_columnconfigure(2, weight=0)  # Scrollbar
 
         self.line_numbers = tk.Text(
-            self.left_frame, width=6, height=25, wrap=tk.NONE,
+            self.left_frame, width=5, height=25, wrap=tk.NONE,
             fg="white", bg="#E53888", state="disabled", borderwidth=5
         )
         self.line_numbers.grid(row=1, column=0, sticky="nsew", padx=(10, 0), pady=(3,20))
@@ -215,7 +215,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         # Line numbers for lexer only
         self.lexer_line_numbers = tk.Text(
             lexer_frame, width=3, height=24, wrap=tk.NONE,
-            fg="white", bg="#E53888", state="disabled"
+            fg="white", bg="#E53888", state="disabled", borderwidth=5
         )
         self.lexer_line_numbers.grid(row=0, column=0, sticky="ns", padx=(5, 0), pady=0)
 
@@ -388,6 +388,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         # Apply the same scroll fraction to all components
         self.output_listbox.yview_moveto(fraction)
         self.token_listbox.yview_moveto(fraction)
+        self.lexer_line_numbers.yview_moveto(fraction) 
     
     def sync_input_scrollbar(self, *args):
         """Update scrollbar position and sync all components"""
@@ -402,19 +403,24 @@ class RoyalScriptLexerGUI(tk.Tk):
 
     def update_line_numbers(self, event=None):
         """Update line numbers and reset modified flag"""
-        if event:
-            self.input_text.edit_modified(False)
+        self.input_text.edit_modified(False)
         
         content = self.input_text.get("1.0", "end-1c")
         num_lines = content.count('\n') + 1
         numbers = '\n'.join(str(i).rjust(3) for i in range(1, num_lines + 1))
         
+        scroll_position = self.input_text.yview()
+
         self.line_numbers.config(state='normal')
         self.line_numbers.delete("1.0", "end")
         self.line_numbers.insert("1.0", numbers)
         self.line_numbers.tag_configure("right", justify="right")
         self.line_numbers.tag_add("right", "1.0", "end")
-        self.line_numbers.config(state='disabled')
+        self.line_numbers.config(state='disable')
+
+            # Restore scroll position to avoid jumping
+        self.input_text.yview_moveto(scroll_position[0])
+        self.line_numbers.yview_moveto(scroll_position[0])
 
     def update_lexer_token_line_numbers(self):
         """Update line numbers for lexer section only"""
@@ -578,10 +584,13 @@ class RoyalScriptLexerGUI(tk.Tk):
 
         try:
             syntax_result = parser.parse()  # Run the syntax analysis
+            
 
             if syntax_result:
                 # Insert success message on a new line
                 self.errors_listbox.insert(tk.END, "✅ Syntax Analysis Successful!")
+                    
+
                 try:
                     ast_builder = RoyalScriptASTBuilder(tokens)
                     ast = ast_builder.build_ast()
