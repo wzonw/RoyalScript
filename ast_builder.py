@@ -134,62 +134,76 @@ class RoyalScriptASTBuilder:
         self.current_index = 0
         self.current_position = (0, 0)  # (line, index) for better error messages
 
-    def current_token(self):
-        """Get the current token without advancing."""
+    def _skip_comments(self):
+        """Internal method to skip comments across lines."""
         while self.current_line < len(self.tokens):
-            if self.tokens[self.current_line]:
-                if self.current_index < len(self.tokens[self.current_line]):
-                    # Update current position for error reporting
-                    self.current_position = (self.current_line, self.current_index)
-                    return self.tokens[self.current_line][self.current_index]
+            # If line is empty, move to next line
+            if not self.tokens[self.current_line]:
+                self.current_line += 1
+                self.current_index = 0
+                continue
+
+            # Check if current token is a comment
+            while (self.current_index < len(self.tokens[self.current_line]) and 
+                   self.tokens[self.current_line][self.current_index][0] in ['single_comment', 'multi_comment']):
+                self.current_index += 1
+
+            # If we've reached a non-comment token, break
+            if (self.current_index < len(self.tokens[self.current_line]) and 
+                self.tokens[self.current_line][self.current_index][0] not in ['single_comment', 'multi_comment']):
+                break
+
+            # If this line is all comments, move to next line
             self.current_line += 1
             self.current_index = 0
-        return None
+
+    def current_token(self):
+        """Get the current token without advancing, skipping comments."""
+        self._skip_comments()
+
+        # Check if we've reached the end of tokens
+        if self.current_line >= len(self.tokens):
+            return None
+
+        # Update current position and return current token
+        self.current_position = (self.current_line, self.current_index)
+        return self.tokens[self.current_line][self.current_index]
 
     def peek_next_token(self):
-        """Look ahead to the next token without advancing."""
-        current_line = self.current_line
-        current_index = self.current_index
-        
+        """Look ahead to the next token without advancing, skipping comments."""
         # Save current position
         saved_line = self.current_line
         saved_index = self.current_index
         
-        # Advance once
-        if current_index + 1 < len(self.tokens[current_line]):
-            current_index += 1
-        else:
-            current_line += 1
-            current_index = 0
-            # Check if we've gone past the end of tokens
-            if current_line >= len(self.tokens):
-                # Restore position
-                self.current_line = saved_line
-                self.current_index = saved_index
-                return None
+        # Move past current position and skip comments
+        self.advance()
+        self._skip_comments()
         
         # Get the next token
-        next_token = None
-        if current_line < len(self.tokens) and self.tokens[current_line]:
-            if current_index < len(self.tokens[current_line]):
-                next_token = self.tokens[current_line][current_index]
+        next_token = self.current_token()
         
-        # Restore position
+        # Restore original position
         self.current_line = saved_line
         self.current_index = saved_index
         
         return next_token
 
     def advance(self):
-        """Move to the next token."""
-        # If we've already gone past the token list, do nothing.
+        """Move to the next token, skipping comments."""
+        # If we've gone past the token list, do nothing
         if self.current_line >= len(self.tokens):
             return
-        if self.current_index + 1 < len(self.tokens[self.current_line]):
-            self.current_index += 1
-        else:
+        
+        # Move to next token
+        self.current_index += 1
+        
+        # If we've reached the end of the current line, move to next line
+        if self.current_index >= len(self.tokens[self.current_line]):
             self.current_line += 1
             self.current_index = 0
+        
+        # Skip any comments
+        self._skip_comments()
 
     def match(self, expected):
         """
@@ -197,9 +211,13 @@ class RoyalScriptASTBuilder:
         raise an error if it doesn't.
         """
         token = self.current_token()
-        if token and token[0] == expected:
+        if token is None:
+            raise SyntaxError(f"Unexpected end of input when parsing. Expected {expected}")
+        
+        if token[0] == expected:
             self.advance()
             return True
+        
         raise SyntaxError(f"Expected {expected}, got {token} at line {self.current_position[0]+1}, position {self.current_position[1]+1}")
 
     def try_match(self, expected):
@@ -295,10 +313,7 @@ class RoyalScriptASTBuilder:
         # with initialization
         if token and token[0] == '=':
             self.match('=')
-            if self.is_array:
-                value = self.build_array(self.is_2d)
-            else:
-                value = self.build_expression()
+            value = self.build_val()
             token = self.current_token()
             
             # Create the declaration node
@@ -351,10 +366,7 @@ class RoyalScriptASTBuilder:
             # with initialization
             if token and token[0] == '=':
                 self.match('=')
-                if self.is_array:
-                    value = self.build_array(self.is_2d)
-                else:
-                    value = self.build_expression()
+                value = self.build_val()
                 token = self.current_token()
                 
                 # Create the declaration node
@@ -571,7 +583,8 @@ class RoyalScriptASTBuilder:
 
             if token is None:
                 raise SyntaxError("Unexpected end of input while parsing output statement")
-
+            if token in ['(', ')']:
+                self.advance() # yung nasa loob lang kunin
             if token[0] == '~':
                 self.advance()  # consume the '~' token
                 break
@@ -603,7 +616,7 @@ class RoyalScriptASTBuilder:
 
         return VariableReassignmentNode(identifier, operator, expression)
 
-    def build_expression(self):
+    def build_expression(self):  # for condition, parameters, arguments
         """Build an expression node."""
         token = self.current_token()  # Get the current token
         if token is None:
@@ -611,7 +624,7 @@ class RoyalScriptASTBuilder:
 
         expression = []
         # Loop until we hit a terminator ('~', ',', or ')')
-        while token is not None and token[0] not in ['~', ',', ')', ']']:
+        while token is not None and token[0] not in [')', ']']:
             expression.append(token)
             self.advance()
             token = self.current_token()  # update token
@@ -633,80 +646,80 @@ class RoyalScriptASTBuilder:
         
         return expression
     
-    def build_array(self, is_2d):
-        """Build an array expression node for both 1D and 2D arrays."""
-        token = self.current_token()
-        if token is None:
-            raise SyntaxError("Unexpected end of input while parsing array")
+    # def build_array(self, is_2d):
+    #     """Build an array expression node for both 1D and 2D arrays."""
+    #     token = self.current_token()
+    #     if token is None:
+    #         raise SyntaxError("Unexpected end of input while parsing array")
         
-        # Expect opening brace
-        if token[0] != '{':
-            raise SyntaxError(f"Expected '{{' at start of array, found {token}")
+    #     # Expect opening brace
+    #     if token[0] != '{':
+    #         raise SyntaxError(f"Expected '{{' at start of array, found {token}")
         
-        self.advance()  # Move past the opening brace
-        token = self.current_token()
+    #     self.advance()  # Move past the opening brace
+    #     token = self.current_token()
         
-        array_values = []
+    #     array_values = []
         
-        if is_2d:
-            # Handle 2D array: array of arrays
-            while token is not None and token[0] != '}':
-                # Skip commas between inner arrays
-                if token[0] == ',':
-                    self.advance()
-                    token = self.current_token()
-                    continue
+    #     if is_2d:
+    #         # Handle 2D array: array of arrays
+    #         while token is not None and token[0] != '}':
+    #             # Skip commas between inner arrays
+    #             if token[0] == ',':
+    #                 self.advance()
+    #                 token = self.current_token()
+    #                 continue
                     
-                # Each inner array should start with '{'
-                if token[0] != '{':
-                    raise SyntaxError(f"Expected '{{' for inner array, found {token}")
+    #             # Each inner array should start with '{'
+    #             if token[0] != '{':
+    #                 raise SyntaxError(f"Expected '{{' for inner array, found {token}")
                     
-                self.advance()  # Move past the inner opening brace
+    #             self.advance()  # Move past the inner opening brace
                 
-                # Parse inner array elements
-                inner_array = []
-                token = self.current_token()
+    #             # Parse inner array elements
+    #             inner_array = []
+    #             token = self.current_token()
                 
-                while token is not None and token[0] != '}':
-                    # Skip commas between elements
-                    if token[0] == ',':
-                        self.advance()
-                        token = self.current_token()
-                        continue
+    #             while token is not None and token[0] != '}':
+    #                 # Skip commas between elements
+    #                 if token[0] == ',':
+    #                     self.advance()
+    #                     token = self.current_token()
+    #                     continue
                         
-                    # Add the element to the inner array
-                    inner_array.append(token)
-                    self.advance()
-                    token = self.current_token()
+    #                 # Add the element to the inner array
+    #                 inner_array.append(token)
+    #                 self.advance()
+    #                 token = self.current_token()
                 
-                # Make sure we found the closing brace for inner array
-                if token is None or token[0] != '}':
-                    raise SyntaxError("Unexpected end of input while parsing inner array")
+    #             # Make sure we found the closing brace for inner array
+    #             if token is None or token[0] != '}':
+    #                 raise SyntaxError("Unexpected end of input while parsing inner array")
                     
-                # Add completed inner array to our 2D array
-                array_values.append(inner_array)
-                self.advance()  # Move past inner closing brace
-                token = self.current_token()
-        else:
-            # Handle 1D array: simpler case
-            while token is not None and token[0] != '}':
-                # Skip commas between elements
-                if token[0] == ',':
-                    self.advance()
-                    token = self.current_token()
-                    continue
+    #             # Add completed inner array to our 2D array
+    #             array_values.append(inner_array)
+    #             self.advance()  # Move past inner closing brace
+    #             token = self.current_token()
+    #     else:
+    #         # Handle 1D array: simpler case
+    #         while token is not None and token[0] != '}':
+    #             # Skip commas between elements
+    #             if token[0] == ',':
+    #                 self.advance()
+    #                 token = self.current_token()
+    #                 continue
                     
-                # Add the element
-                array_values.append(token)
-                self.advance()
-                token = self.current_token()
+    #             # Add the element
+    #             array_values.append(token)
+    #             self.advance()
+    #             token = self.current_token()
         
-        # Make sure we found the closing brace
-        if token is None or token[0] != '}':
-            raise SyntaxError("Unexpected end of input while parsing array")
+    #     # Make sure we found the closing brace
+    #     if token is None or token[0] != '}':
+    #         raise SyntaxError("Unexpected end of input while parsing array")
             
-        self.advance()  # Move past the closing brace
-        return array_values
+    #     self.advance()  # Move past the closing brace
+    #     return array_values
 
     def build_function_call(self):
         """Build a function call node."""
@@ -763,7 +776,7 @@ class RoyalScriptASTBuilder:
         self.advance()
         
         # Get the expression being assigned
-        expression = self.build_expression()
+        expression = self.build_val()
         
         # Ensure '~' at the end
         self.match('~')

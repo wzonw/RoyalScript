@@ -1,3 +1,9 @@
+"""
+Lexical Analyzer for RoyalScript Language
+
+This module provides comprehensive lexical analysis for the RoyalScript language.
+"""
+
 import re
 from RS_RegDef  import Delims
 from RS_RegDef  import RegDef

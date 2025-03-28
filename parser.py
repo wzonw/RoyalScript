@@ -1,3 +1,9 @@
+"""
+Syntax Analyzer for RoyalScript Language
+
+This module provides comprehensive syntactic analysis for the RoyalScript language.
+"""
+
 from other.lexer import RoyalScriptLexer, Token
 from RS_RegDef import Delims, RegDef
 import traceback    
