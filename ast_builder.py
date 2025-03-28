@@ -266,8 +266,7 @@ class RoyalScriptASTBuilder:
         self.is_2d = False
         token = self.current_token()
         array_dimensions = []
-
-        print('it is a dynasty--------------------------------------------------------', token)
+        declarations = []
 
         # Check for optional 'dynasty' token
         if token and token[0] == 'dynasty':
@@ -275,21 +274,18 @@ class RoyalScriptASTBuilder:
             self.advance()
             token = self.current_token()
         
-        print('it is a dynasty--------------------------------------------------------')
-
         # Expect a data type next
-        datatype = token  # use the literal value for the type
+        datatype = token
         self.advance()
         token = self.current_token()
 
         # Expect an identifier
-        identifier = token  # extract the identifier's name
+        identifier = token
         self.advance()
         token = self.current_token()
         
         value = None
-        declarations = []
-
+        
         # Array handling
         if token and token[0] == '[':
             self.is_array = True
@@ -308,17 +304,16 @@ class RoyalScriptASTBuilder:
                 self.advance()
                 self.match(']')
                 token = self.current_token()
-                
-            
+        
         # with initialization
         if token and token[0] == '=':
             self.match('=')
             value = self.build_val()
             token = self.current_token()
             
-            # Create the declaration node
-            decl = VariableDeclarationNode(datatype, identifier, value, is_dynasty, scope_level, array_dimensions)
-            declarations.append(decl)
+        # Create the declaration node
+        decl = VariableDeclarationNode(datatype, identifier, value, is_dynasty, scope_level, array_dimensions)
+        declarations.append(decl)
         
         # Multiple declarations
         while True:
@@ -361,32 +356,26 @@ class RoyalScriptASTBuilder:
                     self.advance()
                     self.match(']')
                     token = self.current_token()
-                    
-                
+            
             # with initialization
             if token and token[0] == '=':
                 self.match('=')
                 value = self.build_val()
                 token = self.current_token()
-                
-                # Create the declaration node
-                decl = VariableDeclarationNode(datatype, identifier, value, is_dynasty, scope_level, array_dimensions)
-                declarations.append(decl)
-
-             # End of declaration
-            token = self.current_token()
-            if token and token[0] == '~':
-                self.match('~')
-
-        # Single declaration without initialization
-        if token and token[0] == '~':
-            self.match('~')
+            
+            # Create the declaration node
             decl = VariableDeclarationNode(datatype, identifier, value, is_dynasty, scope_level, array_dimensions)
             declarations.append(decl)
+
+        # End of declaration
+        token = self.current_token()
+        if token and token[0] == '~':
+            self.match('~')
 
         return declarations
 
     def build_global_declarations(self):
+        print('entered global +++++++++++++++', self.current_token())
         declarations = []
         
         while True:
