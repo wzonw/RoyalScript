@@ -5,8 +5,8 @@ from lexer2 import RoyalScriptLexer
 from lexer2 import Token
 from pygame import mixer
 from parser import RoyalScriptParser
-from ast_builder import RoyalScriptASTBuilder
-from semantic import SemanticAnalyzer
+from ast_builder import RoyalScriptASTBuilder, ASTBuildingException
+from semantic import SemanticAnalyzer, SemanticError
 from test_ast import print_ast
 #from semantic_copy import RoyalScriptSemanticAnalyzer 
 
@@ -612,17 +612,13 @@ class RoyalScriptLexerGUI(tk.Tk):
 
 
     def run_semantic_analysis(self, ast):
-        """
-        Perform semantic analysis on the Abstract Syntax Tree.
-        
-        Args:
-            ast: The Abstract Syntax Tree to analyze
-        
-        Returns:
-            list: A list of semantic errors (if any)
-        """
         semantic_analyzer = SemanticAnalyzer()
-        semantic_errors = semantic_analyzer.analyze(ast)
+        try:
+            semantic_errors = semantic_analyzer.analyze(ast)
+        except Exception as e:
+            # If you raise custom exceptions, catch them here
+            self.errors_listbox.insert(tk.END, f"❌ Semantic Analysis Failed: {e}")
+            return
         
         if semantic_errors:
             self.errors_listbox.insert(tk.END, "❌ Semantic Analysis Detected Errors:")
@@ -646,18 +642,21 @@ class RoyalScriptLexerGUI(tk.Tk):
                 
                 try:
                     ast_builder = RoyalScriptASTBuilder(tokens)
-                    ast = ast_builder.build_ast()
+                    ast = ast_builder.build_ast()   
+                    print_ast(ast)
+                    # If AST building is successful, go do semantic analysis
                     self.errors_listbox.insert(tk.END, "✅ AST Building Successful!")
                     
-                    # Print the AST structure
-                    print("\n=== AST Structure ===")
-                    print_ast(ast)
-                    
-                    # Perform Semantic Analysis
                     semantic_errors = self.run_semantic_analysis(ast)
                     
-                except Exception as e:
+                except ASTBuildingException as e:
                     self.errors_listbox.insert(tk.END, f"❌ AST Building Failed: {e}")
+                except SemanticError as e:
+                    self.errors_listbox.insert(tk.END, f"❌ Semantic Analysis Failed: {e}")
+                except Exception as e:
+                    # truly unexpected
+                    self.errors_listbox.insert(tk.END, f"❌ Unexpected Error: {str(e)}")
+
                     
             else:
                 # Insert failure message on its own line

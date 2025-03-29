@@ -7,6 +7,30 @@ class Node:
     """Base class for all AST nodes"""
     pass
 
+
+class ASTBuildingException(Exception):
+    """
+    Custom exception raised when there's an error specific
+    to building the AST (not just a syntax or semantic error).
+    """
+    def __init__(self, message: str, line: int = None, position: int = None):
+        """
+        Args:
+            message (str): A descriptive error message.
+            line (int, optional): The line where the error occurred.
+            position (int, optional): The position (column) in the line.
+        """
+        super().__init__(message)
+        self.line = line
+        self.position = position
+
+    def __str__(self):
+        base_msg = super().__str__()
+        if self.line is not None and self.position is not None:
+            return f"{base_msg} at line {self.line + 1}, position {self.position + 1}"
+        return base_msg
+
+
 class ProgramNode(Node):
     def __init__(self, globals, functions, main_function):
         self.global_declarations = globals
