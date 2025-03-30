@@ -1808,6 +1808,18 @@ class RoyalScriptParser:
         if self.match('phantom'):
             return True
         
+        # 178	<granted_content_2>	→	lengthof(id_lit <index>)
+        elif self.match('lengthof'):
+            if not self.match('('):
+                return False
+            if not self.match('identifier'):
+                return False
+            if not self.index():
+                return False
+            if not self.match(')'):
+                return False
+            return True
+
         # 173	<granted_content_2>	→	<conversion_func> (<conversion_value>)
         elif self.conversion_func():
             if not self.match('('):
