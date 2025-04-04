@@ -4,7 +4,7 @@ from PIL import Image, ImageTk, ImageSequence
 from lexer2 import RoyalScriptLexer
 from lexer2 import Token
 from pygame import mixer
-from parser import RoyalScriptParser
+from parser_2 import RoyalScriptParser
 from ast_builder import RoyalScriptASTBuilder, ASTBuildingException
 from semantic import SemanticAnalyzer, SemanticError
 from test_ast import print_ast
@@ -339,13 +339,13 @@ class RoyalScriptLexerGUI(tk.Tk):
 
         # Create semantic button using Canvas
         self.semantic_button = tk.Canvas(
-            self.button_frame, height=30, width=100, highlightthickness=0,
+            self.button_frame, height=30, width=100, highlightthickness=0, relief="raised", bd=3
         )
         self.semantic_button.grid(row=2, column=2, sticky="sew", pady=10, padx=30)
 
     # Add button text and sparkles
         self.semantic_button.create_text(
-            50, 15, text="Semantic", font=("Arial", 8, "bold"), fill="#d60083"
+            50, 15, text="Semantic", font=("Century Schoolbook", 8, "bold"), fill="#d60083", 
         )
 
         # Bind button events
