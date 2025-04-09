@@ -297,20 +297,20 @@ class RoyalScriptASTBuilder:
             is_dynasty = True
             self.advance()
             token = self.current_token()
-        
+
         # Expect a data type next
         datatype = token
         self.advance()
         token = self.current_token()
 
-        # Expect an identifier
+        # Expect an identifier for the first variable
         identifier = token
         self.advance()
         token = self.current_token()
-        
+
         value = None
-        
-        # Array handling
+
+        # Array handling if needed
         if token and token[0] == '[':
             self.is_array = True
             self.match('[')
@@ -328,41 +328,40 @@ class RoyalScriptASTBuilder:
                 self.advance()
                 self.match(']')
                 token = self.current_token()
-        
-        # with initialization
+
+        # With initialization: stop at a comma or tilde.
         if token and token[0] == '=':
             self.match('=')
+            # Only capture tokens up to a comma or '~' so that subsequent variables aren’t included.
             value = self.build_val()
             token = self.current_token()
             
-        # Create the declaration node
+        # Create the first declaration node
         decl = VariableDeclarationNode(datatype, identifier, value, is_dynasty, scope_level, array_dimensions)
         declarations.append(decl)
-        
-        # Multiple declarations
+
+        # Process multiple declarations (after the first variable)
         while True:
             self.is_array = False
             self.is_2d = False
             token = self.current_token()
             if not token or token[0] != ',':
                 break
-                
+                    
             self.match(',')
-            
-            # Get the identifier
+                
+            # Get the next identifier
             token = self.current_token()
             if not token:
                 break
-                
+                    
             identifier = token
             self.advance()
-            
             value = None
             array_dimensions = []
-            
             token = self.current_token()
-            
-            # Array handling
+                
+            # Array handling (if declared for the subsequent variable)
             if token and token[0] == '[':
                 self.is_array = True
                 self.match('[')
@@ -380,23 +379,24 @@ class RoyalScriptASTBuilder:
                     self.advance()
                     self.match(']')
                     token = self.current_token()
-            
-            # with initialization
+                
+            # with initialization for the variable: stop at comma or tilde
             if token and token[0] == '=':
                 self.match('=')
                 value = self.build_val()
                 token = self.current_token()
-            
-            # Create the declaration node
+                
+            # Create a new declaration for this variable and add to declarations list
             decl = VariableDeclarationNode(datatype, identifier, value, is_dynasty, scope_level, array_dimensions)
             declarations.append(decl)
 
-        # End of declaration
+        # End of declaration, match the tilde
         token = self.current_token()
         if token and token[0] == '~':
             self.match('~')
 
         return declarations
+
 
     def build_global_declarations(self):
         print('entered global +++++++++++++++', self.current_token())
@@ -529,7 +529,10 @@ class RoyalScriptASTBuilder:
 
             elif token[0] == 'granted':
                 self.match('granted')
+                self.match('(')
                 output = self.build_output()
+                self.match(')')
+                self.match('~')
                 body_nodes.append(OutputNode(output))
 
             elif token[0] == 'identifier':
@@ -590,22 +593,29 @@ class RoyalScriptASTBuilder:
     def build_output(self):
         """Build an output statement."""
         output = []
+        paren = 0
 
         while True:
             token = self.current_token()
 
             if token is None:
                 raise SyntaxError("Unexpected end of input while parsing output statement")
-            if token in ['(', ')']:
-                self.advance() # yung nasa loob lang kunin
-            if token[0] == '~':
-                self.advance()  # consume the '~' token
+            
+            if token[0] == ')' and paren == 0:
                 break
+            
+            if token[0] == '(':
+                paren = 1
+            
+            if token[0] == ')' and paren == 1:
+                paren = 0
+
 
             output.append(token)
             self.advance()
 
         return output
+
 
     def build_var_reassign(self):
         """Build a variable reassignment node."""
@@ -649,14 +659,15 @@ class RoyalScriptASTBuilder:
         token = self.current_token()  # Get the current token
         if token is None:
             raise SyntaxError("Unexpected end of input while parsing expression")
-
+    
         expression = []
         # Loop until we hit a terminator ('~', ',', or ')')
-        while token is not None and token[0] not in ['~']:
+        while token is not None and token[0] not in ['~', ',']:
             expression.append(token)
             self.advance()
             token = self.current_token()  # update token
         
+        print(expression)
         return expression
     
     # def build_array(self, is_2d):
@@ -909,8 +920,11 @@ class RoyalScriptASTBuilder:
         loop_var = []
         
         while self.current_token() and self.current_token()[0] != '~':
-            loop_var.append(self.current_token())
-            self.advance()
+            if self.current_token()[0] == 'treasures':
+                self.advance()
+            else:
+                loop_var.append(self.current_token())
+                self.advance()
         
         return loop_var
     

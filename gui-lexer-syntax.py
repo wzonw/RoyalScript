@@ -1,12 +1,17 @@
 import tkinter as tk
+import subprocess
+import sys
+import os
 from tkinter import PhotoImage, scrolledtext
 from PIL import Image, ImageTk, ImageSequence
 from lexer2 import RoyalScriptLexer
 from lexer2 import Token
 from pygame import mixer
-from parser_2 import RoyalScriptParser
+from parser import RoyalScriptParser
 from ast_builder import RoyalScriptASTBuilder, ASTBuildingException
 from semantic import SemanticAnalyzer, SemanticError
+from coder import RoyalScriptToPythonTranslator
+
 from test_ast import print_ast
 #from semantic_copy import RoyalScriptSemanticAnalyzer 
 
@@ -635,9 +640,8 @@ class RoyalScriptLexerGUI(tk.Tk):
             self.errors_listbox.insert(tk.END, f"Details: {traceback.format_exc()}")
 
     def run_button(self, event=None):
+        
         return
-
-
 
     def run_semantic_analysis(self, ast):
         semantic_analyzer = SemanticAnalyzer()
@@ -685,6 +689,116 @@ class RoyalScriptLexerGUI(tk.Tk):
                     # truly unexpected
                     self.errors_listbox.insert(tk.END, f"❌ Unexpected Error: {str(e)}")
 
+                    
+            else:
+                # Insert failure message on its own line
+                self.errors_listbox.insert(tk.END, "❌ Syntax Analysis Failed.")
+        
+        except SyntaxError as e:
+            # Insert the syntax error message as a separate item
+            self.errors_listbox.insert(tk.END, f"❌ {str(e)}")
+        
+        except Exception as e:
+            self.errors_listbox.insert(tk.END, f"❌ Unexpected Error in Syntax Analysis: {str(e)}")
+
+    def run_syntax_semantic(self, tokens):
+        """Run the syntax analyzer with tokens."""
+        parser = RoyalScriptParser(tokens)
+        
+        try:
+            syntax_result = parser.parse()  # Run the syntax analysis
+            
+            if syntax_result:
+                # Insert success message on a new line
+                self.errors_listbox.insert(tk.END, "✅ Syntax Analysis Successful!")
+                
+                try:
+                    ast_builder = RoyalScriptASTBuilder(tokens)
+                    ast = ast_builder.build_ast()   
+                    print_ast(ast)
+                    # If AST building is successful, go do semantic analysis
+                    self.errors_listbox.insert(tk.END, "✅ AST Building Successful!")
+                    
+                    semantic_errors = self.run_semantic_analysis(ast)
+                    
+                    # Check if there are no semantic errors
+                    if not semantic_errors:
+                        self.errors_listbox.insert(tk.END, "✅ Semantic Analysis Successful!")
+                        
+                        # Now translate and run the RoyalScript code
+                        # self.errors_listbox.insert(tk.END, "Translating to Python and executing...")
+                        
+                        # Create the translator and compile/run the code
+                        translator = RoyalScriptToPythonTranslator()
+                        python_code = translator.translate(ast)
+                        
+                        print("==== FINAL PYTHON CODE ====")
+                        for i, line in enumerate(python_code.splitlines(), 1):
+                            print(f"{i:02}: {repr(line)}")
+
+                        # Save Python code to file
+                        output_file = "output.py"
+
+                        # Sanity check: force to string with newlines
+                        if isinstance(python_code, list):
+                            python_code = "\n".join(python_code)
+
+                        # Always ensure newline at the end
+                        if not python_code.endswith("\n"):
+                            python_code += "\n"
+
+                        with open("output.py", "w", encoding="utf-8") as f:
+                            f.write(python_code)
+
+
+                        
+                        # self.errors_listbox.insert(tk.END, f"Generated Python code saved to '{output_file}'")
+                        
+                        # Execute the generated Python code
+                        # self.errors_listbox.insert(tk.END, "Running the translated Python code...")
+                        
+                        try:
+                            # Use subprocess to run the Python code
+                            import subprocess
+                            result = subprocess.run(
+                                ["python", output_file], 
+                                capture_output=True, 
+                                text=True
+                            )
+                            
+                            # Display the output
+                            if result.stdout:
+                                self.errors_listbox.insert(tk.END, "Program Output:")
+                                for line in result.stdout.splitlines():
+                                    self.errors_listbox.insert(tk.END, f"  {line}")
+                            
+                            # Display any errors
+                            if result.stderr:
+                                self.errors_listbox.insert(tk.END, "Program Errors:")
+                                for line in result.stderr.splitlines():
+                                    self.errors_listbox.insert(tk.END, f"  {line}")
+                            
+                            if result.returncode == 0:
+                                self.errors_listbox.insert(tk.END, "")
+                            else:
+                                self.errors_listbox.insert(tk.END, f"❌ Program execution failed with code {result.returncode}")
+                        
+                        except Exception as e:
+                            self.errors_listbox.insert(tk.END, f"❌ Error running Python code: {str(e)}")
+                    
+                    else:
+                        # Display semantic errors
+                        self.errors_listbox.insert(tk.END, "❌ Semantic Analysis Failed:")
+                        for error in semantic_errors:
+                            self.errors_listbox.insert(tk.END, f"  - {error}")
+                    
+                except ASTBuildingException as e:
+                    self.errors_listbox.insert(tk.END, f"❌ AST Building Failed: {e}")
+                except SemanticError as e:
+                    self.errors_listbox.insert(tk.END, f"❌ Semantic Analysis Failed: {e}")
+                except Exception as e:
+                    # truly unexpected
+                    self.errors_listbox.insert(tk.END, f"❌ Unexpected Error: {str(e)}")
                     
             else:
                 # Insert failure message on its own line

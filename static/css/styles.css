@@ -1,0 +1,294 @@
+/* static/css/styles.css */
+@font-face {
+    font-family: 'Monotype Corsiva';
+    src: url('../fonts/monotype_corsiva.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Century Schoolbook';
+    src: url('../fonts/century_schoolbook.ttf') format('truetype');
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f883aa;
+    background-image: url('../images/rsbg.gif');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    overflow: scroll;
+    position: relative;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    /* margin-bottom: 10px; */
+    /* background-color: #0f0; */
+}
+
+.logo {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.left-panel, .right-panel, .output-panel {
+    background-color: #f883aa;
+    border: 3px ridge #d60083;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    padding: 5px;
+}
+
+.left-panel {
+    flex: 1;
+    display: flex;
+    height: 400px;
+    flex-direction: column;
+}
+
+.right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.token-panels {
+    display: flex;
+    flex: 1;
+    overflow-y: scroll;
+    gap: 10px;
+}
+
+.token-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+    overflow-y: scroll;
+}
+
+.panel-header {
+    font-family: 'Monotype Corsiva', cursive;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    padding: 5px;
+}
+
+.editor-container {
+    display: flex;
+    overflow-y: scroll;
+    flex: 1;
+}
+
+.line-numbers {
+    width: 40px;
+    background-color: #E53888;
+    color: white;
+    padding: 5px;
+    border: 5px solid #E53888;
+    font-size: 14px;
+    overflow-y: hidden;
+    font-family: monospace;
+    text-align: right;
+    padding-right: 5px;
+    user-select: none;
+}
+
+.code-area {
+    flex: 1;
+    border: 5px solid #d60083;
+    resize: none;
+    padding: 5px;
+    font-family: monospace;
+    font-size: 14px;
+    color: #d60083;
+    overflow-y: auto;
+}
+
+.token-container {
+    flex: 1;
+    background-color: white;
+    border: 5px solid #d60083;
+    overflow-y: auto;
+    padding: 5px;
+    color: #d60083;
+    font-family: monospace;
+    text-align: center;
+}
+
+.buttons-container {
+    display:flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    /* background-color: #0f0; */
+}
+
+.cushion-container {
+    position: relative;
+    display: inline-flex;
+    width: 100%;
+    height: 70px;
+    /* background-color: red; */
+}
+
+.cushion-img {
+    width: 100%;
+    height: 100%;
+}
+
+.buttons {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* display: flex; */
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.compiler-btn {
+    width: 100px;
+    padding: 8px;
+    background-color: #fdd9e5;
+    border: 3px solid #d60083;
+    border-radius: 5px;
+    font-family: 'Century Schoolbook', serif;
+    font-weight: bold;
+    color: #d60083;
+    cursor: pointer;
+    text-align: center;
+}
+
+.compiler-btn:hover {
+    background-color: #f0a6ca;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-logo {
+    width: 200px;
+    height: auto;
+}
+
+/* For token items */
+.token-item {
+    padding: 2px;
+    margin: 2px 0;
+    font-size: 14px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f883aa;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d60083;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #b30070;
+}
+
+/* Animation for the typing effect */
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+.typing-animation {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 0.5s steps(40, end);
+}
+
+/* Add these styles to your existing CSS file */
+
+.output-container {
+    background-color: #000;
+    color: #0f0;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 10px;
+    white-space: pre-wrap;
+    overflow-y: auto;
+    flex: 1;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.output-line {
+    display: block;
+    line-height: 1.4;
+}
+
+.output-input {
+    display: inline;
+    outline: none;
+    border: none;
+    background: transparent;
+    color: #0f0;
+    font-family: monospace;
+    font-size: 14px;
+    caret-color: #0f0;
+    width: 80%;
+}
+
+.input-prompt {
+    color: #ffff00;
+    margin-right: 5px;
+}
+
+.success {
+    color: #00ff00;
+    font-weight: bold;
+}
+
+.error {
+    color: #ff0000;
+    font-weight: bold;
+}
+
+/* Make sure the output panel has enough height */
+.output-panel {
+    height: 250px; /* Adjust this value as needed */
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+}

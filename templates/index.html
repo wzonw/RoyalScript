@@ -1,0 +1,61 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoyalScript</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/crown_logo2.png') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="{{ url_for('static', filename='images/crown_logo2.png') }}" alt="Crown Logo" class="logo">
+            <h1>RoyalScript</h1>
+        </div>
+
+        <div class="buttons-container">
+            <div class="cushion-container">
+
+                <div class="buttons">
+                    <button id="lexical-btn" class="compiler-btn">Lexical</button>
+                    <button id="syntax-btn" class="compiler-btn">Syntax</button>
+                    <button id="semantic-btn" class="compiler-btn">Semantic</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="panel-header">Input Code</div>
+                <div class="editor-container">
+                    <div class="line-numbers" id="line-numbers"></div>
+                    <textarea id="input-code" class="code-area" spellcheck="false"></textarea>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div class="token-panels">
+                    <div class="token-panel">
+                        <div class="panel-header">Lexeme</div>
+                        <div class="token-container" id="lexeme-container"></div>
+                    </div>
+                    <div class="token-panel">
+                        <div class="panel-header">Token</div>
+                        <div class="token-container" id="token-container"></div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <div class="output-panel">
+            <div class="panel-header">Output</div>
+            <div class="output-container" id="output-container"></div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

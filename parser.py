@@ -571,13 +571,13 @@ class RoyalScriptParser:
             return True
         
         self.current_index = current_pos
-        # 45	<logical_operand>	→	mirror_lit
-        if self.match('mirror_lit'):
+        # 45	<logical_operand>	→	mirror_lit <relational_more>
+        if self.match('mirror_lit') and self.relational_more():
             return True
         
         self.current_index = current_pos
-        # 46	<logical_operand>	→	<treasures_mirror>
-        if self.treasures_mirror():
+        # 46	<logical_operand>	→	<treasures_mirror> <relational_more>
+        if self.treasures_mirror() and self.relational_more():
             return True
         
         self.current_index = current_pos
@@ -1548,8 +1548,8 @@ class RoyalScriptParser:
             return True
         
         self.current_index = current_pos
-        # 148	<condition>	→	mirror_lit <more_log>
-        if self.match('mirror_lit') and self.more_log():
+        # 148	<condition>	→	mirror_lit <relational_more> <more_log>
+        if self.match('mirror_lit') and self.relational_more() and self.more_log():
             return True
         
         self.current_index = current_pos
@@ -1863,8 +1863,10 @@ class RoyalScriptParser:
                 return True
             
         
-        # 177	<granted_content_2>	→	mirror_lit <more_log>
+        # 177	<granted_content_2>	→	mirror_lit <relational_more> <more_log>
         elif self.match('mirror_lit'):
+            if not self.relational_more():
+                return False
             if not self.more_log():
                 return False
             return True
