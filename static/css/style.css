@@ -1,0 +1,383 @@
+/* General Reset and Fonts */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Century Schoolbook', serif;
+}
+
+body {
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    background-color: #f8f9fa;
+}
+
+/* Background Animation */
+.bg-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+#bg-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Main Container */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 10px;
+    position: relative;
+    overflow-y: auto;
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.header .logo {
+    width: 40px;
+    height: 40px;
+    margin-right: 15px;
+}
+
+.header h1 {
+    color: black;
+    font-family: 'Monotype Corsiva', cursive;
+    font-size: 24px;
+}
+
+/* Content Area */
+.content-area {
+    display: flex;
+    flex: 1;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+/* Panels */
+.panel {
+    background-color: #f883aa;
+    border: 3px solid #666;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.panel-header {
+    color: white;
+    font-family: 'Monotype Corsiva', cursive;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* Left Panel - Input Code */
+.left-panel {
+    flex: 4;
+    min-width: 300px;
+    height: 500px;
+}
+
+.code-container {
+    display: flex;
+    flex: 1;
+    background-color: white;
+    border: 5px solid #d60083;
+    border-radius: 3px;
+    overflow-x: hidden;
+}
+
+
+.line-numbers {
+    width: 70px;
+    background-color: #E53888;
+    color: white;
+    font-family: monospace;
+    font-size: 14px;
+    text-align: right;
+    padding: 5px 3px;
+    user-select: none;
+    overflow-x: hidden;  /* no horizontal scroll */
+    white-space: nowrap; /* keep numbers on single line */
+}
+
+.line-numbers1 {
+    width: 30px;
+    background-color: #E53888;
+    color: white;
+    font-family: monospace;
+    font-size: 14px;
+    text-align: right;
+    padding: 5px 3px;
+    user-select: none;
+    overflow-x: hidden;  /* no horizontal scroll */
+    white-space: nowrap; /* keep numbers on single line */
+}
+
+.code-input {
+    flex: 1;
+    border: none;
+    padding: 5px;
+    font-family: monospace;
+    font-size: 14px;
+    color: #d60083;
+    resize: none;
+    outline: none;
+    line-height: 1.4;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    /* ✨ Magic Sauce for Wrapping */
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    word-wrap: break-word !important;
+}
+
+
+*::-webkit-scrollbar {
+    height: 0px; /* hide horizontal scrollbar */
+}
+
+
+.main-div-middle{
+    width: 500px;
+    height: 500px;
+    padding: 0;
+    align-items: center;
+    /* border: none; */
+}
+
+.header1{
+    display: flex;
+    justify-content: space-between;
+    width: 300px;
+    /* background-color: #00ff00; */
+    padding-top: 20px;
+    /* padding-bottom: 5px; */
+
+}
+
+/* Middle Panel - SCROLL HERE ONLY */
+.middle-panel {
+    flex: 3;
+    height: 470px;
+    overflow-y: auto; /* the only scroll */
+    overflow-x: hidden;
+    width: 100%;
+    /* display: flex;
+    flex-direction: column;    */
+    border: none;
+    box-shadow: none;
+    /* background-color: #00ff00; */
+    max-height: 420px;
+}
+
+
+
+/* Container just aligns things */
+.token-container {
+    display: flex;
+    flex: 1;
+    gap: 10px;
+}
+
+/* Each section grows but doesn't scroll */
+.token-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Token list styling */
+.token-list {
+    flex: 1;
+    border: 5px solid #d60083;
+    background-color: white;
+    color: #d60083;
+    font-family: monospace;
+    font-size: 14px;
+    text-align: center;
+    outline: none;
+    height: auto;
+    overflow: hidden; /* stop internal scrolling */
+    pointer-events: auto; /* keep it selectable */
+    width: 200px;
+    /* max-height: 397px; */
+}
+
+
+/* Right Side - Buttons and Logo */
+.right-side {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.button-panel {
+    flex: 1;
+    position: relative;
+}
+
+.cushion-container {
+    position: relative;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cushion-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.buttons {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    z-index: 2;
+}
+
+.royal-button {
+    width: 100px;
+    height: 30px;
+    background-color: white;
+    border: 3px solid #d60083;
+    border-radius: 5px;
+    color: #d60083;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.royal-button:hover {
+    background-color: #fcbad3;
+}
+
+.logo-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #E53888;
+    border: 3px solid #666;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.logo-image {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+/* Terminal Panel */
+.terminal-panel {
+    flex: 0 0 200px;
+    margin-top: auto;
+}
+
+.terminal-output {
+    background-color: black;
+    color: #00ff00;
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+    padding: 10px;
+    height: 150px;
+    overflow-y: auto;
+    border: 5px solid #555;
+    margin-bottom: 10px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.terminal-input-container {
+    display: flex;
+    align-items: center;
+    background-color: black;
+    border: 5px solid #555;
+    padding: 5px;
+}
+
+.prompt {
+    color: #00ff00;
+    font-family: 'Consolas', monospace;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.terminal-input {
+    flex: 1;
+    background-color: black;
+    color: #00ff00;
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+    border: none;
+    outline: none;
+}
+
+
+/* Terminal Text Colors */
+.terminal-error {
+    color: red;
+}
+
+.terminal-input-prompt {
+    color: yellow;
+}
+
+.terminal-user-input {
+    color: cyan;
+}
+
+.terminal-system {
+    color: gray;
+    font-style: italic;
+}
+
+.line-numbers,
+.code-input {
+    line-height: 1.4;
+    padding-top: 5px;
+    white-space: pre;
+    overflow-y: auto;
+}
+
+
+
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .content-area {
+        flex-direction: column;
+    }
+    
+    .right-side {
+        flex-direction: row;
+    }
+}

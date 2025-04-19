@@ -1557,6 +1557,8 @@ class RoyalScriptParser:
             print('passed body --------------', self.current_token())
             if not self.flow_control():
                 return False
+            if not self.ret_statement():
+                return False
             print('passed flow control')
             if not self.match('}'):
                 return False
@@ -1586,6 +1588,8 @@ class RoyalScriptParser:
                 return False
             if not self.flow_control():
                 return False
+            if not self.ret_statement():
+                return False
             if not self.match('}'):
                 return False
             if not self.elif_break():
@@ -1608,6 +1612,8 @@ class RoyalScriptParser:
             if not self.flow_body():
                 return False
             if not self.flow_control():
+                return False
+            if not self.ret_statement():
                 return False
             if not self.match('}'):
                 return False
@@ -1882,6 +1888,8 @@ class RoyalScriptParser:
                 return False
             if not self.body():
                 return False
+            if not self.ret_statement():
+                return False
             if not self.match('}'):
                 return False
             if not self.elif_statement():
@@ -1907,6 +1915,8 @@ class RoyalScriptParser:
                 return False
             if not self.body():
                 return False
+            if not self.ret_statement():
+                return False
             if not self.match('}'):
                 return False
             if not self.elif_statement():
@@ -1927,6 +1937,8 @@ class RoyalScriptParser:
             if not self.match('{'):
                 return False
             if not self.body():
+                return False
+            if not self.ret_statement():
                 return False
             if not self.match('}'):
                 return False

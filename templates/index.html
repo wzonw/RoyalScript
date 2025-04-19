@@ -1,61 +1,97 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoyalScript</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='images/crown_logo2.png') }}">
+    <title>RoyalScript Web Compiler</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Monotype+Corsiva&family=Century+Schoolbook&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <div class="container">
+    <div class="main-container">
+        <!-- Background animation container -->
+        <div class="bg-container">
+            <img id="bg-image" src="{{ url_for('static', filename='images/rsbg.gif') }}" alt="Background">
+        </div>
+
+        <!-- Header with logo -->
         <div class="header">
-            <img src="{{ url_for('static', filename='images/crown_logo2.png') }}" alt="Crown Logo" class="logo">
-            <h1>RoyalScript</h1>
+            <img src="{{ url_for('static', filename='images/crown_logo2.png') }}" alt="RoyalScript Logo" class="logo">
+            <h1>RoyalScript Web Compiler</h1>
         </div>
 
-        <div class="buttons-container">
-            <div class="cushion-container">
-
-                <div class="buttons">
-                    <button id="lexical-btn" class="compiler-btn">Lexical</button>
-                    <button id="syntax-btn" class="compiler-btn">Syntax</button>
-                    <button id="semantic-btn" class="compiler-btn">Semantic</button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="main-content">
-            <div class="left-panel">
+        <!-- Main content area -->
+        <div class="content-area">
+            <!-- Left panel - Input Code -->
+            <div class="panel left-panel">
                 <div class="panel-header">Input Code</div>
-                <div class="editor-container">
-                    <div class="line-numbers" id="line-numbers"></div>
-                    <textarea id="input-code" class="code-area" spellcheck="false"></textarea>
+                <div class="code-container">
+                    <div class="line-numbers" id="input-line-numbers"></div>
+                    <textarea id="input-code" class="code-input" wrap="soft" spellcheck="false"></textarea>
                 </div>
             </div>
-            
-            <div class="right-panel">
-                <div class="token-panels">
-                    <div class="token-panel">
-                        <div class="panel-header">Lexeme</div>
-                        <div class="token-container" id="lexeme-container"></div>
-                    </div>
-                    <div class="token-panel">
-                        <div class="panel-header">Token</div>
-                        <div class="token-container" id="token-container"></div>
+
+            <!-- Middle panel - Lexeme and Tokens -->
+            <div class="panel main-div-middle">
+                <div class="header1">
+                    <div class="panel-header">Lexeme</div>
+                    <div class="panel-header">Token</div>
+                </div>
+                <div class="panel middle-panel">
+                    <div class="token-container">
+                        <div class="token-section">
+                            <div class="code-container">
+                                <div class="line-numbers1" id="lexer-line-numbers"></div>
+                                <select id="lexeme-list" class="token-list" size="1000" multiple></select>
+                            </div>
+                        </div>
+                        <div class="token-section">
+                            <div class="code-container">
+                                <select id="token-list" class="token-list" size="1000" multiple></select>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
+    
+            </div>
+
+            
+
+            <!-- Right panel - Buttons and Logo -->
+            <div class="right-side">
+                <div class="panel button-panel">
+                    <div class="cushion-container">
+                        <img src="{{ url_for('static', filename='images/cushion.png') }}" alt="Button Background" class="cushion-image">
+                        <div class="buttons">
+                            <button id="lexical-btn" class="royal-button">Lexical</button>
+                            <button id="syntax-btn" class="royal-button">Syntax</button>
+                            <button id="semantic-btn" class="royal-button">Semantic</button>
+                            <button id="run-btn" class="royal-button">Run</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="logo-container">
+                    <img src="{{ url_for('static', filename='images/RoyalScript_logo.png') }}" alt="RoyalScript Logo" class="logo-image">
+                </div>
             </div>
         </div>
-        
-        <div class="output-panel">
-            <div class="panel-header">Output</div>
-            <div class="output-container" id="output-container"></div>
+
+        <!-- Terminal area -->
+        <div class="panel terminal-panel">
+            <div class="panel-header">Terminal</div>
+            <div id="terminal-output" class="terminal-output"></div>
+            <div class="terminal-input-container">
+                <span class="prompt">></span>
+                <input type="text" id="terminal-input" class="terminal-input" disabled>
+            </div>
         </div>
     </div>
-    
+
+    <!-- Session ID storage (hidden) -->
+    <input type="hidden" id="session-id" value="">
+
+    <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

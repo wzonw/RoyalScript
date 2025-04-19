@@ -13,6 +13,7 @@ from parser import RoyalScriptParser
 from ast_builder import RoyalScriptASTBuilder, ASTBuildingException
 from semantic import SemanticAnalyzer, SemanticError
 from coder import RoyalScriptToPythonTranslator
+import time 
 
 from test_ast import print_ast
 
@@ -27,6 +28,9 @@ class InteractiveTerminal:
         
     def start_process(self, command):
         """Start a subprocess to run output.py"""
+        # Terminate any existing process first
+        self.terminate_process()
+        
         # Create process with pipes for stdin, stdout, stderr
         self.process = subprocess.Popen(
             command,
@@ -76,7 +80,11 @@ class InteractiveTerminal:
         sys.stdout.flush()  # Flush output immediately after displaying prompt
 
     def send_input(self, text):
-        """Send input to the process"""
+        """Send input to the process only if not empty"""
+        if not text.strip():
+            # Don't send empty input
+            return False
+            
         if self.process and self.process.poll() is None:  # If process is running
             try:
                 # Display the input in the terminal
@@ -103,6 +111,37 @@ class InteractiveTerminal:
     def is_running(self):
         """Check if process is still running"""
         return self.process is not None and self.process.poll() is None
+        
+    def terminate_process(self):
+        """Terminate the current process if it exists and is running"""
+        if self.process and self.process.poll() is None:
+            try:
+                # Try to terminate gracefully first
+                self.process.terminate()
+                
+                # Give it a moment to terminate
+                timeout = 0.5
+                start_time = time.time()
+                while self.process.poll() is None and time.time() - start_time < timeout:
+                    time.sleep(0.1)
+                    
+                # If still running after timeout, force kill
+                if self.process.poll() is None:
+                    self.process.kill()
+                    
+                # Update terminal to show process was terminated
+                self.output_widget.config(state=tk.NORMAL)
+                self.output_widget.insert(tk.END, "\n[Process terminated]\n", "system")
+                self.output_widget.see(tk.END)
+                self.output_widget.config(state=tk.DISABLED)
+                
+                # Reset flags
+                self.is_waiting_for_input = False
+            except Exception as e:
+                self.output_widget.config(state=tk.NORMAL)
+                self.output_widget.insert(tk.END, f"\nError terminating process: {str(e)}\n", "error")
+                self.output_widget.see(tk.END)
+                self.output_widget.config(state=tk.DISABLED)
 
     def _set_waiting_for_input(self):
         """Set flag indicating process is waiting for input"""
@@ -121,7 +160,6 @@ class InteractiveTerminal:
             self.output_widget.insert(tk.END, text)
         self.output_widget.see(tk.END)
         self.output_widget.config(state=tk.DISABLED)
-
 
 
 class RoyalScriptLexerGUI(tk.Tk):
@@ -267,8 +305,8 @@ class RoyalScriptLexerGUI(tk.Tk):
         # Main text widget
         self.input_text = tk.Text(
             self.left_frame, width=85, height=25,
-            wrap=tk.WORD, fg="#d60083", relief="sunken", bd=5
-        )
+            wrap=tk.WORD, fg="#d60083", relief="sunken", bd=5, undo=True, maxundo=-1, autoseparators=True)
+        
         self.input_text.grid(row=1, column=1, padx=(0, 0), pady=(3,20))
 
         # Input section scrollbar
@@ -391,7 +429,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         
         # Terminal output text widget (scrolled text for better handling)
         self.terminal_text = scrolledtext.ScrolledText(
-            terminal_frame, width=180, height=10, bg="black", fg="#00ff00",
+            terminal_frame, width=177, height=10, bg="black", fg="#00ff00",
             insertbackground="#00ff00", relief="sunken", bd=5, font=("Consolas", 10)
         )
         self.terminal_text.grid(row=0, column=0, padx=(0, 10), pady=(3, 0), sticky="nsew")
@@ -416,7 +454,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         
         # Terminal input entry
         self.terminal_input = tk.Entry(
-            input_frame, width=180, bg="black", fg="#00ff00",
+            input_frame, width=177, bg="black", fg="#00ff00",
             insertbackground="#00ff00", relief="flat", font=("Consolas", 10)
         )
         self.terminal_input.grid(row=0, column=1, sticky="ew", padx=(0, 10))
@@ -454,6 +492,39 @@ class RoyalScriptLexerGUI(tk.Tk):
             self.terminal_input.delete(0, tk.END)
     
         return "break"  # Prevent default Enter behavior
+    
+    
+    def submit_input(self, event=None):
+        """Submit input to the running process"""
+        # Get input from the input field
+        input_text = self.input_field.get()
+        
+        # Special command to clear the terminal
+        if input_text.strip().lower() == "clear":
+            self.clear_terminal()
+            self.input_field.delete(0, tk.END)
+            return
+        
+        # Check if input is not empty and there's a running process waiting for input
+        if hasattr(self, 'terminal') and self.terminal and self.terminal.is_running():
+            # The send_input method now checks if the input is empty
+            self.terminal.send_input(input_text)
+            
+        # Clear the input field regardless of whether input was sent
+        self.input_field.delete(0, tk.END)
+
+    def clear_terminal(self):
+        """Clear the terminal output"""
+        if hasattr(self, 'terminal_text'):
+            self.terminal_text.config(state=tk.NORMAL)
+            self.terminal_text.delete(1.0, tk.END)
+            self.terminal_text.config(state=tk.DISABLED)
+            
+            # Show a message indicating the terminal was cleared
+            self.terminal_text.config(state=tk.NORMAL)
+            self.terminal_text.insert(tk.END, "[Terminal cleared]\n", "system")
+            self.terminal_text.see(tk.END)
+            self.terminal_text.config(state=tk.DISABLED)
 
     def run_code(self, event=None):
         """Run the generated Python code with input capabilities"""
@@ -461,6 +532,10 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.terminal_text.config(state=tk.NORMAL)
         self.terminal_text.delete(1.0, tk.END)
         self.terminal_text.config(state=tk.DISABLED)
+        
+        # Clear output and token listboxes
+        self.output_listbox.delete(0, tk.END)
+        self.token_listbox.delete(0, tk.END)
         
         code = self.input_text.get("1.0", tk.END)
         if not code.strip():
@@ -477,6 +552,13 @@ class RoyalScriptLexerGUI(tk.Tk):
             for error in lexer.errors:
                 self.show_terminal_message(f"  - {error}")
             return
+        
+        # Display tokens in output_listbox and token_listbox
+        for line_idx, line_tokens in enumerate(token_lines):
+            for token in line_tokens:
+                if isinstance(token, Token) and hasattr(token, 'token_type'):
+                    self.output_listbox.insert(tk.END, token.value)
+                    self.token_listbox.insert(tk.END, token.token_type)
             
         # Flatten token structure for parser
         all_tokens = []
@@ -520,22 +602,16 @@ class RoyalScriptLexerGUI(tk.Tk):
             output_file = "output.py"
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(python_code)
-                
-            # Show the generated Python code
-            # self.show_terminal_message(f"Generated Python code:\n")
-            # self.show_terminal_message("-" * 40)
-            # self.show_terminal_message(python_code)
-            # self.show_terminal_message("-" * 40)
-            # self.show_terminal_message("\n") 
-            
-            # Create a new terminal if needed
-            if not self.terminal:
+                    
+            # Create a new terminal if needed, or ensure existing one is ready
+            if not hasattr(self, 'terminal') or self.terminal is None:
                 self.terminal = InteractiveTerminal(self.terminal_text)
+            else:
+                # The terminal's start_process method will handle terminating any existing process
+                pass
             
             # Start the process and handle I/O
             self.terminal.start_process(["python", "-u", output_file])
-            # Add this right after starting the process:
-            # self.show_terminal_message("Program started. If you need to provide input, type in the input box below and press Enter.")
         except Exception as e:
             import traceback
             self.show_terminal_message(f"❌ Error during compilation: {str(e)}")
@@ -698,6 +774,13 @@ class RoyalScriptLexerGUI(tk.Tk):
                 for error in lexer.errors:
                     self.show_terminal_message(f"  - {error}")
                 return
+            
+            # Display tokens in output_listbox and token_listbox
+            for line_idx, line_tokens in enumerate(token_lines):
+                for token in line_tokens:
+                    if isinstance(token, Token) and hasattr(token, 'token_type'):
+                        self.output_listbox.insert(tk.END, token.value)
+                        self.token_listbox.insert(tk.END, token.token_type)
                 
             # Prepare tokens for parser
             for line_tokens in token_lines:
@@ -769,6 +852,13 @@ class RoyalScriptLexerGUI(tk.Tk):
                 for error in lexer.errors:
                     self.show_terminal_message(f"  - {error}")
                 return
+            
+            # Display tokens in output_listbox and token_listbox
+            for line_idx, line_tokens in enumerate(token_lines):
+                for token in line_tokens:
+                    if isinstance(token, Token) and hasattr(token, 'token_type'):
+                        self.output_listbox.insert(tk.END, token.value)
+                        self.token_listbox.insert(tk.END, token.token_type)
                 
             # Prepare tokens for parser
             all_tokens = []
@@ -825,6 +915,7 @@ class RoyalScriptLexerGUI(tk.Tk):
                     self.show_terminal_message(f"  - {error}")
             else:
                 self.show_terminal_message("✅ Lexical analysis completed successfully!")
+                self.show_terminal_message("No lexical errors found.")
                 
             # Display tokens in output_listbox and token_listbox
             for line_idx, line_tokens in enumerate(token_lines):

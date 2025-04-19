@@ -1024,8 +1024,12 @@ class SemanticAnalyzer:
         if result:
             for res in result:
                 print(res)
-                self.validate_id(res, datatype, node, 'Arithmetic')
-
+                # Check if res contains an opening parenthesis
+                if ('(', '(') in res:
+                    print(f"Found opening parenthesis in: {res}")
+                    self.validate_id(res, datatype, node, 'FunctionEx')
+                else:
+                    self.validate_id(res, datatype, node, 'Arithmetic')
         if others:
             for other in others:
                 print('others:', other)
@@ -1526,13 +1530,18 @@ class SemanticAnalyzer:
         # Look up the symbol in the symbol table
         symbol_entry = self.symbol_table.lookup(identifier_name)
         
+        print(expr_type, "+++++++", identifier_name)
         # Check if the identifier is declared
-        if expr_type in ['Setprecission', 'Granted']:
-            if not symbol_entry:
-                raise ValueError(f"Undeclared identifier '{identifier_name}'")
-        else:
+        if hasattr(node, 'identifier') and node.identifier is not None:
             if not symbol_entry or identifier_name == node.identifier[1]:
                 raise ValueError(f"Undeclared identifier '{identifier_name}'")
+        else:
+            print('entered 1')
+            if not symbol_entry:
+                raise ValueError(f"Undeclared identifier '{identifier_name}'")
+
+            
+        
         
         # print(identifier_name, node.identifier[1])
         # If it's a function, perform additional checks
@@ -1833,14 +1842,21 @@ class SemanticAnalyzer:
                 raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype}")
             
         else:
-        
-            if len(node.value) > 1:
-                if node.value[1][0] in ['(', '[']:
-                    raise ValueError(f"{symbol_entry.name} is declared as a variable but is used as an array or function.")
-        
-            # Check type compatibility
-            if not self.validate_type_compatibility(datatype, symbol_entry.datatype):
-                raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype}")
+            
+            # First check if node.value exists and is not None
+            if hasattr(node, 'value') and node.value is not None:
+                # Then check if it has length > 1
+                if len(node.value) > 1:
+                    if node.value[1][0] in ['(', '[']:
+                        raise ValueError(f"{symbol_entry.name} is declared as a variable but is used as an array or function.")
+                
+                # Check type compatibility
+                if not self.validate_type_compatibility(datatype, symbol_entry.datatype):
+                    raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype}")
+            else:
+                # Handle the case where node.value doesn't exist or is None
+                # You might want to perform alternative checks or skip certain validations
+                pass
             
         # Check if the identifier is initialized
         # if not symbol_entry.is_initialized:
@@ -1954,6 +1970,21 @@ class SemanticAnalyzer:
         if expr_type == 'assignment':
             return True
         
+        elif expr_type == 'arithmetic':
+            if datatype in ['ocean', 'treasures']:
+                self.validate_arithmetic(value, datatype, node)
+            else:
+                raise ValueError(f"Cannot return arithmetic operation for datatype '{datatype}'.")
+            
+        elif expr_type in ['relational', 'logical']:
+            if datatype == 'mirror':
+                if expr_type == 'relational':
+                    self.validate_relational(value, datatype, node)
+                elif expr_type == 'logical':
+                    self.validate_logical(value, datatype, node)
+            else:
+                raise ValueError(f"Cannot return {expr_type} operation for datatype '{datatype}'.")
+        
         if val_type == 'identifier':
             if len(value) > 1:
                 if value[1][0] in ['++', '--']:
@@ -2057,70 +2088,84 @@ class SemanticAnalyzer:
         - Function exists
         - Argument count matches
         - Argument types are compatible
+        - Passes argument values to symbol table
         """
-        # symbol_entry = self.symbol_table.lookup(node.name)
+        symbol_entry = self.symbol_table.lookup(node.name)
         
-        # if not symbol_entry or not symbol_entry.is_function:
-        #     raise ValueError(f"Function '{node.name}' not declared")
+        if not symbol_entry or not symbol_entry.is_function:
+            raise ValueError(f"Function '{node.name}' not declared")
         
-        # identifier_name = node.name
+        identifier_name = node.name
 
-        # if symbol_entry.is_function:
-        #      # Check if the function has parameters
-        #     print('1 ==================')
-        #     arguments = []
-        #     flat_args = [item for sublist in node.arguments for item in sublist]
-        #     for val in flat_args:
-        #         if val[0] not in ['(', ',', ')']:
-        #             arguments.append(val)
-        #     print(arguments,"===========")
-        #     if symbol_entry.parameters:
-                
-        #         # if getattr(node, 'Arguments', None) is None:
-        #         #     param_details = ", ".join([f"{param[0][0]} {param[1][1]}" for param in symbol_entry.parameters])
-        #         #     raise ValueError(f"Function '{identifier_name}' requires arguments: ({param_details})")
-
-        #         print('++++++++++++',len(symbol_entry.parameters))
-        #         print('----------------',len(arguments), arguments)
-                
-        #         # Validate number of arguments
-        #         if len(arguments) == 0:
-        #             param_details = ", ".join([f"{param[0][0]} {param[1][1]}" for param in symbol_entry.parameters])
-        #             raise ValueError(f"Function '{identifier_name}' requires arguments: ({param_details})")
-                
-        #         # Check if argument count matches parameter count
-        #         if len(arguments) != len(symbol_entry.parameters):
-        #             raise ValueError(f"Function '{identifier_name}' requires {len(symbol_entry.parameters)} arguments but got {len(arguments)}")
-                
-        #         # Validate argument types
-        #         for i, param in enumerate(symbol_entry.parameters):
-        #             expected_type = param[0][0]  # First element of the first tuple is the type
-        #             arg = arguments[i]
-
-        #             print(expected_type, "=============+++")
-        #             # Type-specific validation
-        #             try:
-        #                 if expected_type == 'treasures':
-        #                     self.validate_treasures([arg], expected_type, node)
-        #                 elif expected_type == 'ocean':
-        #                     self.validate_ocean([arg], expected_type, node)
-        #                 elif expected_type == 'scroll':
-        #                     self.validate_scroll([arg], expected_type, node)
-        #                 elif expected_type == 'rose':
-        #                     self.validate_rose([arg], expected_type, node)
-        #                 elif expected_type == 'mirror':
-        #                     self.validate_mirror([arg], expected_type, node)
-        #             except ValueError as e:
-        #                 raise ValueError(f"Invalid argument for function '{identifier_name}': {str(e)}")
-                    
-        #         return True
-        #     print('false---------', identifier_name, len(arguments))
-
-        #     if len(arguments) != 0:
-        #         raise ValueError(f"Function '{identifier_name}' does not accept arguments but {len(arguments)} were provided")
+        if symbol_entry.is_function:
+            print('1 ==================')
+            arguments = []
+            flat_args = [item for sublist in node.arguments for item in sublist]
+            for val in flat_args:
+                if val[0] not in ['(', ',', ')']:
+                    arguments.append(val)
+            print(arguments,"===========")
             
-        #     return True
-        pass
+            if symbol_entry.parameters:
+                print('++++++++++++',len(symbol_entry.parameters))
+                print('----------------',len(arguments), arguments)
+                
+                # Validate number of arguments
+                if len(arguments) == 0:
+                    param_details = ", ".join([f"{param[0][0]} {param[1][1]}" for param in symbol_entry.parameters])
+                    raise ValueError(f"Function '{identifier_name}' requires arguments: ({param_details})")
+                
+                # Check if argument count matches parameter count
+                if len(arguments) != len(symbol_entry.parameters):
+                    raise ValueError(f"Function '{identifier_name}' requires {len(symbol_entry.parameters)} arguments but got {len(arguments)}")
+                
+                # Create a new scope for function parameters
+                self.symbol_table.enter_scope()
+                
+                # Validate argument types and add parameters to symbol table
+                for i, param in enumerate(symbol_entry.parameters):
+                    param_type = param[0][0]  # Type
+                    param_name = param[1][1]  # Parameter name
+                    arg_value = arguments[i]  # Argument value
+
+                    print(param_type, "=============+++")
+                    
+                    # Type-specific validation
+                    try:
+                        if param_type == 'treasures':
+                            self.validate_treasures([arg_value], param_type, node)
+                        elif param_type == 'ocean':
+                            self.validate_ocean([arg_value], param_type, node)
+                        elif param_type == 'scroll':
+                            self.validate_scroll([arg_value], param_type, node)
+                        elif param_type == 'rose':
+                            self.validate_rose([arg_value], param_type, node)
+                        elif param_type == 'mirror':
+                            self.validate_mirror([arg_value], param_type, node)
+                    except ValueError as e:
+                        self.symbol_table.exit_scope()  # Clean up scope on error
+                        raise ValueError(f"Invalid argument for function '{identifier_name}': {str(e)}")
+                    
+                    # Add the parameter with its argument value to the symbol table
+                    self.symbol_table.insert(param_name, {
+                        'type': param_type,
+                        'value': arg_value,
+                        'is_function': False,
+                        'line': node.line if hasattr(node, 'line') else None
+                    })
+                
+                # Note: You'll need to handle exiting this scope elsewhere,
+                # typically after function body execution is completed
+                
+                return True
+            print('false---------', identifier_name, len(arguments))
+
+            if len(arguments) != 0:
+                raise ValueError(f"Function '{identifier_name}' does not accept arguments but {len(arguments)} were provided")
+            
+            return True
+        # pass
+        
 
     def validate_UnaryOperationNode(self, node):
         symbol_entry = self.symbol_table.lookup(node.identifier)
@@ -2182,10 +2227,10 @@ class SemanticAnalyzer:
         return True
 
     # di pa nagagawa
-    def validate_DoWhileNode(node):
+    def validate_DoWhileNode(self, node):
         pass
 
-    def validate_WhileNode(node):
+    def validate_WhileNode(self, node):
         pass
 
     def validate_IfNode(self,node):
@@ -2219,115 +2264,133 @@ class SemanticAnalyzer:
         pass
 
     def validate_OutputNode(self, node):
-        # expr = node.expressions
-        # expressions = []
-        # expression = []
-        # exp_content = []
-        # i = 0
-        # n = len(expr)
-        # setprecission = False
+        expr = node.expressions
+        expressions = []
+        expression = []
+        exp_content = []
+        i = 0
+        n = len(expr)
+        setprecission = False
         
-        # while i < n:  # Changed from 'if' to 'while' to process all tokens
-        #     if expr[i][0] == ',':
-        #         expressions.append(expression)
-        #         expression = []
-        #     else:
-        #         expression.append(expr[i])
-        #     i += 1
+        while i < n:  # Process all tokens
+            if expr[i][0] == 'identifier':
+                expression.append(expr[i])
+                i += 1
+                if i < n and expr[i][0] == '(':
+                    expression.append(expr[i])  # Add the opening parenthesis
+                    i += 1
+                    # Collect everything until the closing parenthesis
+                    paren_count = 1  # We've seen one opening parenthesis
+                    while i < n and paren_count > 0:
+                        if expr[i][0] == '(':
+                            paren_count += 1
+                        elif expr[i][0] == ')':
+                            paren_count -= 1
+                        expression.append(expr[i])
+                        i += 1
+                    continue  # Skip the normal increment since we've already incremented i
+            
+            if i < n:  # Check bounds before accessing
+                if expr[i][0] == ',':
+                    expressions.append(expression)
+                    expression = []
+                else:
+                    expression.append(expr[i])
+                i += 1
         
-        # # Don't forget to append the last expression
-        # if expression:
-        #     expressions.append(expression)
+        # Don't forget to append the last expression
+        if expression:
+            expressions.append(expression)
         
-        # i = 0
-        # n = len(expressions)
+        i = 0
+        n = len(expressions)
 
-        # while i < n:
-        #     if expressions[i][0][0] == 'setprecission':
-        #         if n == 1:
-        #             raise ValueError("Expected value after set_precision token - formatting directives should be before the value they format")
+        while i < n:
+            if expressions[i][0][0] == 'setprecission':
+                if n == 1:
+                    raise ValueError("Expected value after set_precision token - formatting directives should be before the value they format")
                 
-        #         i+=1
+                i+=1
 
-        #         if len(expressions[i]) == 1:
-        #             if expressions[i][0][0] not in ['treasures_lit', 'ocean_lit', 'identifier', '1', '0']:
-        #                 raise ValueError("Invalid value for set precission, must be a treasures or ocean literal")
-        #             if expressions[i][0][0] == 'identifier':
-        #                 self.validate_id(expressions[i], ['treasures_lit', 'ocean_lit'], node, 'Setprecission')
+                if len(expressions[i]) == 1:
+                    if expressions[i][0][0] not in ['treasures_lit', 'ocean_lit', 'identifier', '1', '0']:
+                        raise ValueError("Invalid value for set precission, must be a treasures or ocean literal")
+                    if expressions[i][0][0] == 'identifier':
+                        self.validate_id(expressions[i], ['treasures_lit', 'ocean_lit'], node, 'Setprecission')
                 
-        #         is_Arith = False
+                is_Arith = False
 
-        #         for exp in expressions[i]:
-        #             if exp[0] in ['+', '-', '/', '*', '%']:
-        #                 is_Arith = True
-        #             if exp[0] in ['<', '>', '<=', '>=', '==', '!=', '&&', '||']:
-        #                 raise ValueError("Invalid value for set precission, must be a treasures or ocean literal")
+                for exp in expressions[i]:
+                    if exp[0] in ['+', '-', '/', '*', '%']:
+                        is_Arith = True
+                    if exp[0] in ['<', '>', '<=', '>=', '==', '!=', '&&', '||']:
+                        raise ValueError("Invalid value for set precission, must be a treasures or ocean literal")
                     
-        #         if is_Arith:
-        #             self.validate_arithmetic(expressions[i], ['treasures', 'ocean'], node)
+                if is_Arith:
+                    self.validate_arithmetic(expressions[i], ['treasures', 'ocean'], node)
                 
-        #         else:
-        #             if expressions[i][0][0] == 'identifier':
-        #                 self.validate_id(expressions[i], ['treasures', 'ocean'], node, 'Setprecission')
+                else:
+                    if expressions[i][0][0] == 'identifier':
+                        self.validate_id(expressions[i], ['treasures', 'ocean'], node, 'Setprecission')
                     
-        #             elif expressions[i][0][0] == 'totreasures':
-        #                 self.validate_conversion_func(expressions[i],'treasures', node)
+                    elif expressions[i][0][0] == 'totreasures':
+                        self.validate_conversion_func(expressions[i],'treasures', node)
 
-        #             elif expressions[i][0][0] == 'toocean':
-        #                 self.validate_conversion_func(expressions[i],'ocean', node)
+                    elif expressions[i][0][0] == 'toocean':
+                        self.validate_conversion_func(expressions[i],'ocean', node)
 
-        #             else:
-        #                 raise ValueError("Invalid value for set precission, must be a treasures or ocean literal")
-        #     print("here =???????????")     
-        #     for exp in expressions[i]:
-        #         exp_content.append(exp[0])
+                    else:
+                        raise ValueError("Invalid value for set precission, must be a treasures or ocean literal")
+            print("here =???????????")     
+            for exp in expressions[i]:
+                exp_content.append(exp[0])
 
-        #     print(exp_content)
+            print(exp_content)
                     
-        #     expr_type = self.type_expr(exp_content)
+            expr_type = self.type_expr(exp_content)
 
-        #     print(expr_type, expressions[i])
+            print(expr_type, expressions[i])
 
-        #     if expr_type == 'arithmetic':
-        #         self.validate_arithmetic(expressions[i], None, node)
+            if expr_type == 'arithmetic':
+                self.validate_arithmetic(expressions[i], None, node)
 
-        #     elif expr_type == 'logical':
-        #         self.validate_logical(expressions[i], None, node)
+            elif expr_type == 'logical':
+                self.validate_logical(expressions[i], None, node)
             
-        #     elif expr_type == 'relational':
-        #         self.validate_relational(expressions[i], None, node)
+            elif expr_type == 'relational':
+                self.validate_relational(expressions[i], None, node)
             
-        #     elif expr_type == 'assignment':
-        #          raise ValueError("Invalid granted content 'assignment expression' ")
+            elif expr_type == 'assignment':
+                 raise ValueError("Invalid granted content 'assignment expression' ")
             
-        #     elif expr_type == 'Not Valid':
+            elif expr_type == 'Not Valid':
+                print(expressions[i], "========++=========")
+                if expressions[i][0][0] == 'lengthof':
+                    self.lengthof(node, 'Granted')
 
-        #         if expressions[i][0][0] == 'lengthof':
-        #             self.lengthof(node, 'Granted')
-
-        #         if expressions[i][0][0] == 'identifier':
-        #             is_unary = False
-        #             for exp in expressions[i]:
-        #                 if exp[0] in ['++', '--']:
-        #                     is_unary = True
+                if expressions[i][0][0] == 'identifier':
+                    is_unary = False
+                    for exp in expressions[i]:
+                        if exp[0] in ['++', '--']:
+                            is_unary = True
                     
-        #             if is_unary:
-        #                 self.unary(expressions[i], None, node, False)
+                    if is_unary:
+                        self.unary(expressions[i], None, node, False)
 
-        #             else:
-        #                 self.validate_id(expressions[i], ['treasures', 'ocean', 'scroll', 'rose', 'mirror'], node, 'Granted')
-
-
-        #         elif expressions[i][0][0] not in ['treasures_lit', 'ocean_lit', 'scroll_lit', 'rose_lit', '1', '0', 'phantom']:
-        #             raise ValueError(f"Invalid granted content '{expressions[i][0][0]}' ")
+                    else:
+                        self.validate_id(expressions[i], ['treasures', 'ocean', 'scroll', 'rose', 'mirror'], node, 'Granted')
 
 
-        #     i += 1
+                elif expressions[i][0][0] not in ['treasures_lit', 'ocean_lit', 'scroll_lit', 'rose_lit', '1', '0', 'phantom']:
+                    raise ValueError(f"Invalid granted content '{expressions[i][0][0]}' ")
 
-        # print(expressions)
 
-        # return True
-        pass
+            i += 1
+
+        print(expressions)
+
+        return True
+        # pass
 
 
 

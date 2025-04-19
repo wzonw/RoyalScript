@@ -467,7 +467,7 @@ class RoyalScriptASTBuilder:
             return_expr_token = self.current_token()
             if return_expr_token is None:
                 raise SyntaxError("Expected expression after 'return'")
-            return_val = self.build_val()
+            return_val = self.build_rval()
             self.match('~')
 
         self.match('}')
@@ -659,10 +659,44 @@ class RoyalScriptASTBuilder:
         token = self.current_token()  # Get the current token
         if token is None:
             raise SyntaxError("Unexpected end of input while parsing expression")
+            
+        expression = []
+        
+        # Track parentheses level to handle commas inside parentheses
+        paren_level = 0
+        
+        # Loop until we hit a terminator ('~', ',', or ')') at the top level
+        while token is not None:
+            if token[0] == '(':
+                paren_level += 1
+            elif token[0] == ')':
+                paren_level -= 1
+                # If we've closed all parentheses and the next token is a terminator, add the token and break
+                if paren_level == 0 and self.peek_next_token() and self.peek_next_token()[0] in ['~', ',']:
+                    expression.append(token)
+                    self.advance()
+                    break
+            
+            # Only treat ',' and '~' as terminators when at the top level (paren_level == 0)
+            if paren_level == 0 and token[0] in ['~', ',']:
+                break
+                
+            expression.append(token)
+            self.advance()
+            token = self.current_token()  # update token
+                
+        print(expression)
+        return expression
+        
+    def build_rval(self):
+        """Build an expression node."""
+        token = self.current_token()  # Get the current token
+        if token is None:
+            raise SyntaxError("Unexpected end of input while parsing expression")
     
         expression = []
         # Loop until we hit a terminator ('~', ',', or ')')
-        while token is not None and token[0] not in ['~', ',']:
+        while token is not None and token[0] not in ['~']:
             expression.append(token)
             self.advance()
             token = self.current_token()  # update token
@@ -866,6 +900,7 @@ class RoyalScriptASTBuilder:
         self.match(')')
         self.match('{')
         body = self.build_body()
+        
         self.match('}')
 
         # Collect optional 'twist' (elif) statements

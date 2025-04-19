@@ -1499,7 +1499,7 @@ class RoyalScriptParser:
              return True
         
         # 143	<flow_control>	→	λ
-        elif token in ['}']:
+        elif token in ['}', 'return']:
             return True
 
         return False
