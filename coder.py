@@ -174,12 +174,12 @@ class RoyalScriptToPythonTranslator:
         code = [f"def {func_name}({param_str}):"]
         
         # If body is empty, add a pass statement
-        if not node.body:
+        if not node.body and node.return_type == 'chamber':
             self.indent_level += 1
             code.append(self.indent("pass"))
             self.indent_level -= 1
         else:
-            # Translate function body
+        # Translate function body
             self.indent_level += 1
             for stmt in node.body:
                 translated = self.translate(stmt)
@@ -191,7 +191,7 @@ class RoyalScriptToPythonTranslator:
                 ret_expr = self.translate_expression(node.return_val, None)
                 code.append(self.indent(f"return {ret_expr}"))
             self.indent_level -= 1
-        
+    
         return "\n".join(code)
 
     def translate_MainFunctionNode(self, node):
@@ -394,7 +394,7 @@ class RoyalScriptToPythonTranslator:
             # Apply precision formatting if needed
             if has_precision and precision_value:
                 prec_val = precision_value[1] if isinstance(precision_value, tuple) else precision_value
-                translated = f"f'{{{{float({translated}):.{prec_val}f}}}}'"
+                translated = f"f'{{{float({translated}):.{prec_val}f}}}'"
             
             print_args.append(translated)
         
@@ -441,10 +441,6 @@ class RoyalScriptToPythonTranslator:
             return self.indent(f"# Unsupported unary operator: {node.operator}")
 
     def translate_expression(self, tokens, name):
-        """
-        Translates a token list into a Python expression string.
-        Handles special cases like wish() for input.
-        """
         if not tokens:
             return ""
         
@@ -454,11 +450,60 @@ class RoyalScriptToPythonTranslator:
         
         # Process tokens into Python expression
         parts = []
-        for token in tokens:
+        i = 0
+        while i < len(tokens):
+            token = tokens[i]
+            
             if isinstance(token, tuple):
                 token_type, token_val = token
                 
-                if token_type == 'scroll_lit':
+                # Handle type conversion functions
+                if token_type in ['totreasures', 'toocean', 'torose', 'toscroll', 'tomirror']:
+                    # This is a type conversion function
+                    conversion_type = token_val
+                    
+                    # Find opening parenthesis
+                    i += 1
+                    while i < len(tokens) and (not isinstance(tokens[i], tuple) or tokens[i][0] != '('):
+                        i += 1
+                    
+                    if i < len(tokens):
+                        i += 1  # Skip '('
+                    
+                    # Collect tokens for the inner expression
+                    inner_tokens = []
+                    paren_count = 1
+                    
+                    while i < len(tokens) and paren_count > 0:
+                        if isinstance(tokens[i], tuple):
+                            if tokens[i][0] == '(':
+                                paren_count += 1
+                            elif tokens[i][0] == ')':
+                                paren_count -= 1
+                                
+                        if paren_count > 0:
+                            inner_tokens.append(tokens[i])
+                        
+                        i += 1
+                    
+                    # Convert the inner expression
+                    inner_expr = self.translate_expression(inner_tokens, None)
+                    
+                    # Apply the appropriate type conversion
+                    if conversion_type == 'totreasures':
+                        parts.append(f"int({inner_expr})")
+                    elif conversion_type == 'toocean':
+                        parts.append(f"float({inner_expr})")
+                    elif conversion_type == 'torose':
+                        parts.append(f"{inner_expr}[0] if {inner_expr} else ''")  # Get first char
+                    elif conversion_type == 'toscroll':
+                        parts.append(f"str({inner_expr})")
+                    elif conversion_type == 'tomirror':
+                        parts.append(f"bool({inner_expr})")
+                    
+                    # Skip to next token
+                    i -= 1  # Adjust for the loop increment
+                elif token_type == 'scroll_lit':
                     # String literal
                     parts.append(token_val)
                 elif token_type == 'rose_lit':
@@ -489,12 +534,17 @@ class RoyalScriptToPythonTranslator:
                     parts.append('(')
                 elif token_type == ')':
                     parts.append(')')
+                elif token_type == '!':
+                    # NOT operator - replace ! with not but preserve the rest of the value
+                    parts.append("not" + token_val[1:] if len(token_val) > 1 else "not")
                 else:
                     # Default case: use the token value
                     parts.append(str(token_val))
             else:
                 # If not a tuple, just add the token as string
                 parts.append(str(token))
+            
+            i += 1
         
         return " ".join(parts)
 

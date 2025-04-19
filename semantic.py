@@ -1027,9 +1027,10 @@ class SemanticAnalyzer:
                 # Check if res contains an opening parenthesis
                 if ('(', '(') in res:
                     print(f"Found opening parenthesis in: {res}")
-                    self.validate_id(res, datatype, node, 'FunctionEx')
+                    self.validate_id(res, datatype, node, 'Arithmetic')
                 else:
                     self.validate_id(res, datatype, node, 'Arithmetic')
+                    
         if others:
             for other in others:
                 print('others:', other)
@@ -1583,6 +1584,7 @@ class SemanticAnalyzer:
                     arg = arguments[i]
         
                     # Type-specific validation
+                    print(f'args {arg}')
                     try:
                         if expected_type == 'treasures':
                             self.validate_treasures([arg], expected_type, node)
@@ -1772,9 +1774,9 @@ class SemanticAnalyzer:
                 value = node.return_val
                 datatype = node.return_type[0]
 
-        print(datatype, 'datatype=============')
+        print(datatype, 'datatype=============', expr_type)
         
-        if expr_type in "Arithmetic":
+        if expr_type == "Arithmetic":
             # Check type compatibility
 
             if len(value) > 1:
@@ -1853,10 +1855,7 @@ class SemanticAnalyzer:
                 # Check type compatibility
                 if not self.validate_type_compatibility(datatype, symbol_entry.datatype):
                     raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype}")
-            else:
-                # Handle the case where node.value doesn't exist or is None
-                # You might want to perform alternative checks or skip certain validations
-                pass
+    
             
         # Check if the identifier is initialized
         # if not symbol_entry.is_initialized:
@@ -1919,8 +1918,11 @@ class SemanticAnalyzer:
             )
             self.symbol_table.declare(param_symbol)
         
+        print(node.body, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
         # Validate function body
-        self.validate_function_body(node.body)
+        if  node.body or len(node.body) > 0:
+            print("entered body not none")
+            self.validate_function_body(node.body)
         
         # Validate return value if present
         if node.return_type[1] != 'chamber':
@@ -1985,34 +1987,34 @@ class SemanticAnalyzer:
             else:
                 raise ValueError(f"Cannot return {expr_type} operation for datatype '{datatype}'.")
         
-        if val_type == 'identifier':
-            if len(value) > 1:
-                if value[1][0] in ['++', '--']:
-                    return True
-                self.validate_id(value, datatype, node, 'Function')
-            else:
-                self.validate_id(value, datatype, node, 'Function')
         else:
-            try:
-                print('data_type ---- ', datatype)
-                if datatype == 'treasures':
-                    print('enetered treasures')
-                    self.validate_treasures( value, datatype, node)
-                elif datatype == 'ocean':
-                    self.validate_ocean(value, datatype, node)
-                elif datatype == 'scroll':
-                    self.validate_scroll(value, datatype, node)
-                elif datatype == 'rose':
-                    self.validate_rose(value, datatype, node)
-                elif datatype == 'mirror':
-                    self.validate_mirror(value, datatype, node)
-            except Exception as e:
-                self.errors.append(SemanticError(
-                    SemanticErrorType.Invalid_Assignment,
-                    f"{str(e)}"
-                ))
+            if val_type == 'identifier':
+                if len(value) > 1:
+                    if value[1][0] in ['++', '--']:
+                        return True
+                    self.validate_id(value, datatype, node, 'Function')
+                else:
+                    self.validate_id(value, datatype, node, 'Function')
+            else:
+                try:
+                    print('data_type ---- ', datatype)
+                    if datatype == 'treasures':
+                        print('enetered treasures')
+                        self.validate_treasures( value, datatype, node)
+                    elif datatype == 'ocean':
+                        self.validate_ocean(value, datatype, node)
+                    elif datatype == 'scroll':
+                        self.validate_scroll(value, datatype, node)
+                    elif datatype == 'rose':
+                        self.validate_rose(value, datatype, node)
+                    elif datatype == 'mirror':
+                        self.validate_mirror(value, datatype, node)
+                except Exception as e:
+                    self.errors.append(SemanticError(
+                        SemanticErrorType.Invalid_Assignment,
+                        f"{str(e)}"
+                    ))
             
-
         print("++++++++++++++++++++",node.return_val, node.return_type)
         return True
 
@@ -2352,7 +2354,7 @@ class SemanticAnalyzer:
             print(expr_type, expressions[i])
 
             if expr_type == 'arithmetic':
-                self.validate_arithmetic(expressions[i], None, node)
+                self.validate_arithmetic(expressions[i], None, node) # check if concat
 
             elif expr_type == 'logical':
                 self.validate_logical(expressions[i], None, node)
@@ -2380,6 +2382,23 @@ class SemanticAnalyzer:
                     else:
                         self.validate_id(expressions[i], ['treasures', 'ocean', 'scroll', 'rose', 'mirror'], node, 'Granted')
 
+                elif expressions[i][0][0] == 'totreasures':
+                    self.validate_conversion_func(expressions[i], 'treasures', node)
+
+                elif expressions[i][0][0] == 'toocean':
+                    self.validate_conversion_func(expressions[i], 'ocean', node)
+
+                elif expressions[i][0][0] == 'toscroll':
+                    self.validate_conversion_func(expressions[i], 'scroll', node)
+
+                elif expressions[i][0][0] == 'torose':
+                    self.validate_conversion_func(expressions[i], 'rose', node)
+
+                elif expressions[i][0][0] == 'tomirror':
+                    self.validate_conversion_func(expressions[i], 'mirror', node)
+                
+                elif expressions[i][0][0] == '!':
+                    self.validate_logical(expressions[i], 'mirror', node)
 
                 elif expressions[i][0][0] not in ['treasures_lit', 'ocean_lit', 'scroll_lit', 'rose_lit', '1', '0', 'phantom']:
                     raise ValueError(f"Invalid granted content '{expressions[i][0][0]}' ")
