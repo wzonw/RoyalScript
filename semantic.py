@@ -1542,7 +1542,8 @@ class SemanticAnalyzer:
             if not symbol_entry:
                 raise ValueError(f"Undeclared identifier '{identifier_name}'")
 
-            
+        
+        print(identifier_name, symbol_entry.is_function, '////////////????????')
         
         
         # print(identifier_name, node.identifier[1])
@@ -1966,7 +1967,8 @@ class SemanticAnalyzer:
                 value=None,
                 datatype=param_type[0],
                 scope_level=self.symbol_table.current_scope_level,
-                is_initialized=True
+                is_initialized=True,
+                is_function=False
             )
             self.symbol_table.declare(param_symbol)
         
