@@ -168,7 +168,7 @@ Delims = {
 
     'gate_delim': {' ', '~', '?'},
 
-    'phantom_delim': {' ', '~', ')', '?'},
+    'phantom_delim': {' ', '~', ')', '?', ','},
 
     'genie_delim': {' ', '(', '?'},
 

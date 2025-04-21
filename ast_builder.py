@@ -82,7 +82,7 @@ class IfNode(Node):
         self.condition = condition
         self.body = body
         self.elif_nodes = elif_nodes if elif_nodes else []
-        self.else_node = else_node
+        self.else_node = else_node if else_node else []
 
 class ElifNode(Node):
     def __init__(self, condition, body):
@@ -93,21 +93,21 @@ class ElseNode(Node):
     def __init__(self, body):
         self.body = body
     
-class IfBreakNode(Node):
-    def __init__(self, condition, body, elif_nodes=None, else_node=None):
-        self.condition = condition
-        self.body = body
-        self.elif_nodes = elif_nodes if elif_nodes else []
-        self.else_node = else_node
+# class IfBreakNode(Node):
+#     def __init__(self, condition, body, elif_nodes=None, else_node=None):
+#         self.condition = condition
+#         self.body = body
+#         self.elif_nodes = elif_nodes if elif_nodes else []
+#         self.else_node = else_node
 
-class ElifBreakNode(Node):
-    def __init__(self, condition, body):
-        self.condition = condition
-        self.body = body
+# class ElifBreakNode(Node):
+#     def __init__(self, condition, body):
+#         self.condition = condition
+#         self.body = body
 
-class ElseBreakNode(Node):
-    def __init__(self, body):
-        self.body = body
+# class ElseBreakNode(Node):
+#     def __init__(self, body):
+#         self.body = body
 
 class BreakNode(Node):
     def __init__(self):
@@ -955,11 +955,9 @@ class RoyalScriptASTBuilder:
         loop_var = []
         
         while self.current_token() and self.current_token()[0] != '~':
-            if self.current_token()[0] == 'treasures':
-                self.advance()
-            else:
-                loop_var.append(self.current_token())
-                self.advance()
+        
+            loop_var.append(self.current_token())
+            self.advance()
         
         return loop_var
     

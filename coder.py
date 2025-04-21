@@ -317,7 +317,7 @@ class RoyalScriptToPythonTranslator:
         update = self.translate_expression(node.loop_unary, None)
         
         # In Python, we need to emulate C-style for loops with while
-        code.append(self.indent(f"{init}"))
+        code.append(self.indent(f"{init.replace('treasures ', '')}"))
         code.append(self.indent(f"while {condition}:"))
         
         # Translate loop body
@@ -346,6 +346,7 @@ class RoyalScriptToPythonTranslator:
         expressions = []
         i = 0
         
+        print(node.expressions, 'heeree')
         # Group tokens into separate expressions (separated by commas)
         current_expr = []
         while i < len(node.expressions):
@@ -357,10 +358,16 @@ class RoyalScriptToPythonTranslator:
                     current_expr = []
             elif token[0] == 'setprecission':
                 # Handle precision specifier specially
-                precision_value = None
+                precision_value = ""
                 if i + 2 < len(node.expressions) and node.expressions[i+1][0] == ',':
-                    precision_value = node.expressions[i+2]
-                    i += 2  # Skip the comma and value
+                    cur_pos = node.expressions[i][1][2]
+                    cur = 2
+                    while cur_pos != 'f':
+                        precision_value += cur_pos
+                        cur+=1
+                        cur_pos = node.expressions[i][1][cur]
+                    print(precision_value, "[[[[[]]]]]")
+                    i += 1  # Skip the comma and value
                 
                 # Store as a special token with its value
                 if precision_value:
@@ -374,6 +381,8 @@ class RoyalScriptToPythonTranslator:
         if current_expr:
             expressions.append(current_expr)
         
+        print(expressions)
+
         # Translate each expression
         print_args = []
         for expr in expressions:
@@ -383,19 +392,23 @@ class RoyalScriptToPythonTranslator:
             filtered_expr = []
             
             for token in expr:
+                print(token, '---------++')
                 if token[0] == 'precision':
                     has_precision = True
                     precision_value = token[1]
+                    if int(precision_value) > 15:
+                        raise ValueError("Up to 15 decimal precision is only allowed.")
                 else:
                     filtered_expr.append(token)
             
             translated = self.translate_expression(filtered_expr, None)
-            
+            print("translated", translated)
             # Apply precision formatting if needed
             if has_precision and precision_value:
                 prec_val = precision_value[1] if isinstance(precision_value, tuple) else precision_value
-                translated = f"f'{{{float({translated}):.{prec_val}f}}}'"
+                translated = f"f'{{({translated}):.{prec_val}f}}'"
             
+            translated = f"str({translated}).replace('True', 'true').replace('False', 'false').replace('None', 'phantom')"
             print_args.append(translated)
         
         # Construct the print statement without automatic newline

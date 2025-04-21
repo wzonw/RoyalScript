@@ -140,7 +140,7 @@ class SemanticAnalyzer:
         return self.errors
 
 
-    def validate_VariableDeclarationNode(self, node):
+    def validate_VariableDeclarationNode(self, node, scope_level):
         """
         Validate a variable declaration.
         Checks:
@@ -158,7 +158,7 @@ class SemanticAnalyzer:
         
         # Create symbol entry
         symbol = SymbolEntry(
-            name=node.identifier[1],  # Assuming identifier is a token with value at index 1
+            name=node.identifier[1],  
             datatype=node.datatype[0],
             value=node.value,
             scope_level=node.scope_level,
@@ -171,6 +171,7 @@ class SemanticAnalyzer:
         redecl_error = self.symbol_table.declare(symbol)
         if redecl_error:
             self.errors.append(redecl_error)
+            raise ValueError(self.errors)
 
         # if array required may value
         if node.array_dimensions:
@@ -953,7 +954,7 @@ class SemanticAnalyzer:
         if identifiers:
             for id in identifiers:
                 print("id: ",id)
-                self.validate_id(id, ('scroll', 'scroll'), node, 'Not_expr')
+                self.validate_id(id, ['scroll', 'rose'], node, 'String_op')
 
         if toscrolls:
             for scroll in toscrolls:
@@ -1631,6 +1632,16 @@ class SemanticAnalyzer:
                         if not self.validate_type_compatibility(datatype, symbol_entry.datatype[0]):
                             raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype[0]}")
                         
+                    elif expr_type == 'String_op':
+
+                        if symbol_entry.datatype not in datatype:
+                            raise ValueError(f"Invalid string operand '{symbol_entry.name}' of '{symbol_entry.datatype}' data type. ")
+                    
+                    elif expr_type == "Condition":
+
+                        if symbol_entry.datatype[0] not in ['mirror']:
+                            raise ValueError(f"Invalid condition '{symbol_entry.name}' of '{symbol_entry.datatype}' data type, must be mirror.")
+                        
                     else:
 
                         # Check type compatibility
@@ -1688,6 +1699,16 @@ class SemanticAnalyzer:
                 if not self.validate_type_compatibility(datatype, symbol_entry.datatype[0]):
                     raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype[0]}")
                 
+            elif expr_type == 'String_op':
+
+                if symbol_entry.datatype not in datatype:
+                    raise ValueError(f"Invalid string operand '{symbol_entry.name}' of '{symbol_entry.datatype}' data type. ")
+                
+            elif expr_type == "Condition":
+
+                        if symbol_entry.datatype[0] not in ['mirror']:
+                            raise ValueError(f"Invalid condition '{symbol_entry.name}' of '{symbol_entry.datatype}' data type, must be mirror.")
+                
             else:
             
                 # Check type compatibility
@@ -1735,6 +1756,11 @@ class SemanticAnalyzer:
                 # Check type compatibility
                 if not self.validate_type_compatibility(datatype, symbol_entry.datatype):
                     raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype}")
+                
+            elif expr_type == 'String_op':
+
+                if symbol_entry.datatype not in datatype:
+                    raise ValueError(f"Invalid string operand '{symbol_entry.name}' of '{symbol_entry.datatype}' data type. ")
                 
             else:
             
@@ -1842,6 +1868,32 @@ class SemanticAnalyzer:
             # Check type compatibility
             if not self.validate_type_compatibility(datatype, symbol_entry.datatype):
                 raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype}")
+        
+        elif expr_type == 'String_op':
+
+            if len(value) > 1:
+                if value[1][0] in ['(', '[']:
+                    raise ValueError(f"{symbol_entry.name} is declared as a variable but is used as an array or function.")
+
+            if symbol_entry.datatype not in datatype:
+                raise ValueError(f"Invalid string operand '{symbol_entry.name}' of '{symbol_entry.datatype}' data type. ")
+            
+            # Check if the identifier is initialized
+            if not symbol_entry.is_initialized:
+                raise ValueError(f"Uninitialized identifier '{identifier_name}'")
+
+        elif expr_type == "Condition":
+
+            if len(value) > 1:
+                if value[1][0] in ['(', '[']:
+                    raise ValueError(f"{symbol_entry.name} is declared as a variable but is used as an array or function.")
+
+            if symbol_entry.datatype != 'mirror':
+                raise ValueError(f"Invalid condition '{symbol_entry.name}' of '{symbol_entry.datatype}' data type, must be mirror.")
+            
+            # Check if the identifier is initialized
+            if not symbol_entry.is_initialized:
+                raise ValueError(f"Uninitialized identifier '{identifier_name}'")
             
         else:
             
@@ -1922,12 +1974,12 @@ class SemanticAnalyzer:
         # Validate function body
         if  node.body or len(node.body) > 0:
             print("entered body not none")
-            self.validate_function_body(node.body)
+            self.validate_function_body(node.body, node.scope_level)
         
         # Validate return value if present
         if node.return_type[1] != 'chamber':
             if node.return_val:
-                self.validate_return_value(node)
+                self.validate_return_value(node, node.scope_level)
             else:
                 raise ValueError(f"A function declared to return '{node.return_type[1]}' must return a value.")
             
@@ -1940,7 +1992,7 @@ class SemanticAnalyzer:
         self.symbol_table.exit_scope()
         print('Function Node done')
 
-    def validate_function_body(self, body):
+    def validate_function_body(self, body, scope_level):
         """
         Validate the body of a function.
         Recursively checks semantic rules for different statement types.
@@ -1949,9 +2001,9 @@ class SemanticAnalyzer:
             # Dispatch to appropriate validation method based on node type
             validator_method = getattr(self, f'validate_{type(statement).__name__}', None)
             if validator_method:
-                validator_method(statement)
+                validator_method(statement, scope_level)
 
-    def validate_return_value(self, node):
+    def validate_return_value(self, node, scope_level):
         """
         Validate the return value of a function.
         """
@@ -2032,9 +2084,9 @@ class SemanticAnalyzer:
         
         # Validate main function body
         print('main func passed')
-        self.validate_function_body(node.body)
+        self.validate_function_body(node.body, 1)
 
-    def validate_VariableReassignmentNode(self, node):
+    def validate_VariableReassignmentNode(self, node, scope_level):
         """
         Validate variable reassignment.
         Checks:
@@ -2083,7 +2135,7 @@ class SemanticAnalyzer:
         
 
 
-    def validate_FunctionCallNode(self, node):
+    def validate_FunctionCallNode(self, node, scope_level):
         """
         Validate function call.
         Checks:
@@ -2149,12 +2201,19 @@ class SemanticAnalyzer:
                         raise ValueError(f"Invalid argument for function '{identifier_name}': {str(e)}")
                     
                     # Add the parameter with its argument value to the symbol table
-                    self.symbol_table.insert(param_name, {
-                        'type': param_type,
-                        'value': arg_value,
-                        'is_function': False,
-                        'line': node.line if hasattr(node, 'line') else None
-                    })
+                    # self.symbol_table.insert(param_name, {
+                    #     'type': param_type,
+                    #     'value': arg_value,
+                    #     'is_function': False,
+                    #     'line': node.line if hasattr(node, 'line') else None
+                    # })
+                    symbol_entry = self.symbol_table.lookup(param_name)
+
+                    symbol_entry.type = param_type
+                    symbol_entry.value = arg_value
+                    symbol_entry.is_function = False,
+                    symbol_entry.line = node.line if hasattr(node, 'line') else None
+
                 
                 # Note: You'll need to handle exiting this scope elsewhere,
                 # typically after function body execution is completed
@@ -2169,7 +2228,7 @@ class SemanticAnalyzer:
         # pass
         
 
-    def validate_UnaryOperationNode(self, node):
+    def validate_UnaryOperationNode(self, node, scope_level):
         symbol_entry = self.symbol_table.lookup(node.identifier)
         
         if not symbol_entry:
@@ -2180,7 +2239,7 @@ class SemanticAnalyzer:
         
         return True
 
-    def validate_ArrayAssignmentNode(self, node):
+    def validate_ArrayAssignmentNode(self, node, scope_level):
         index = 0
         column = 0
         flat_indices = [item for sublist in node.indices for item in sublist]
@@ -2229,43 +2288,187 @@ class SemanticAnalyzer:
         return True
 
     # di pa nagagawa
-    def validate_DoWhileNode(self, node):
-        pass
+    def validate_DoWhileNode(self, node, scope_level):
+        # condition
+        conditions = node.condition
+        condition = []
+        for exp in conditions:
+                condition.append(exp[0])
 
-    def validate_WhileNode(self, node):
-        pass
+                
+        expr_type = self.type_expr(condition)
 
-    def validate_IfNode(self,node):
-        pass
+        print(condition, expr_type)
 
-    def validate_ElifNode(sefl, node):
-        pass
+        if expr_type == 'relational':
+            self.validate_relational(conditions, None, node)
 
-    def validate_ElseNode(self, node):
-        pass
+        elif expr_type == 'logical':
+            self.validate_logical(conditions, None, node)
 
-    def validate_IfBreakNode(self, node):
-        pass
+        elif expr_type == 'Not Valid':
+            if conditions[0][0] == 'identifier':
+                self.validate_id(conditions, ('mirror', 'mirror'), node, 'Condition')
 
-    def validate_ElifBreakNode(self, node):
-        pass
+        # body
+        self.validate_function_body(node.loop_body, scope_level)
 
-    def validate_ElseBreakNode(self, node):
-        pass
+        return True
 
-    def validate_BreakNode(self, node):
-        pass
+    def validate_WhileNode(self, node, scope_level):
+        # condition
+        conditions = node.condition
+        condition = []
+        for exp in conditions:
+                condition.append(exp[0])
+                        
+        expr_type = self.type_expr(condition)
+        print(conditions, ">>>>>>>>>>>>")
+        print(condition, expr_type)
 
-    def validate_ContinueNode(self, node):
-        pass
+        if expr_type == 'relational':
+            self.validate_relational(conditions, None, node)
 
-    def validate_ForLoopNode(self, node):
-        pass
+        elif expr_type == 'logical':
+            self.validate_logical(conditions, None, node)
 
-    def validate_LiteralNode(self, node):
-        pass
+        elif expr_type == 'Not Valid':
+            if conditions[0][0] == 'identifier':
+                self.validate_id(conditions, ('mirror', 'mirror'), node, 'Condition')
 
-    def validate_OutputNode(self, node):
+        # body
+        self.validate_function_body(node.loop_body, scope_level)
+
+        return True
+
+
+    def validate_IfNode(self,node, scope_level):
+        # condition
+        conditions = node.condition
+        condition = []
+        for exp in conditions:
+                condition.append(exp[0])
+                        
+        expr_type = self.type_expr(condition)
+        print(conditions, ">>>>>>>>>>>>")
+        print(condition, expr_type)
+
+        if expr_type == 'relational':
+            self.validate_relational(conditions, None, node)
+
+        elif expr_type == 'logical':
+            self.validate_logical(conditions, None, node)
+
+        elif expr_type == 'Not Valid':
+            if conditions[0][0] == 'identifier':
+                self.validate_id(conditions, ('mirror', 'mirror'), node, 'Condition')
+
+        # body
+        self.validate_function_body(node.body, scope_level)
+
+        # elif
+        if node.elif_nodes:
+            self.validate_ElifNode(node.elif_nodes, scope_level)
+
+        # else
+        if node.else_node:
+            self.validate_ElseNode(node.else_node, scope_level)
+        
+        return True
+
+    def validate_ElifNode(self, elif_nodes, scope_level):
+        # Handle each elif node in the list
+        for node in elif_nodes:
+            # condition
+            conditions = node.condition
+            condition = []
+            for exp in conditions:
+                condition.append(exp[0])
+                        
+            expr_type = self.type_expr(condition)
+            print(conditions, ">>>>>>>>>>>>")
+            print(condition, expr_type)
+
+            if expr_type == 'relational':
+                self.validate_relational(conditions, None, node)
+            elif expr_type == 'logical':
+                self.validate_logical(conditions, None, node)
+            elif expr_type == 'Not Valid':
+                if conditions[0][0] == 'identifier':
+                    self.validate_id(conditions, ('mirror', 'mirror'), node, 'Condition')
+
+            # body
+            self.validate_function_body(node.body, scope_level)
+
+    def validate_ElseNode(self, node, scope_level):
+        # body
+        self.validate_function_body(node.body, scope_level)
+
+        return True
+
+
+    def validate_BreakNode(self, node, scope_level):
+        return True
+
+    def validate_ContinueNode(self, node, scope_level):
+        return True
+
+    def validate_ForLoopNode(self, node, scope_level):
+        loop_var = node.loop_var
+        loop_exp = node.loop_exp
+        loop_unary = node.loop_unary
+        loop_body = node.loop_body
+        print(loop_body, 'loop_var')
+        # loop variable
+        if loop_var[0][0] == 'treasures':
+            # Create symbol entry
+            symbol = SymbolEntry(
+                name=loop_var[1][1],  
+                datatype=loop_var[0][0],
+                value=loop_var[3][1],
+                scope_level=scope_level,
+                is_dynasty=False,
+                is_initialized=True,
+            )
+            redecl_error = self.symbol_table.declare(symbol)
+            if redecl_error:
+                self.errors.append(redecl_error)
+                raise ValueError(self.errors)
+        
+
+        else:
+            print("FALSE")
+            self.validate_id([loop_var[0]], ('treasures', 'treasures'), node, 'Not expr')
+            symbol_entry = self.symbol_table.lookup(loop_var[0][1])
+
+            symbol_entry.value = loop_var[2][1]
+            symbol_entry.is_initialized = True
+
+        # condition
+        self.validate_relational(loop_exp, ('treasures', 'treasures'), node)
+
+        # unary
+        self.unary(loop_unary, ('treasures', 'treasures'), node, False)
+
+        # body
+        self.validate_function_body(node.loop_body, scope_level)
+
+        return True
+    
+    # def validate_LiteralNode(self, node, scope_level):
+    #     pass
+
+    # def validate_IfBreakNode(self, node, scope_level):
+    #     pass
+
+
+    # def validate_ElifBreakNode(self, node, scope_level):
+    #     pass
+
+    # def validate_ElseBreakNode(self, node, scope_level):
+    #     pass
+
+    def validate_OutputNode(self, node, scope_level):
         expr = node.expressions
         expressions = []
         expression = []
@@ -2320,29 +2523,31 @@ class SemanticAnalyzer:
                     if expressions[i][0][0] == 'identifier':
                         self.validate_id(expressions[i], ['treasures_lit', 'ocean_lit'], node, 'Setprecission')
                 
-                is_Arith = False
-
-                for exp in expressions[i]:
-                    if exp[0] in ['+', '-', '/', '*', '%']:
-                        is_Arith = True
-                    if exp[0] in ['<', '>', '<=', '>=', '==', '!=', '&&', '||']:
-                        raise ValueError("Invalid value for set precission, must be a treasures or ocean literal")
-                    
-                if is_Arith:
-                    self.validate_arithmetic(expressions[i], ['treasures', 'ocean'], node)
-                
+                    print(expressions, "------========", len(expressions[i]))
                 else:
-                    if expressions[i][0][0] == 'identifier':
-                        self.validate_id(expressions[i], ['treasures', 'ocean'], node, 'Setprecission')
+                    is_Arith = False
+
+                    for exp in expressions[i]:
+                        if exp[0] in ['+', '-', '/', '*', '%']:
+                            is_Arith = True
+                        if exp[0] in ['<', '>', '<=', '>=', '==', '!=', '&&', '||']:
+                            raise ValueError("Invalid value for set precission, must be a treasures or ocean literal")
+                        
+                    if is_Arith:
+                        self.validate_arithmetic(expressions[i], ['treasures', 'ocean'], node)
                     
-                    elif expressions[i][0][0] == 'totreasures':
-                        self.validate_conversion_func(expressions[i],'treasures', node)
-
-                    elif expressions[i][0][0] == 'toocean':
-                        self.validate_conversion_func(expressions[i],'ocean', node)
-
                     else:
-                        raise ValueError("Invalid value for set precission, must be a treasures or ocean literal")
+                        if expressions[i][0][0] == 'identifier':
+                            self.validate_id(expressions[i], ['treasures', 'ocean'], node, 'Setprecission')
+                        
+                        elif expressions[i][0][0] == 'totreasures':
+                            self.validate_conversion_func(expressions[i],'treasures', node)
+
+                        elif expressions[i][0][0] == 'toocean':
+                            self.validate_conversion_func(expressions[i],'ocean', node)
+
+                        else:
+                            raise ValueError("Invalid value for set precission, must be a treasures or ocean literal")
             print("here =???????????")     
             for exp in expressions[i]:
                 exp_content.append(exp[0])
@@ -2351,10 +2556,27 @@ class SemanticAnalyzer:
                     
             expr_type = self.type_expr(exp_content)
 
-            print(expr_type, expressions[i])
+            print(expr_type, expressions[i], '----===-------')
 
             if expr_type == 'arithmetic':
-                self.validate_arithmetic(expressions[i], None, node) # check if concat
+                has_string = False
+                for expr in expressions[i]:
+                    if 'scroll_lit' in expr[0] or 'rose_lit' in expr[0]:
+                        has_string = True
+                    
+                    if expr[0] == 'identifier':
+                        id = expr[1]
+                        symbol_entry = self.symbol_table.lookup(id)
+
+                        if symbol_entry and symbol_entry.datatype in ['scroll', 'rose']:
+                            has_string = True
+
+                if has_string:
+                    print("ttttttttttttrrrrrrrrrruuuuuuuuuuuuueee", exp_content, expressions[i])
+                    self.string_op(exp_content, expressions[i], node)
+                else:
+                    print("ffffffffffaaaaaaalllllllsssseeeeeeee")
+                    self.validate_arithmetic(expressions[i], None, node) # check if concat
 
             elif expr_type == 'logical':
                 self.validate_logical(expressions[i], None, node)
