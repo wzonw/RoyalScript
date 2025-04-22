@@ -591,7 +591,9 @@ class RoyalScriptLexerGUI(tk.Tk):
                 return
                 
             # Translate to Python
-            translator = RoyalScriptToPythonTranslator()
+            # analyzer = SemanticAnalyzer()
+            print("GLOBAL TYPE MAP:", semantic_analyzer .global_variable_types)
+            translator = RoyalScriptToPythonTranslator(global_variable_types=semantic_analyzer.global_variable_types)
             python_code = translator.translate(ast)
             
             # Ensure python_code is a string with newlines

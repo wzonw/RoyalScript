@@ -1375,7 +1375,7 @@ class RoyalScriptParser:
             self.match('identifier')
             if not self.body_1_ext():
                 return False
-            print('passed body id ext')
+            print('passed body id ext', token)
             return self.loop_body()
         
         elif token == 'spell':
@@ -1401,7 +1401,7 @@ class RoyalScriptParser:
         elif token in ['}']:  # Adjust this set as needed.
             return True
 
-        raise SyntaxError(self.error_message)
+        # raise SyntaxError(self.error_message)
         return False
 
 
@@ -1432,8 +1432,10 @@ class RoyalScriptParser:
                 return False
             if not self.elif_break():
                 return False
+            print('passed elif control')
             if not self.else_break():
                 return False
+            print('passed else control')
             return True
         
         return False
@@ -1462,7 +1464,7 @@ class RoyalScriptParser:
             return True
 
         # 138	<elif_break>	→	λ
-        elif token in ['curse', 'dynasty', 'scroll', 'treasures', 'mirror', 'ocean', 'rose', 'granted',  'id_lit', 'spell', 'tale', 'cast', 'forever', 'believe', '}']:
+        elif token in ['curse', 'identifier', 'dynasty', 'scroll', 'treasures', 'mirror', 'ocean', 'rose', 'granted',  'id_lit', 'spell', 'tale', 'cast', 'forever', 'believe', '}']:
             return True 
 
         return False
@@ -1482,7 +1484,7 @@ class RoyalScriptParser:
             return True
         
         # 140	<else_break>	→	λ
-        elif token in ['dynasty', 'scroll', 'treasures', 'mirror', 'ocean', 'rose', 'granted',  'id_lit', 'spell', 'tale', 'cast', 'forever', 'believe', '}']:
+        elif token in ['dynasty', 'scroll', 'identifier', 'treasures', 'mirror', 'ocean', 'rose', 'granted',  'id_lit', 'spell', 'tale', 'cast', 'forever', 'believe', '}']:
             return True 
         
         return False

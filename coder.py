@@ -5,9 +5,11 @@ import re
 from io import StringIO
 
 class RoyalScriptToPythonTranslator:
-    def __init__(self):
+    def __init__(self, global_variable_types=None):
         self.indent_level = 0
-        self.symbol_table = {}  # To track variable types
+        self.symbol_table = {}
+        self.global_variable_types = global_variable_types or {}
+
 
     def indent(self, text):
         """Indent the given text according to the current indent_level.
@@ -153,8 +155,20 @@ class RoyalScriptToPythonTranslator:
         """Translates variable reassignments."""
         var_name = node.identifier[1] if isinstance(node.identifier, tuple) else node.identifier
         operator = node.operator[1] if isinstance(node.operator, tuple) else node.operator
-        expr = self.translate_expression(node.expression, None)
+
+        var_type = self.symbol_table.get(var_name)
+        if var_type is None:
+            var_type = self.global_variable_types.get(var_name)
+
+        print(var_type, 'varrtyopeee', var_name, self.global_variable_types.get(var_name))
+
+        if operator == "/=" and var_type == "treasures":
+            operator = "//="
+
+        expr = self.translate_expression(node.expression, var_type)
         return self.indent(f"{var_name} {operator} {expr}")
+
+
 
     def translate_FunctionNode(self, node):
         """Translates function definitions."""
@@ -346,13 +360,22 @@ class RoyalScriptToPythonTranslator:
         expressions = []
         i = 0
         
-        print(node.expressions, 'heeree')
         # Group tokens into separate expressions (separated by commas)
         current_expr = []
+        paren_count = 0  # Track parentheses to properly group function arguments
+        
         while i < len(node.expressions):
             token = node.expressions[i]
             
-            if token[0] == ',':
+            # Keep track of parentheses for proper grouping of function arguments
+            if isinstance(token, tuple):
+                if token[0] == '(':
+                    paren_count += 1
+                elif token[0] == ')':
+                    paren_count -= 1
+            
+            if token[0] == ',' and paren_count == 0:
+                # Only treat commas as separators if they're not inside parentheses
                 if current_expr:  # Only add non-empty expressions
                     expressions.append(current_expr)
                     current_expr = []
@@ -364,10 +387,10 @@ class RoyalScriptToPythonTranslator:
                     cur = 2
                     while cur_pos != 'f':
                         precision_value += cur_pos
-                        cur+=1
+                        cur += 1
                         cur_pos = node.expressions[i][1][cur]
-                    print(precision_value, "[[[[[]]]]]")
-                    i += 1  # Skip the comma and value
+                    if paren_count == 0:
+                        i += 1  # Skip the comma only if not inside function args
                 
                 # Store as a special token with its value
                 if precision_value:
@@ -380,8 +403,6 @@ class RoyalScriptToPythonTranslator:
         # Add the last expression if not empty
         if current_expr:
             expressions.append(current_expr)
-        
-        print(expressions)
 
         # Translate each expression
         print_args = []
@@ -392,7 +413,6 @@ class RoyalScriptToPythonTranslator:
             filtered_expr = []
             
             for token in expr:
-                print(token, '---------++')
                 if token[0] == 'precision':
                     has_precision = True
                     precision_value = token[1]
@@ -402,17 +422,18 @@ class RoyalScriptToPythonTranslator:
                     filtered_expr.append(token)
             
             translated = self.translate_expression(filtered_expr, None)
-            print("translated", translated)
+            
             # Apply precision formatting if needed
             if has_precision and precision_value:
                 prec_val = precision_value[1] if isinstance(precision_value, tuple) else precision_value
                 translated = f"f'{{({translated}):.{prec_val}f}}'"
             
+            # Apply string replacements for boolean and None values
             translated = f"str({translated}).replace('True', 'true').replace('False', 'false').replace('None', 'phantom')"
             print_args.append(translated)
         
         # Construct the print statement without automatic newline
-        return self.indent(f"print({', '.join(print_args)}, end='')")  # Added `end=''` to prevent newline
+        return self.indent(f"print({', '.join(print_args)}, end='')")
 
 
     def translate_FunctionCallNode(self, node):
@@ -547,6 +568,8 @@ class RoyalScriptToPythonTranslator:
                     parts.append('(')
                 elif token_type == ')':
                     parts.append(')')
+                elif token_type == 'lengthof':
+                    parts.append("len" + token_val[8:] if len(token_val) > 1 else "not")
                 elif token_type == '!':
                     # NOT operator - replace ! with not but preserve the rest of the value
                     parts.append("not" + token_val[1:] if len(token_val) > 1 else "not")
