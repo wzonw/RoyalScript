@@ -436,7 +436,7 @@ class RoyalScriptToPythonTranslator:
                 translated = f"f'{{({translated}):.{prec_val}f}}'"
             
             # Apply string replacements for boolean and None values
-            translated = f"str({translated}).replace('True', 'true').replace('False', 'false').replace('None', 'phantom')"
+            translated = f"str({translated}).replace('None', 'phantom')"
             print_args.append(translated)
         
         # Construct the print statement without automatic newline
