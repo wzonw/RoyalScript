@@ -113,11 +113,11 @@ class RoyalScriptToPythonTranslator:
                     self.symbol_table[var_name] = node.datatype[1]
             
             # Handle arrays specially
-            if node.array_dimensions:
+            if hasattr(node, 'array_dimensions') and node.array_dimensions:
                 return self.translate_array_declaration(node)
                 
             # Regular variable declaration
-            value = self.translate_expression(node.value, node.datatype[1]) if node.value else "None"
+            value = self.translate_expression(node.value, node.datatype[1] if hasattr(node, 'datatype') and isinstance(node.datatype, tuple) else None) if node.value else "None"
             if isinstance(node.identifier, tuple):
                 return self.indent(f"{node.identifier[1]} = {value}")
             else:
@@ -125,7 +125,7 @@ class RoyalScriptToPythonTranslator:
 
     def translate_array_declaration(self, node):
         """Translates array declarations to Python lists or nested lists."""
-        var_name = node.identifier[1]
+        var_name = node.identifier[1] if isinstance(node.identifier, tuple) else node.identifier
         
         # Get array dimensions
         dimensions = []
@@ -136,20 +136,27 @@ class RoyalScriptToPythonTranslator:
                 dimensions.append(str(dim))
         
         # Create array initialization code
-        if len(dimensions) == 1:
-            # 1D array
-            if node.value:
-                return self.indent(f"{var_name} = {self.translate_expression(node.value, None)}")
-            else:
-                return self.indent(f"{var_name} = [None] * {dimensions[0]}")
-        elif len(dimensions) == 2:
-            # 2D array
-            if node.value:
-                return self.indent(f"{var_name} = {self.translate_expression(node.value, None)}")
-            else:
-                return self.indent(f"{var_name} = [[None] * {dimensions[1]} for _ in range({dimensions[0]})]")
+        if node.value:
+            # Handle initialization with values
+            # First, parse the value which might be in curly brace notation
+            value_str = self.translate_expression(node.value, None)
+            
+            # Check if the value appears to be a curly-brace initialization
+            if value_str.startswith('{') and value_str.endswith('}'):
+                # Convert curly braces to Python list literals
+                value_str = value_str.replace('{', '[').replace('}', ']')
+            
+            return self.indent(f"{var_name} = {value_str}")
         else:
-            return self.indent(f"# Unsupported array dimension: {len(dimensions)}")
+            # Handle initialization without values
+            if len(dimensions) == 1:
+                # 1D array
+                return self.indent(f"{var_name} = [None] * {dimensions[0]}")
+            elif len(dimensions) == 2:
+                # 2D array
+                return self.indent(f"{var_name} = [[None] * {dimensions[1]} for _ in range({dimensions[0]})]")
+            else:
+                return self.indent(f"# Unsupported array dimension: {len(dimensions)}")
 
     def translate_VariableReassignmentNode(self, node):
         """Translates variable reassignments."""
@@ -481,6 +488,23 @@ class RoyalScriptToPythonTranslator:
         # Handle wish() function call for input
         if isinstance(tokens, list) and tokens and tokens[0][0] == 'wish':
             return self.translate_wish_function(tokens, name)
+            
+        # Check if this is a curly brace array initialization
+        if isinstance(tokens, list) and len(tokens) >= 3:
+            # Look for opening and closing curly braces
+            has_opening_brace = False
+            has_closing_brace = False
+            
+            for token in tokens:
+                if isinstance(token, tuple):
+                    if token[0] == '{' or (token[0] == 'identifier' and token[1] == '{'):
+                        has_opening_brace = True
+                    elif token[0] == '}' or (token[0] == 'identifier' and token[1] == '}'):
+                        has_closing_brace = True
+            
+            if has_opening_brace and has_closing_brace:
+                # Process array initialization with curly braces
+                return self.translate_array_initializer(tokens)
         
         # Process tokens into Python expression
         parts = []
@@ -568,6 +592,12 @@ class RoyalScriptToPythonTranslator:
                     parts.append('(')
                 elif token_type == ')':
                     parts.append(')')
+                elif token_type == '{':
+                    # Translate curly brace to square bracket for array initialization
+                    parts.append('[')
+                elif token_type == '}':
+                    # Translate curly brace to square bracket for array initialization
+                    parts.append(']')
                 elif token_type == 'lengthof':
                     parts.append("len" + token_val[8:] if len(token_val) > 1 else "not")
                 elif token_type == '!':
@@ -583,6 +613,32 @@ class RoyalScriptToPythonTranslator:
             i += 1
         
         return " ".join(parts)
+
+    def translate_array_initializer(self, tokens):
+        """Translates array initializer expressions with curly braces to Python list syntax."""
+        result = []
+        in_array = False
+        
+        for token in tokens:
+            if isinstance(token, tuple):
+                token_type, token_val = token
+                
+                if token_type == '{' or (token_type == 'identifier' and token_val == '{'):
+                    result.append('[')
+                    in_array = True
+                elif token_type == '}' or (token_type == 'identifier' and token_val == '}'):
+                    result.append(']')
+                    in_array = False
+                elif token_type == ',':
+                    result.append(',')
+                else:
+                    # For other tokens within the array, translate normally
+                    result.append(token_val)
+            else:
+                result.append(str(token))
+        
+        return " ".join(result)
+
 
     def translate_wish_function(self, tokens, datatype):
         """Special handler for wish() function (input in RoyalScript)."""

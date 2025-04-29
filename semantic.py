@@ -235,8 +235,8 @@ class SemanticAnalyzer:
                         if element[0] in ['{', '}']:
                             curly += 1
 
-                        if element[0] == 'identifier':
-                            raise ValueError(f"Mismatch in array dimensions during initialization, declared as 1-dimension array but initialized as 2-dimension array")
+                        # if element[0] == 'identifier':
+                            # raise ValueError(f"Mismatch in array dimensions during initialization, declared as 1-dimension array but initialized as 2-dimension array")
                         
 
                     print('curly ===================', curly)
@@ -738,7 +738,7 @@ class SemanticAnalyzer:
                 symbol_entry = self.symbol_table.lookup(identifier_name)
 
                 # Check if the identifier is declared
-                if not symbol_entry or identifier_name == node.identifier[1]:
+                if not symbol_entry: # or identifier_name == node.identifier[1]:
                     raise ValueError(f"Undeclared identifier '{identifier_name}'")
                 
                 if not symbol_entry.value:
@@ -1512,15 +1512,21 @@ class SemanticAnalyzer:
                 raise ValueError(f"Mismatched array dimensions for '{identifier_name}'. Declared as a {len(id_index)}-dimensional array, but used as a {dimensions}-dimensional array.")
             
             if dimensions == 1:
-                print('array size', array_size[0], id_index[0][1])
-                if int(array_size[0]) >= int(id_index[0][1]):
-                    raise ValueError(f"Array index out of bounds. Attempted to access index {array_size[0]} in an array of size {id_index[0][1]}")
+                if isinstance(array_size[0], str):
+                    pass
+                    print('array size', array_size[0], id_index[0][1])
+                else:
+                    if int(array_size[0]) >= int(id_index[0][1]):
+                        raise ValueError(f"Array index out of bounds. Attempted to access index {array_size[0]} in an array of size {id_index[0][1]}")
                 
             if dimensions == 2:
-                if int(array_size[0]) >= int(id_index[0][1]):
-                    raise ValueError(f"Array index out of bounds. Attempted to access index {array_size[0]} in an array of size {id_index[0][1]}")
-                if int(array_size[1]) >= int(id_index[1][1]):
-                    raise ValueError(f"Array index out of bounds. Attempted to access index {array_size[1]} in an array of size {id_index[1][1]}")
+                if isinstance(array_size[0], str):
+                    pass
+                else:
+                    if int(array_size[0]) >= int(id_index[0][1]):
+                        raise ValueError(f"Array index out of bounds. Attempted to access index {array_size[0]} in an array of size {id_index[0][1]}")
+                    if int(array_size[1]) >= int(id_index[1][1]):
+                        raise ValueError(f"Array index out of bounds. Attempted to access index {array_size[1]} in an array of size {id_index[1][1]}")
 
 
             print(array_size, dimensions, id_index)
@@ -1784,14 +1790,20 @@ class SemanticAnalyzer:
             
             if dimensions == 1:
                 print('array size', array_size[0], id_index[0][1])
-                if int(array_size[0]) >= int(id_index[0][1]):
-                    raise ValueError(f"Array index out of bounds. Attempted to access index {array_size[0]} in an array of size {id_index[0][1]}")
+                if isinstance(array_size[0], str):
+                    pass
+                else:
+                    if int(array_size[0]) >= int(id_index[0][1]):
+                        raise ValueError(f"Array index out of bounds. Attempted to access index {array_size[0]} in an array of size {id_index[0][1]}")
                 
             if dimensions == 2:
-                if int(array_size[0]) >= int(id_index[0][1]):
-                    raise ValueError(f"Array index out of bounds. Attempted to access index {array_size[0]} in an array of size {id_index[0][1]}")
-                if int(array_size[1]) >= int(id_index[1][1]):
-                    raise ValueError(f"Array index out of bounds. Attempted to access index {array_size[1]} in an array of size {id_index[1][1]}")
+                if isinstance(array_size[0], str):
+                    pass
+                else:
+                    if int(array_size[0]) >= int(id_index[0][1]):
+                        raise ValueError(f"Array index out of bounds. Attempted to access index {array_size[0]} in an array of size {id_index[0][1]}")
+                    if int(array_size[1]) >= int(id_index[1][1]):
+                        raise ValueError(f"Array index out of bounds. Attempted to access index {array_size[1]} in an array of size {id_index[1][1]}")
 
             print(array_size, dimensions, id_index)
             return True, symbol_entry.datatype 
@@ -2128,7 +2140,7 @@ class SemanticAnalyzer:
             
          
         
-        print(node.body, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhh", param_type[0])
+        # print(node.body, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhh", param_type[0])
         # Validate function body
         if  node.body or len(node.body) > 0:
             print("entered body not none")
@@ -2249,7 +2261,7 @@ class SemanticAnalyzer:
         """
         symbol = self.symbol_table.lookup(node.identifier[1])
 
-        if symbol.array_dimensions:
+        if hasattr(symbol, 'array_dimensions') and symbol.array_dimensions:
             raise ValueError(f"Cannot use array variable '{node.identifier[1]}' without an index in variable initialization. Array elements must be accessed using an index")
         
         if not symbol:
@@ -2325,9 +2337,11 @@ class SemanticAnalyzer:
 
             if len(flat_indices) != 1:
                 raise ValueError(f"Mismatched array dimensions for '{symbol.identifier}'. Declared as a 1-dimensional array, but used as a {len(flat_indices)}-dimensional array.")
-            
-            if int(flat_indices[0][1]) > int(symbol.array_dimensions[0][1]):
-                raise ValueError(f"Array index out of bounds. Attempted to access index {flat_indices[0][1]} in an array of size {symbol.array_dimensions[0][1]}")
+            if isinstance(flat_indices[0][1], str):
+                    pass
+            else:
+                if int(flat_indices[0][1]) > int(symbol.array_dimensions[0][1]):
+                    raise ValueError(f"Array index out of bounds. Attempted to access index {flat_indices[0][1]} in an array of size {symbol.array_dimensions[0][1]}")
 
             try:
                 print('data_type ---- ', datatype)

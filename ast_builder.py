@@ -331,9 +331,15 @@ class RoyalScriptASTBuilder:
 
         # With initialization: stop at a comma or tilde.
         if token and token[0] == '=':
+            print("ENTEREES")
             self.match('=')
             # Only capture tokens up to a comma or '~' so that subsequent variables aren’t included.
-            value = self.build_val()
+            if self.is_array:
+                print('is arrsyyy')
+                value = self.build_array()
+            else:
+                print('not arrsyyy')
+                value = self.build_val()
             token = self.current_token()
             
         # Create the first declaration node
@@ -382,8 +388,14 @@ class RoyalScriptASTBuilder:
                 
             # with initialization for the variable: stop at comma or tilde
             if token and token[0] == '=':
+                print("ENTEREES")
                 self.match('=')
-                value = self.build_val()
+                if self.is_array:
+                    print('is arrsyyy')
+                    value = self.build_array()
+                else:
+                    print('not arrsyyy')
+                    value = self.build_val()
                 token = self.current_token()
                 
             # Create a new declaration for this variable and add to declarations list
@@ -646,8 +658,8 @@ class RoyalScriptASTBuilder:
             raise SyntaxError("Unexpected end of input while parsing expression")
 
         expression = []
-        # Loop until we hit a terminator ('~', ',', or ')')
-        while token is not None and token[0] not in [')', ']']:
+        # Loop until we hit a terminator ('~', ',', ')', '}', or ']')
+        while token is not None and token[0] not in [')', ']', ',', '}']:
             expression.append(token)
             self.advance()
             token = self.current_token()  # update token
@@ -687,6 +699,41 @@ class RoyalScriptASTBuilder:
                 
         print(expression)
         return expression
+    
+    def build_array(self):
+        """Build an array expression node that captures the entire array literal."""
+        # Store starting position
+        start_token = self.current_token()
+        
+        # Create a list to store the entire array expression
+        array_tokens = [start_token]  # Start with opening brace
+        self.match('{')
+        
+        # Track the brace nesting level to handle nested arrays
+        brace_level = 1
+        
+        # Continue until we find the matching closing brace
+        while brace_level > 0:
+            token = self.current_token()
+            
+            if token is None:
+                raise SyntaxError("Unexpected end of input while parsing array, unclosed '{'")
+            
+            array_tokens.append(token)
+            
+            if token[0] == '{':
+                brace_level += 1
+            elif token[0] == '}':
+                brace_level -= 1
+            
+            self.advance()
+        
+        print(array_tokens, "")
+
+        # The last token added was the closing brace, which we've already consumed with advance()
+        # So we're done - just return the collected tokens
+        return array_tokens
+    
         
     def build_rval(self):
         """Build an expression node."""
