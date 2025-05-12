@@ -1,0 +1,228 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    BELIEVE
+    CAST
+    CHAMBER
+    CHAR
+    CURSE
+    FOREVER
+    LENGTHOF
+    STRING
+    TALE
+    TOMIRROR
+    TOOCEAN
+    TOROSE
+    TOSCROLL
+    TOTREASURES
+    TWIST
+
+Grammar
+
+Rule 0     S' -> program
+Rule 1     program -> CROWN TILDE global_dec user_defined_func CASTLE TREASURES ID LPAREN RPAREN LBRACE body RETURN expr TILDE RBRACE REIGN TILDE
+Rule 2     global_dec -> var_dec global_dec
+Rule 3     global_dec -> empty
+Rule 4     var_dec -> dynasty data_type ID vardec_def
+Rule 5     dynasty -> DYNASTY
+Rule 6     dynasty -> empty
+Rule 7     data_type -> SCROLL
+Rule 8     data_type -> TREASURES
+Rule 9     data_type -> MIRROR
+Rule 10    data_type -> OCEAN
+Rule 11    data_type -> ROSE
+Rule 12    vardec_def -> initialization vardec_more TILDE
+Rule 13    vardec_def -> LBRACKET NUMBER RBRACKET column array_initialization array_more TILDE
+Rule 14    initialization -> EQ val
+Rule 15    initialization -> empty
+Rule 16    val -> SCROLL_LIT
+Rule 17    val -> ROSE_LIT
+Rule 18    val -> OCEAN_LIT
+Rule 19    val -> TREASURES_LIT
+Rule 20    val -> MIRROR_LIT
+Rule 21    val -> NUMBER
+Rule 22    val -> ID
+Rule 23    vardec_more -> COMMA ID initialization vardec_more
+Rule 24    vardec_more -> empty
+Rule 25    column -> LBRACKET NUMBER RBRACKET
+Rule 26    column -> empty
+Rule 27    array_initialization -> EQ array_list
+Rule 28    array_initialization -> empty
+Rule 29    array_list -> LBRACE array_content RBRACE
+Rule 30    array_content -> array_lit lit_more
+Rule 31    array_content -> LBRACE array_row RBRACE row_more
+Rule 32    array_content -> ID row_more
+Rule 33    array_row -> array_lit lit_more
+Rule 34    row_more -> COMMA row_more_ext
+Rule 35    row_more -> empty
+Rule 36    row_more_ext -> LBRACE array_row RBRACE row_more
+Rule 37    row_more_ext -> ID row_more
+Rule 38    lit_more -> COMMA array_lit lit_more
+Rule 39    lit_more -> empty
+Rule 40    array_more -> COMMA ID LBRACKET NUMBER RBRACKET column array_initialization array_more
+Rule 41    array_more -> empty
+Rule 42    array_lit -> SCROLL_LIT
+Rule 43    array_lit -> ROSE_LIT
+Rule 44    array_lit -> OCEAN_LIT
+Rule 45    array_lit -> TREASURES_LIT
+Rule 46    array_lit -> MIRROR_LIT
+Rule 47    array_lit -> ID
+Rule 48    assignment_operator -> PLUSEQ
+Rule 49    assignment_operator -> MINUSEQ
+Rule 50    assignment_operator -> TIMESEQ
+Rule 51    assignment_operator -> DIVEQ
+Rule 52    assignment_operator -> MODEQ
+Rule 53    body -> stmt body
+Rule 54    body -> empty
+Rule 55    stmt -> expression TILDE
+Rule 56    stmt -> ID LPAREN args RPAREN TILDE
+Rule 57    stmt -> BREAK TILDE
+Rule 58    stmt -> CONTINUE TILDE
+Rule 59    stmt -> GRANTED LPAREN expression RPAREN TILDE
+Rule 60    user_defined_func -> SPELL return_type ID LPAREN param RPAREN LBRACE body ret_statement RBRACE user_defined_func
+Rule 61    user_defined_func -> empty
+Rule 62    ret_statement -> RETURN expr TILDE
+Rule 63    ret_statement -> empty
+Rule 64    param -> data_type ID param_more
+Rule 65    param -> empty
+Rule 66    param_more -> COMMA data_type ID param_more
+Rule 67    param_more -> empty
+Rule 68    expression -> expression PLUS expression
+Rule 69    expression -> expression MINUS expression
+Rule 70    expression -> expression TIMES expression
+Rule 71    expression -> expression DIVIDE expression
+Rule 72    expression -> expression MOD expression
+Rule 73    expression -> expression AND expression
+Rule 74    expression -> expression OR expression
+Rule 75    expression -> expression EQEQ expression
+Rule 76    expression -> expression NE expression
+Rule 77    expression -> expression LT expression
+Rule 78    expression -> expression LE expression
+Rule 79    expression -> expression GT expression
+Rule 80    expression -> expression GE expression
+Rule 81    expression -> NOT expression
+Rule 82    expression -> PLUSPLUS expression
+Rule 83    expression -> MINUSMINUS expression
+Rule 84    expression -> expression PLUSPLUS
+Rule 85    expression -> expression MINUSMINUS
+Rule 86    expression -> LPAREN expression RPAREN
+Rule 87    expression -> NUMBER
+Rule 88    expression -> SCROLL_LIT
+Rule 89    expression -> ROSE_LIT
+Rule 90    expression -> OCEAN_LIT
+Rule 91    expression -> TREASURES_LIT
+Rule 92    expression -> MIRROR_LIT
+Rule 93    expression -> ID
+Rule 94    expression -> ID LPAREN args RPAREN
+Rule 95    args -> expression args_more
+Rule 96    args -> empty
+Rule 97    args_more -> COMMA expression args_more
+Rule 98    args_more -> empty
+Rule 99    empty -> <empty>
+
+Terminals, with rules where they appear
+
+AND                  : 73
+BELIEVE              : 
+BREAK                : 57
+CAST                 : 
+CASTLE               : 1
+CHAMBER              : 
+CHAR                 : 
+COMMA                : 23 34 38 40 66 97
+CONTINUE             : 58
+CROWN                : 1
+CURSE                : 
+DIVEQ                : 51
+DIVIDE               : 71
+DYNASTY              : 5
+EQ                   : 14 27
+EQEQ                 : 75
+FOREVER              : 
+GE                   : 80
+GRANTED              : 59
+GT                   : 79
+ID                   : 1 4 22 23 32 37 40 47 56 60 64 66 93 94
+LBRACE               : 1 29 31 36 60
+LBRACKET             : 13 25 40
+LE                   : 78
+LENGTHOF             : 
+LPAREN               : 1 56 59 60 86 94
+LT                   : 77
+MINUS                : 69
+MINUSEQ              : 49
+MINUSMINUS           : 83 85
+MIRROR               : 9
+MIRROR_LIT           : 20 46 92
+MOD                  : 72
+MODEQ                : 52
+NE                   : 76
+NOT                  : 81
+NUMBER               : 13 21 25 40 87
+OCEAN                : 10
+OCEAN_LIT            : 18 44 90
+OR                   : 74
+PLUS                 : 68
+PLUSEQ               : 48
+PLUSPLUS             : 82 84
+RBRACE               : 1 29 31 36 60
+RBRACKET             : 13 25 40
+REIGN                : 1
+RETURN               : 1 62
+ROSE                 : 11
+ROSE_LIT             : 17 43 89
+RPAREN               : 1 56 59 60 86 94
+SCROLL               : 7
+SCROLL_LIT           : 16 42 88
+SPELL                : 60
+STRING               : 
+TALE                 : 
+TILDE                : 1 1 1 12 13 55 56 57 58 59 62
+TIMES                : 70
+TIMESEQ              : 50
+TOMIRROR             : 
+TOOCEAN              : 
+TOROSE               : 
+TOSCROLL             : 
+TOTREASURES          : 
+TREASURES            : 1 8
+TREASURES_LIT        : 19 45 91
+TWIST                : 
+error                : 
+
+Nonterminals, with rules where they appear
+
+args                 : 56 94
+args_more            : 95 97
+array_content        : 29
+array_initialization : 13 40
+array_list           : 27
+array_lit            : 30 33 38
+array_more           : 13 40
+array_row            : 31 36
+assignment_operator  : 
+body                 : 1 53 60
+column               : 13 40
+data_type            : 4 64 66
+dynasty              : 4
+empty                : 3 6 15 24 26 28 35 39 41 54 61 63 65 67 96 98
+expr                 : 1 62
+expression           : 55 59 68 68 69 69 70 70 71 71 72 72 73 73 74 74 75 75 76 76 77 77 78 78 79 79 80 80 81 82 83 84 85 86 95 97
+global_dec           : 1 2
+initialization       : 12 23
+lit_more             : 30 33 38
+param                : 60
+param_more           : 64 66
+program              : 0
+ret_statement        : 60
+return_type          : 60
+row_more             : 31 32 36 37
+row_more_ext         : 34
+stmt                 : 53
+user_defined_func    : 1 60
+val                  : 14
+var_dec              : 2
+vardec_def           : 4
+vardec_more          : 12 23
+

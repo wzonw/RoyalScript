@@ -164,7 +164,7 @@ Delims = {
 
     'escape_sequence_delim': {' ', '"', '"', *RegDef['ascii'], *RegDef['escape_seq'], '?'},
 
-    'equal_delim': {' ', '(', '[', '‘', '“', *RegDef['alphanum'], '{', '?'},
+    'equal_delim': {' ', '(', '[', '‘', '“', *RegDef['alphanum'], '{', '?', '.'},
 
     'gate_delim': {' ', '~', '?'},
 

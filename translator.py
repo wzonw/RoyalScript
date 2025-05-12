@@ -660,26 +660,29 @@ class RoyalScriptToPythonTranslator:
             i += 1
         
         # Format the prompt
+        prompt_text = ""
         if prompt_tokens:
-            prompt =  prompt_tokens[0][1].strip("'")
-            # prompt = prompt.replace('"', '\"')  # Escape quotes
+            # Extract the prompt text and escape any quotes
+            prompt_text = prompt_tokens[0][1].strip("'").strip('"')
+            
+            # Add newline character if not present
+            if not prompt_text.endswith('\n'):
+                prompt_text += '\\n'
+            prompt_text = f'"{prompt_text}"'
+            prompt = f'"{prompt_text}"'  # Format as a quoted string
 
-        # Guarantee the prompt shows before input
-        input_expr = f'input({prompt})'
-        
         # Handle appropriate type casting based on datatype
         if datatype == "treasures":     # int
-            return f"int(input({prompt}))"
+            return f"int(input({prompt_text}))"
         elif datatype == "ocean":       # float
-            return f"float(input({prompt}))"
-        elif datatype == "rose":        # char
-            return f"input({prompt})[:1]"
+            return f"float(input({prompt_text}))"
+        elif datatype == "rose":  # char
+            return f"(lambda: (lambda v: v if len(v)==1 else (_ for _ in ()).throw(ValueError('Semantic Error: Invalid value for rose datatype, must be a single character only.')))(input({prompt_text}).strip()))()"
         elif datatype == "mirror":      # bool
-            return f"input({prompt}).lower() in ['true', '1', 'yes', 'y']"
+            return f"input({prompt_text}).lower() in ['true', '1', 'false', '0']"
         else:
             # Default to string if we can't determine type
-            return input_expr
-
+            return f"input({prompt_text})"
 
     def get_assignment_target(self, tokens):
         """

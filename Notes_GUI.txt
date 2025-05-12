@@ -1,0 +1,122 @@
+RoyalScript GUI : Function-by-Function Guide
+
+Overview:
+
+    This code provides a graphical IDE for the RoyalScript language, allowing users to:
+        => Write code
+        => Perform lexical, syntax, and semantic analysis
+        => View tokens and AST
+        => Run the translated Python code interactively (with input/output)
+        => Enjoy a themed, animated, and musical interface
+
+
+1. Key Components
+    A. InteractiveTerminal
+    => Handles running and interacting with a subprocess (the translated Python code).
+        start_process(command):
+            => Starts a subprocess, sets up threads to read its stdout and stderr, and handles input requests.
+        send_input(text):
+            => Sends user input to the subprocess.
+        terminate_process():
+            => Terminates the running process, if any.
+        _read_output(pipe, pipe_name):
+            => Reads output from the subprocess and updates the terminal widget in real time.
+        _display_input_prompt(prompt):
+            => Shows an input prompt in the terminal when the subprocess requests input.
+
+2. RoyalScriptLexerGUI (Main GUI Class)
+    => Inherits from tk.Tk and sets up the entire GUI.
+    Initialization
+        Music and Theme:
+            => Plays intro music, sets window icon, and loads an animated GIF background.
+        Frames and Layout:
+            => Sets up main frames for input, output, tokens, terminal, and buttons.
+        Logo and Branding:
+            => Displays the RoyalScript logo and themed images.
+        Input Section
+            => Text widget for code input
+            => Line numbers
+            => Scrollbars and synchronized scrolling
+        Lexer Tokens Section
+            => Listboxes for lexemes and token types
+            => Line numbers for tokens
+            => Scrollbars and synchronized scrolling
+        Interactive Terminal
+            => ScrolledText widget for output
+            => Entry widget for user input
+            => Prompt label
+            => Run button to execute code
+            => Handles input/output with the running Python process
+        Buttons
+            => Lexical, Syntax, and Semantic analysis buttons
+            => Hover effects for buttons
+
+3. Core Functionalities
+    A. Lexical Analysis
+            => Triggered by the "Lexical" button
+            => Uses RoyalScriptLexer to tokenize the input code.
+            => Displays tokens and their types in the listboxes.
+            => Shows errors in the terminal if any.
+    B. Syntax Analysis
+            => Triggered by the "Syntax" button
+            => Tokenizes the code, reconstructs it for the parser, and uses RoyalScriptParser to build a parse tree.
+            => If successful, builds and displays the AST.
+            => Shows syntax errors in the terminal if any.
+    C. Semantic Analysis
+            => Triggered by the "Semantic" button
+            => Runs lexical and syntax analysis first.
+            => If successful, builds the AST and runs SemanticAnalyzer for semantic checks.
+            => Shows semantic errors or success messages in the terminal.
+    D. Running Code
+            => Triggered by the "Run" button
+            => Runs the full pipeline: lexical, syntax, semantic analysis, AST building, translation to Python.
+            => Writes the translated Python code to output.py.
+            => Starts a subprocess to run the code, with interactive input/output in the terminal.
+
+4. User Experience Features
+    => Animated background and logo
+    => Intro music
+    => Themed colors and fonts
+    => Typing effect for output (optional)
+    => Synchronized scrolling for all listboxes and text widgets
+    => Hover effects for buttons
+    => Clear terminal and input field commands
+
+5. How the Analysis Pipeline Works
+    => User writes code in the input box.
+    => User clicks "Lexical", "Syntax", "Semantic", or "Run":
+    => Lexical: Tokenizes and displays tokens.
+    => Syntax: Tokenizes, parses, and displays AST.
+    => Semantic: Tokenizes, parses, builds AST, and checks for semantic errors.
+    => Run: Does all of the above, translates to Python, runs the code, and provides an interactive terminal for input/output.
+
+6. How the Interactive Terminal Works
+    => When running code, the Python subprocess is started.
+    => Output and errors are read in real time and displayed in the terminal.
+    => If the code requests input, the terminal displays a prompt and waits for user input.
+    => User types input and presses Enter; the input is sent to the subprocess.
+
+7. How the GUI is Structured
+    => Left Frame: Code input and line numbers.
+    => Center Frame: Lexeme and token display.
+    => Bottom Frame: Interactive terminal.
+    => Right Frame: Buttons and logo.
+
+    
+Summary Table
+| Component/Class | Purpose/Functionality |
+|------------------------|--------------------------------------------------------------------|
+| InteractiveTerminal | Handles running and interacting with the Python subprocess |
+| RoyalScriptLexerGUI | Main GUI class, sets up all frames, widgets, and event handlers |
+| setup_frames | Lays out the main frames and images |
+| setup_input_section | Sets up code input area and line numbers |
+| setup_lexer_tokens_section | Sets up lexeme/token display area |
+| setup_interactive_terminal | Sets up the terminal for I/O |
+| setup_analyze_button | Sets up Lexical, Syntax, Semantic, and Run buttons |
+| analyze_lexical | Performs lexical analysis and displays results |
+| analyze_syntax | Performs syntax analysis and displays results |
+| analyze_semantic | Performs semantic analysis and displays results |
+| run_code | Runs the full pipeline and executes the translated code |
+| show_terminal_message | Displays messages in the terminal |
+| update_line_numbers | Updates line numbers for code input |
+| update_lexer_token_line_numbers | Updates line numbers for token display |

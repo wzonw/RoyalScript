@@ -71,7 +71,7 @@ logical_operand: IDENTIFIER id_ext logical_operand_ext
                | lit3 more_arith relational_operator relational_operand relational_more
                | SCROLL_LIT relational_operator relational_operand relational_more
                | ROSE_LIT relational_operator relational_operand relational_more
-               | "mirror_lit" relational_more
+               | MIRROR_LIT relational_more
                | treasures_mirror relational_more
                | "LPAREN" expression
 
@@ -119,8 +119,7 @@ relational_operand: IDENTIFIER id_ext more_arith
                   | lit3 more_arith
                   | SCROLL_LIT
                   | ROSE_LIT
-                  | "mirror_lit"
-                  | treasures_mirror
+                  | MIRROR_LIT
                   | "LPAREN" expression_2
 
 expression_2: arithmetic_exp "RPAREN" more_arith
@@ -220,7 +219,7 @@ do_while: "believe" "LCUR" loop_body "RCUR" "forever" "LPAREN" condition "RPAREN
 condition: treasures_mirror more_log
          | IDENTIFIER condi_id_ext
          | logical_operator1 logical_operand more_log
-         | "mirror_lit" relational_more more_log
+         | MIRROR_LIT relational_more more_log
          | lit3 more_arith relational_operator relational_operand relational_more more_log
          | SCROLL_LIT relational_operator relational_operand relational_more more_log
          | ROSE_LIT relational_operator relational_operand relational_more more_log
@@ -242,8 +241,8 @@ other_id_ext_1: more_arith relational_operator relational_operand relational_mor
 other_id_ext_2: logical_operand more_log
               | 
 
-mirror_init: "EQUAL_EQUAL" "mirror_lit"
-           | "NOT_EQUAL" "mirror_lit"
+mirror_init: "EQUAL_EQUAL" MIRROR_LIT
+           | "NOT_EQUAL" MIRROR_LIT
            | 
 
 while: "forever" "LPAREN" condition "RPAREN" "LCUR" loop_body "RCUR"
@@ -258,7 +257,7 @@ else: "curse" "LCUR" body "RCUR"
 
 output: "granted" "LPAREN" granted_content more_granted "RPAREN" "TILDE"
 
-granted_content_1: "set_precision"
+granted_content_1: "setprecission"
                  | IDENTIFIER granted_id_ext
 
 granted_content_2: "phantom"
@@ -266,7 +265,7 @@ granted_content_2: "phantom"
                  | conversion_func "LPAREN" conversion_value "RPAREN"
                  | "toscroll" "LPAREN" conversion_value "RPAREN" string_more
                  | treasures_mirror more_log
-                 | "mirror_lit" relational_more more_log
+                 | MIRROR_LIT relational_more more_log
                  | SCROLL_LIT granted_scroll_ext
                  | ROSE_LIT granted_rose_ext
                  | lit3 granted_lit3_ext
@@ -346,7 +345,7 @@ input: "wish" "LPAREN" SCROLL_LIT "RPAREN"
 lit1: SCROLL_LIT
      | ROSE_LIT
 
-lit2: "mirror_lit"
+lit2: MIRROR_LIT
 
 lit3: OCEAN_LIT
      | TREASURES_LIT
@@ -387,7 +386,7 @@ SCROLL_LIT: ESCAPED_STRING
 ROSE_LIT: /'(\\.|[^\\'])'/
 
 // Boolean literal (mirror_lit)
-MIRROR_LIT: "true" | "false"
+MIRROR_LIT: "true" | "false" | "1" | "0"
 
 NEGATIVE: /-?/
 
@@ -406,14 +405,9 @@ IDENTIFIER: /[A-Z][A-Za-z0-9_]*/
 %ignore WS
 %ignore COMMENTS
 """
-
-
-from lark import Lark, UnexpectedInput, UnexpectedToken, UnexpectedCharacters
-
 class RoyalScriptParser:
     def __init__(self, reconstructed_code, token_positions):
         self.reconstructed_code = reconstructed_code
-        self.token_positions = token_positions
         
         # Map token types to their actual symbols
         self.token_map = {
@@ -462,8 +456,118 @@ class RoyalScriptParser:
             word_end += 1
         return line_content[word_start:word_end]
 
+    def _extract_anon_values(self, parser):
+        # Extract the actual values of anonymous tokens
+        anon_values = {}
+        
+        # First try accessing terminals directly
+        if hasattr(parser, 'terminals'):
+            for terminal in parser.terminals:
+                if terminal.name.startswith('__ANON_'):
+                    # For string literals, the pattern will contain the actual value
+                    if hasattr(terminal, 'pattern'):
+                        if isinstance(terminal.pattern, str):
+                            # Strip quotes for string literals
+                            if terminal.pattern.startswith('"') and terminal.pattern.endswith('"'):
+                                value = terminal.pattern[1:-1]
+                            else:
+                                value = terminal.pattern
+                            anon_values[terminal.name] = value
+        
+        # If that didn't work, try to extract directly from the grammar
+        if not anon_values and hasattr(parser, 'lexer'):
+            if hasattr(parser.lexer, 'terminals'):
+                term_defs = parser.lexer.terminals
+                for name, (priority, re_pattern, *_) in term_defs.items():
+                    if name.startswith('__ANON_'):
+                        # Try to extract the value from the pattern
+                        try:
+                            # For literal strings in the grammar
+                            if re_pattern.startswith('"') and re_pattern.endswith('"'):
+                                value = re_pattern[1:-1]
+                            # For fixed tokens
+                            elif not re_pattern.startswith('(') and not re_pattern.startswith('['):
+                                value = re_pattern
+                            else:
+                                value = re_pattern
+                            anon_values[name] = value
+                        except:
+                            pass
+
+        # Direct mapping for common ANON tokens based on grammar inspection
+        # These are manually identified from the grammar
+        if '__ANON_0' not in anon_values:
+            anon_values['__ANON_0'] = 'MIRROR_LIT'
+        if '__ANON_1' not in anon_values:
+            anon_values['__ANON_1'] = '0'
+        if '__ANON_2' not in anon_values:
+            anon_values['__ANON_2'] = '1'
+        
+        print("Anonymous token values:", anon_values)  # Debug print
+        return anon_values
+
+    def _check_unclosed_brackets(self, code):
+        """Check for unclosed parentheses, braces, and brackets."""
+        stack = []
+        brackets = {
+            '(': ')',
+            '{': '}',
+            '[': ']'
+        }
+        
+        lines = code.split('\n')
+        for line_num, line in enumerate(lines, 1):
+            for col_num, char in enumerate(line, 1):
+                if char in brackets.keys():
+                    # Push the opening bracket with its position
+                    stack.append((char, line_num, col_num))
+                elif char in brackets.values():
+                    # Check if this is a closing bracket
+                    if not stack:
+                        # Extra closing bracket (unmatched)
+                        return f"Syntax Error: Unexpected closing '{char}' at Line {line_num}, Column {col_num}."
+                    
+                    opening, open_line, open_col = stack.pop()
+                    if brackets[opening] != char:
+                        # Mismatched brackets
+                        return f"Syntax Error: Mismatched brackets. Found '{char}' at Line {line_num}, Column {col_num}, but expected '{brackets[opening]}'."
+        
+        # Check if any brackets remain unclosed
+        if stack:
+            opening, line_num, col_num = stack[0]  # Report the first unclosed bracket
+            expected_closing = brackets[opening]
+            return f"Syntax Error: Unclosed '{opening}' at Line {line_num}, Column {col_num}. Expected '{expected_closing}'."
+        
+        return None  # No unclosed brackets
+    
+    def _filter_expected_tokens(self, expected_values_set):
+        """
+        Filter out redundant values when special literals are present.
+        If MIRROR_LIT or TREASURES_LIT is in the expected set, remove numeric literals.
+        """
+        special_literals = {'MIRROR_LIT', 'TREASURES_LIT'}
+        
+        # Check if any special literals are in the expected set
+        has_special = any(lit in expected_values_set for lit in special_literals)
+        
+        # If we have special literals, filter out "0", "1", "2" which are redundant
+        if has_special:
+            return {token for token in expected_values_set if token not in {"0", "1", "2"}}
+        
+        return expected_values_set
+    
     def parse(self):
-        parser = Lark(castle_grammar, parser="earley")
+        parser = Lark(castle_grammar, parser="earley", lexer='dynamic_complete', 
+                      propagate_positions=True, maybe_placeholders=False, 
+                      start="start", priority="normal", 
+                      ambiguity="explicit")
+        anon_values = self._extract_anon_values(parser)
+        
+        # First check for unclosed brackets
+        bracket_error = self._check_unclosed_brackets(self.reconstructed_code)
+        if bracket_error:
+            return None, bracket_error
+        
         try:
             tree = parser.parse(self.reconstructed_code)
             return tree, None
@@ -477,16 +581,33 @@ class RoyalScriptParser:
             actual_token = mapped_actual if mapped_actual != actual_token else actual_token
 
             line = e.line
-            # Map expected token types to their symbols
-            expected_values = []
+            # Map expected token types to their symbols - Use a set to eliminate duplicates
+            expected_values_set = set()
+            
+            # Debug - print what tokens we're processing
+            print(f"Expected tokens: {sorted(e.expected)}")
+            print(f"Anonymous token values: {anon_values}")
+            
             for token_type in sorted(e.expected):
-                if token_type.startswith('"') and token_type.endswith('"'):
-                    expected_values.append(token_type[1:-1])
+                if token_type.startswith('__ANON_'):
+                    # Use the actual value of the anonymous token if available
+                    if token_type in anon_values:
+                        token_value = anon_values[token_type]
+                        print(f"Mapped {token_type} to {token_value}")  # Debug print
+                        expected_values_set.add(token_value)
+                    else:
+                        expected_values_set.add(token_type)
+                elif token_type.startswith('"') and token_type.endswith('"'):
+                    expected_values_set.add(token_type[1:-1])
                 elif token_type in self.token_map:
-                    expected_values.append(self.token_map[token_type])
+                    expected_values_set.add(self.token_map[token_type])
                 else:
-                    expected_values.append(token_type)
-            expected = ', '.join(expected_values)
+                    expected_values_set.add(token_type)
+            
+            # Filter expected tokens to avoid redundancy
+            expected_values_set = self._filter_expected_tokens(expected_values_set)
+                    
+            expected = ', '.join(sorted(expected_values_set))  # Sort for consistent output
             msg = (f'Syntax Error: Invalid input "{actual_token}" at Line {line}. '
                    f'Expected one of [{expected}].')
             return None, msg
@@ -501,16 +622,26 @@ class RoyalScriptParser:
             actual_token = mapped_actual if mapped_actual != actual_token else actual_token
 
             line = e.line
-            expected_values = []
+            expected_values_set = set()  # Use a set to eliminate duplicates
             if e.allowed:
                 for token_type in sorted(e.allowed):
-                    if token_type.startswith('"') and token_type.endswith('"'):
-                        expected_values.append(token_type[1:-1])
+                    if token_type.startswith('__ANON_'):
+                        # Use the actual value of the anonymous token if available
+                        if token_type in anon_values:
+                            expected_values_set.add(anon_values[token_type])
+                        else:
+                            expected_values_set.add(token_type)
+                    elif token_type.startswith('"') and token_type.endswith('"'):
+                        expected_values_set.add(token_type[1:-1])
                     elif token_type in self.token_map:
-                        expected_values.append(self.token_map[token_type])
+                        expected_values_set.add(self.token_map[token_type])
                     else:
-                        expected_values.append(token_type)
-                expected = ', '.join(expected_values)
+                        expected_values_set.add(token_type)
+                
+                # Filter expected tokens to avoid redundancy
+                expected_values_set = self._filter_expected_tokens(expected_values_set)
+                
+                expected = ', '.join(sorted(expected_values_set))  # Sort for consistent output
             else:
                 expected = "valid token"
             msg = (f'Syntax Error: Invalid input "{actual_token}" at Line {line}. '

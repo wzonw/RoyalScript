@@ -1,0 +1,218 @@
+RoyalScript Semantic Analyzer: Function-by-Function Guide
+
+Overview:
+
+This module performs semantic analysis for the RoyalScript language. Semantic analysis checks that the program is meaningful and consistent according to the language rules, beyond just correct syntax. It ensures variables are declared before use, types match, functions are called correctly, and more.
+
+1. Error Handling
+SemanticErrorType(Enum)
+Defines all possible semantic error types (e.g., redeclaration, undeclared variable, type mismatch, etc.).
+SemanticError(Exception)
+Custom exception for semantic errors.
+Parameters:
+error_type: The type of semantic error (from SemanticErrorType)
+message: Description of the error
+line, position: (Optional) Location in the source code
+
+2. Symbol Table Management
+
+SymbolEntry
+ => Represents a variable, function, or array in the program.
+Fields:
+ => name, datatype, value, scope_level, is_dynasty, is_initialized, is_function, array_dimensions, parameters
+
+SymbolTable
+ => Manages all declared symbols and their scopes.
+    __init__()
+        => Initializes the symbol table with a global scope.
+    enter_scope()
+        => Creates a new scope (e.g., when entering a function or block).
+    exit_scope()
+        => Removes the current scope (e.g., when leaving a function or block).
+    declare(symbol: SymbolEntry)
+        => Adds a new symbol to the current scope.
+        Checks:
+        => If the symbol is already declared in the current scope, returns a SemanticError.
+    lookup(name: str)
+        => Searches for a symbol by name, starting from the innermost scope and moving outward.
+        Returns:
+        => The SymbolEntry if found, else None.
+    insert(param_name, entry_data)
+        => Adds a symbol to the current scope using a dictionary (used for function parameters).
+
+3. Semantic Analyzer Core
+SemanticAnalyzer
+ => The main class that checks the AST for semantic correctness.
+    __init__()
+        => Initializes the analyzer, symbol table, error list, and primitive types.
+    analyze(ast_root)
+    => Purpose:
+        Entry point for semantic analysis.
+    Logic:
+        => Clears previous errors.
+        => Validates global variable declarations, functions, and the main function.
+        => Returns a list of semantic errors.
+
+4. Validation Functions
+    Variable Declarations
+        => validate_VariableDeclarationNode(node)
+        => Checks a variable declaration for:
+        => Valid type
+        => Proper initialization
+        => Scope rules
+        => Dynasty (constant) rules
+    Logic:
+        => Checks if the type is valid.
+        => Creates a symbol entry and tries to declare it.
+        => If initialized, calls validate_initialization.
+        => validate_initialization(node)
+        => Checks that a variable is initialized with a compatible value.
+    Handles:
+        => 1D and 2D arrays (checks dimensions, element types, and initialization)
+        => Calls type-specific validation functions for primitives.
+
+5. Type Compatibility
+    => validate_type_compatibility(expected_type, actual_type)
+    => Checks if two types are compatible (currently only exact match).
+
+6. Type-Specific Validation
+    => validate_treasures(value, datatype, node)
+    => hecks if a value is valid for a treasures type variable.
+    Handles:
+        => Literals, identifiers, conversion functions, arithmetic expressions, etc.
+        => validate_ocean(value, datatype, node)
+        => Checks if a value is valid for an ocean type variable.
+        => validate_scroll(value, datatype, node)
+        => Checks if a value is valid for a scroll (string) type variable.
+        => validate_rose(value, datatype, node)
+        => Checks if a value is valid for a rose (character) type variable.
+        => validate_mirror(value, datatype, node)
+        => Checks if a value is valid for a mirror (boolean) type variable.
+
+
+7. Type Conversion
+    validate_conversion_func(value, value_type, node)
+        => Checks if a type conversion (e.g., totreasures, toocean, etc.) is valid for the given value and target type.
+    is_float(value_string)
+        => Checks if a string represents a valid floating-point number.
+
+8. Expression Validation
+    string_op(content, value, node)
+        => Checks if a string concatenation or operation is valid.
+    validate_arithmetic(value, datatype, node)
+        => Checks if an arithmetic expression is valid for the given type.
+    validate_logical(value, datatype, node)
+        => Checks if a logical expression is valid.
+    validate_relational(value, datatype, node)
+        => Checks if a relational (comparison) expression is valid.
+    validate_relOp(value, datatype, node)
+        => Helper for validating relational operations.
+    unary(value, datatype, node, is_varVal)
+        => Checks if a unary operation (e.g., increment, decrement) is valid.
+
+9. Identifier Validation
+    validate_id(value, datatype, node, expr_type)
+        => Checks if an identifier (variable, array, or function) is valid in the current context.
+    Handles:
+        => Functions: checks parameters, return type, and call syntax.
+        => Arrays: checks dimensions and indices.
+        => Variables: checks type compatibility and initialization.
+
+10. Function Validation
+    validate_FunctionNode(node)
+        Checks a function declaration for:
+        => Valid return type
+        => Valid parameter types
+        => No redeclaration
+        => Valid function body
+        => Valid return value (if required)
+    validate_FunctionCallNode(node)
+        => Checks a function call for:
+        => Existence of the function
+        => Correct number and types of arguments
+    validate_function_body(body)
+        => Iterates through each statement in a function body and dispatches to the appropriate validation method based on the node type (using getattr).
+    validate_return_value(node)
+        => Checks if a function's return value is valid for its declared return type.
+    validate_MainFunctionNode(node)
+        => Checks the main function's body for semantic correctness.
+
+11. Variable Reassignment
+    validate_VariableReassignmentNode(node)
+        => Checks if a variable reassignment is valid:
+        => Variable exists
+        => Not a dynasty (constant)
+        => Type compatibility
+
+12. Array Assignment
+    validate_ArrayAssignmentNode(node)
+        => Checks if an array assignment is valid:
+        => Array exists
+        => Indices are within bounds
+        => Type compatibility
+
+13. Control Structures
+    validate_IfNode(node)
+        => Checks an if statement:
+        => Condition is valid (relational, logical, or identifier)
+        => Body is valid
+        => Handles elif and else branches
+        => validate_ElifNode(elif_nodes)
+        => Checks each elif node in a list.
+    validate_ElseNode(node)
+        => Checks the body of an else node.
+    validate_WhileNode(node)
+        => Checks a while loop:
+        => Condition is valid
+        => Body is valid
+    validate_DoWhileNode(node)
+        => Checks a do-while loop:
+        => Condition is valid
+        => Body is valid
+    validate_ForLoopNode(node)
+        => Checks a for loop:
+        => Loop variable is valid
+        => Condition is valid
+        => Unary operation is valid
+        => Body is valid
+
+14. Output
+    validate_OutputNode(node)
+        => Checks an output statement (e.g., print):
+        => Each expression is valid (arithmetic, logical, string, etc.)
+        => Handles formatting directives (e.g., setprecission)
+
+15. Utility
+    type_expr(content)
+        => Analyzes a list of tokens to determine the type of expression:
+        => Returns 'arithmetic', 'logical', 'relational', 'assignment', or 'Not Valid'.
+
+16. Entry Point
+    semantic_analyze(ast_root)
+        => Convenience function to run semantic analysis on an AST.
+        Returns:
+        => List of semantic errors (if any).
+
+
+Summary Table
+| Function Name | What It Checks/Does |
+|--------------------------------------|------------------------------------------------------------------|
+| validate_VariableDeclarationNode | Variable declaration, type, initialization, scope |
+| validate_initialization | Variable initialization, type, array dimensions |
+| validate_FunctionNode | Function declaration, parameters, return type, body |
+| validate_FunctionCallNode | Function call, argument count and types |
+| validate_id | Identifier usage (variable, array, function) |
+| validate_* (type-specific) | Value validity for each primitive type |
+| validate_arithmetic | Arithmetic expressions |
+| validate_logical | Logical expressions |
+| validate_relational | Relational (comparison) expressions |
+| validate_function_body | Iterates and dispatches validation for each statement |
+| validate_return_value | Function return value |
+| validate_MainFunctionNode | Main function body |
+| validate_VariableReassignmentNode | Variable reassignment |
+| validate_ArrayAssignmentNode | Array assignment, index bounds |
+| validate_IfNode, validate_ElifNode, validate_ElseNode | If/elif/else statements, conditions, bodies |
+| validate_WhileNode, validate_DoWhileNode, validate_ForLoopNode | Loops, conditions, bodies |
+| validate_OutputNode | Output/print statements, formatting |
+| type_expr | Determines expression type |
+| semantic_analyze | Entry point for semantic analysis |

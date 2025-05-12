@@ -1,0 +1,176 @@
+AST Builder : Function-by-Function Guide
+
+Overview:
+    This code defines the structure of the AST for the RoyalScript language and provides a builder that constructs the AST from a list of tokens from the lexer
+
+1. AST Node Classes
+    => Each class represents a different kind of node in the AST. All inherit from Node, which stores line and position for error reporting.
+    Node
+        => Base class for all AST nodes.
+        => Stores line and position for error reporting.
+    ASTBuildingException
+        => Custom exception for errors during AST construction (distinct from syntax/semantic errors).
+        => Stores error message, line, and position.
+    ProgramNode
+        => Root node of the AST.
+        Contains:
+            => global_declarations: List of global variable declarations.
+            => functions: List of function nodes.
+            => main_function: The main function node.
+    VariableDeclarationNode
+        => Represents a variable declaration.
+        => Stores type, name, value, dynasty (constant) flag, scope, and array dimensions.
+    VariableReassignmentNode
+        => Represents a variable reassignment (e.g., x = 5).
+    FunctionNode
+        => Represents a function definition.
+        => Stores return type, name, parameters, body, return value, and scope info.
+    FunctionCallNode
+        => Represents a function call (e.g., foo(1, 2)).
+    DoWhileNode, WhileNode, ForLoopNode
+        => Represent their respective loop constructs.
+        => Store body and condition/loop expressions.
+    IfNode, ElifNode, ElseNode
+        => Represent conditional branches.
+        => Store condition and body for each branch.
+    BreakNode, ContinueNode
+        => Represent break and continue statements.
+    LiteralNode
+        => Represents a literal value (number, string, etc.).
+    MainFunctionNode
+        => Represents the main function (entry point).
+    ArrayAssignmentNode
+        => Represents assignment to an array element.
+    UnaryOperationNode
+        => Represents unary operations (e.g., i++).
+    OutputNode
+        => Represents output/print statements.
+
+2. AST Builder: RoyalScriptASTBuilder
+    => This class takes a list of tokens and builds the AST by parsing the token stream.
+    Initialization
+        => self.tokens: The list of tokens (grouped by line).
+        => self.current_line, self.current_index: Track current position in the token stream.
+        => self.current_position: For error reporting.
+
+3. Token Navigation Methods
+    _skip_comments()
+        => Skips over comment tokens and empty lines.
+    current_token()
+        => Returns the current token, skipping comments.
+    peek_next_token()
+        => Looks ahead to the next token without advancing.
+    advance()
+        => Moves to the next token, skipping comments.
+
+4. Matching and Error Handling
+    match(expected)
+        => Checks if the current token matches the expected type.
+        => Advances if matched, raises SyntaxError if not.
+    try_match(expected)
+        => Like match, but returns True/False instead of raising an error.
+        => current_token_position(), get_token_position()
+        => Return the current line and position for error messages.
+
+7. AST Construction Methods
+    build_ast()
+        => Entry point. Calls build_program() and returns the root node.
+    build_program()
+        => Matches the start of the program (crown ~).
+        => Builds global declarations, functions, and the main function.
+        => Matches the end of the program (reign ~).
+        => Returns a ProgramNode.
+    build_declaration(scope_level)
+        => Builds one or more variable declarations (including arrays and initialization).
+        => Handles multiple declarations in a single statement (e.g., int a = 1, b = 2~).
+        => Returns a list of VariableDeclarationNodes.
+    build_global_declarations()
+        => Builds all global variable declarations until a function or main function is encountered.
+    build_global_functions()
+        => Builds all global function definitions
+    build_function(is_global, scope_level)
+        => Builds a function definition, including return type, name, parameters, body, and return value.
+    build_main_function()
+        => Builds the main function node.
+    build_body()
+        => Builds the body of a function or control structure.
+        => Handles variable declarations, function calls, assignments, loops, conditionals, output, break/continue, etc.
+    build_output()
+        => Builds an output/print statement node.
+    build_var_reassign(line, pos)
+        => Builds a variable reassignment node.
+    build_expression(), build_val()
+        => Build a general expression node (list of tokens until a terminator).
+    build_array()
+        => Builds an array literal (handles nested braces).
+    build_rval()
+        => Builds a return value expression.
+    build_function_call(line, pos)
+        => Builds a function call node.
+    build_array_assignment(line, pos)
+        => Builds an array assignment node.
+    build_unary_operation(line, pos)
+        => Builds a unary operation node (++ or --).
+    build_parameters()
+        => Builds a list of function parameters.
+    build_do_while(line, pos), build_while(line, pos), build_if(line, pos), build_for_loop(line, pos)
+        => Build the respective control structure nodes.
+    build_loop_var(), build_loop_exp(), build_loop_unary()
+        => Build the initialization, condition, and update parts of a for loop.
+    build_break(line, pos), build_continue(line, pos)
+        => Build break and continue nodes.
+    build_condition()
+        => Builds a condition expression for control structures.
+
+8. How the Builder Works (Step-by-Step)
+    Initialization:
+        => The builder is given a list of tokens (from the lexer/parser).
+    Building the AST:
+        => build_ast() is called.
+        => It calls build_program(), which matches the program structure and delegates to other methods for each part.
+        => Each method advances through the tokens, building nodes and subtrees as it goes.
+        => Handles nested structures (e.g., function bodies, loops, conditionals) recursively.
+    Error Handling:
+        => If an unexpected token or end of input is encountered, raises a SyntaxError or ASTBuildingException with line/position info.
+    Result:
+        => Returns the root ProgramNode, which contains the entire AST.
+
+9. Extending the AST
+        => To add a new language feature:
+        => Define a new node class (e.g., SwitchNode).
+        => Add a method to the builder to construct that node.
+        => Update build_body() or other relevant methods to recognize and build the new node.
+
+Summary Table
+| Class/Method | Purpose/Functionality |
+|-----------------------------|--------------------------------------------------------------|
+| Node | Base class for all AST nodes |
+| ProgramNode | Root node, holds globals, functions, main function |
+| VariableDeclarationNode | Variable declaration |
+| FunctionNode | Function definition |
+| IfNode, ElifNode, ElseNode | Conditional branches |
+| WhileNode, DoWhileNode, ForLoopNode | Loop constructs |
+| OutputNode | Output/print statement |
+| ArrayAssignmentNode | Assignment to array element |
+| UnaryOperationNode | ++/-- operations |
+| RoyalScriptASTBuilder | Builds the AST from tokens |
+| build_ast() | Entry point for AST building |
+| build_program() | Builds the root program node |
+| build_body() | Builds a block of statements |
+| build_declaration() | Builds variable declarations |
+| build_function() | Builds function definitions |
+| build_main_function() | Builds the main function node |
+| build_output() | Builds output statements |
+| build_var_reassign() | Builds variable reassignments |
+| build_expression(), build_val() | Build expressions |
+| build_array() | Builds array literals |
+| build_function_call() | Builds function call nodes |
+| build_array_assignment() | Builds array assignment nodes |
+| build_unary_operation() | Builds unary operation nodes |
+| build_parameters() | Builds function parameter lists |
+| build_do_while(), build_while(), build_if(), build_for_loop() | Build control structures |
+| build_break(), build_continue() | Build break/continue nodes |
+| build_condition() | Builds condition expressions |
+
+
+        

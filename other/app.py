@@ -14,7 +14,7 @@ from lexer2 import RoyalScriptLexer, Token
 from parser import RoyalScriptParser
 from ast_builder import RoyalScriptASTBuilder, ASTBuildingException
 from semantic import SemanticAnalyzer, SemanticError
-from coder import RoyalScriptToPythonTranslator
+from translatorpy import RoyalScriptToPythonTranslator
 from test_ast import print_ast
 
 app = Flask(__name__)

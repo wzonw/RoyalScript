@@ -1,0 +1,76 @@
+RoyalScript Lexical Analyzer: Function-by-Function Guide
+
+Overview:
+
+This module tokenizes (breaks into tokens) RoyalScript source code.
+
+
+1. Key Components
+    Token Class
+        => Represents a single token.
+        Stores:
+            => value: The actual text (e.g., "castle", "123", "+")
+            => token_type: The type (e.g., IDENTIFIER, TREASURES, ADDITION_OPERATOR)
+            => position: The character position in the source code
+            => line: The line number
+    TokenType Class
+        => Contains all possible token types as class variables (keywords, operators, literals, etc.).
+        => Used for easy reference and to avoid typos.
+    RoyalScriptLexer Class
+        => The main lexer class.
+        => Input: RoyalScript source code as a string.
+        => Output: A list of lists of Token objects (one list per line).
+
+2. Initialization
+    => self.code: The source code to tokenize.
+    => self.position: Current character index in the code.
+    => self.line: Current line number (starts at 1).
+    => self.tokens: List of token lists, one per line.
+    => self.deci: Used for counting decimal places in floats.
+
+3. Core Methods
+    advance(self)
+        => Moves to the next character.
+        => If a newline is found, increments the line number and starts a new token list for the new line.
+    current_char(self)
+        => Returns the current character at self.position.
+    match(self, regex)
+        => Tries to match a regex pattern at the current position.
+
+4. Main Loop
+    While not at the end of the code:
+        => Gets the current character.
+        => Whitespace: Skips spaces, tabs, and newlines.
+        => Reserved Words: If the character matches the start of a reserved word (e.g., 'b' for "believe"), calls the corresponding stateXX() function to try to match the full word.
+        => Symbols/Operators: If the character is a symbol (e.g., +, -, *, /, etc.), calls the corresponding stateXX() function.
+        => Identifiers: If the character is an uppercase letter, calls state259() to match an identifier.
+        => Literals: Handles string ("), char ('), numbers, and floats with their own states.
+        => Comments: Handles single-line and multi-line comments.
+        => Invalid Characters: If a character doesn't match any known pattern, records an error and skips it.
+    State Functions
+        => Each stateXX() function is a finite state machine for recognizing a specific token or keyword.
+        => For example, state1() starts matching "believe", calling state2(), state3(), etc., for each subsequent character.
+        => If a match is successful, returns (True, input_str, TokenType.XXX).
+        => If not, records an error and skips to the next delimiter.
+    Token Creation
+        => When a valid token is recognized, a Token object is created and added to the current line's token list.
+    End of File
+        => After tokenizing, adds an EOF token to the last line.
+
+5. Special Handling
+    Numbers and Floats
+        => Handles negative and positive integers and floats.
+        => Uses normalize_integer and normalize_float to:
+            => Remove leading zeros.
+            => Limit floats to 15 decimal places.
+            => Handle negative numbers.
+    String and Char Literals
+        => Handles escape sequences and ensures literals are properly closed.
+    Comments
+        => Single-line comments start with ? and end at newline.
+        => Multi-line comments start with ?* and end with *?.
+    Error Handling
+        => If an invalid character or sequence is found, records an error message with line and position.
+
+6. Delimiters and Regular Definitions
+        => Uses Delims and RegDef (imported from RS_RegDef) to define what characters are valid as delimiters, whitespace, numbers, etc.

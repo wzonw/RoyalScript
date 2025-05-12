@@ -104,9 +104,9 @@ class SymbolTable:
             param_name: The name of the symbol
             entry_data: A dictionary containing symbol information:
                 - type: The data type of the symbol
-                - value: The value of the symbol (optional)
-                - is_function: Whether the symbol is a function (optional)
-                - line: Source code line number (optional)
+                - value: The value of the symbol 
+                - is_function: Whether the symbol is a function 
+                - line: Source code line number 
         """
         current_scope = self.scopes[self.current_scope_level]
         current_scope[param_name] = entry_data
@@ -127,7 +127,8 @@ class SemanticAnalyzer:
         # Exact match
         if expected_type == actual_type:
             return True
-
+        
+        # TODO: Add more advanced type compatibility rules if needed
         return False
 
     def analyze(self, ast_root):
@@ -148,11 +149,8 @@ class SemanticAnalyzer:
                 self.validate_MainFunctionNode(ast_root.main_function)
         
         except SemanticError as e:
-            # As soon as we encounter the FIRST semantic error,
             self.errors.append(e.semantic_error)
             
-            # Stop immediately—no more analysis
-        
         return self.errors
 
 
@@ -188,7 +186,7 @@ class SemanticAnalyzer:
         if redecl_error:
             self.errors.append(redecl_error)
             raise ValueError(self.errors)
-        
+
         # Validate initialization if present
         if node.value:
             self.validate_initialization(node)
@@ -199,9 +197,10 @@ class SemanticAnalyzer:
         Validate variable initialization.
         Checks type compatibility of assigned value.
         """
+        
         datatype = node.datatype[1] # store data type
         print('data_type', datatype)
-        
+          
         if node.array_dimensions:
             dimension = len(node.array_dimensions)
             if node.value is not None:
@@ -220,16 +219,6 @@ class SemanticAnalyzer:
                         if element[0] in ['{', '}']:
                             curly += 1
 
-                        if element[0] == 'identifier':
-                            identifier_name = element[1]
-
-                            # check if nageexist
-                            symbol_entry = self.symbol_table.lookup(identifier_name)
-
-                            if symbol_entry:
-                                if symbol_entry.array_dimensions:
-                                    raise ValueError(f"Cannot initialized 1-Dimension array '{node.identifier[1]}' with another 1-Dimension array '{identifier_name}' at line {node.line+1}.")
-
                     print('curly ===================', curly)
                     # Bracket depth check
                     if curly != 2:
@@ -240,99 +229,76 @@ class SemanticAnalyzer:
                         raise ValueError(f"Array size does not match, expected {num_elements} elements but got {len(elements_val)} at line {node.line+1}.")
                     
                     print(elements_val, '-------------------------')
-
-                    
                     for element in elements_val:
                         # Type-specific validation
-                        print(element, '1111', node.datatype, element[0] == 'identifier')
-                        print("heree2", element[0] == 'identifier')
-                        if element[0] == 'identifier':
-                            print("heree1", symbol_entry.value)
-                            identifier_name = element[1]
-
-                            # check if nageexist
-                            symbol_entry = self.symbol_table.lookup(identifier_name)
-
-                            if symbol_entry:
-                                    # check if same datatype
-                                    if symbol_entry.datatype != node.datatype[0]:
-                                         raise ValueError(f"1Type mismatch: Cannot initialize {node.datatype[0]} with {symbol_entry.datatype} at line {node.line+1}.")
-                                    #check if initialized with value
-                                    print("heree0", symbol_entry.value)
-                                    if not symbol_entry.value:
-                                        raise ValueError(f"Uninitialized identifier '{identifier_name}' at line {node.line+1}.")
-                            else:
-                                raise ValueError(f"Undeclared identifier '{identifier_name}' at line {node.line+1}.")
-
-                        else:
-                            try:
-                                if node.datatype[0] == 'treasures':
-                                    self.validate_treasures([element], node.datatype[0], node)
-                                elif node.datatype[0] == 'ocean':
-                                    self.validate_ocean([element], node.datatype[0], node)
-                                elif node.datatype[0] == 'scroll':
-                                    self.validate_scroll([element], node.datatype[0], node)
-                                elif node.datatype[0] == 'rose':
-                                    self.validate_rose([element], node.datatype[0], node)
-                                elif node.datatype[0] == 'mirror':
-                                    self.validate_mirror([element], node.datatype[0], node)
-                            except ValueError as e:
-                                self.errors.append(SemanticError(
-                                    SemanticErrorType.Invalid_Assignment,
-                                    f"{str(e)}"
-                                ))
-                        
+                        print(element, '+++++++++++++++++++++++++++', node.datatype)
+                        try:
+                            if node.datatype[0] == 'treasures':
+                                self.validate_treasures([element], node.datatype[0], node)
+                            elif node.datatype[0] == 'ocean':
+                                self.validate_ocean([element], node.datatype[0], node)
+                            elif node.datatype[0] == 'scroll':
+                                self.validate_scroll([element], node.datatype[0], node)
+                            elif node.datatype[0] == 'rose':
+                                self.validate_rose([element], node.datatype[0], node)
+                            elif node.datatype[0] == 'mirror':
+                                self.validate_mirror([element], node.datatype[0], node)
+                        except ValueError as e:
+                            self.errors.append(SemanticError(
+                                SemanticErrorType.Invalid_Assignment,
+                                f"{str(e)}"
+                            ))
+                    
                     return True
                 
                 elif dimension == 2:
                     num_elements = int(node.array_dimensions[1][1])
                     elements_val = []
-                    expected_rows = int(node.array_dimensions[0][1]) + 1
-                    actual_rows = 0
+                    curly = int(node.array_dimensions[0][1]) * 2
                     cur_element = []
-                    id_elements = []
-                    nesting_level = 0  # Start at 0 and increment when we see opening braces
+                    count = 0
+                    id_elements = 0
+
+                    print(num_elements, elements_val, curly)
+
                     
-                    for element in node.value:
+                    for element in node.value[1:-1]:
+                        # Check if the element is a tuple and has at least one item
                         if isinstance(element, tuple) and len(element) > 0:
-                            if element[0] == '{':
-                                nesting_level += 1
-                                actual_rows += 1
-                                if nesting_level == 2:  # Starting a new inner array
-                                    cur_element = []  # Reset for new inner array
-                            elif element[0] == '}':
-                                if nesting_level == 2:  # Closing an inner array
-                                    elements_val.append(cur_element)  # Add the completed inner array
+                            # Handle separators - note element[0] is now properly checked as a tuple's first item
+                            if element[0] in {',', '{', '}'}:
+                                # Handle start of a new nested element
+                                if element[0] == '{':
+                                    count += 1
                                     cur_element = []
-                                nesting_level -= 1
-                            elif element[0] == ',':
-                                continue  # Skip commas
+                                # Handle end of a nested element
+                                elif element[0] == '}':
+                                    if cur_element:
+                                        elements_val.append(cur_element)
+                                    cur_element = []
+                                    count += 1
+                                continue
+                            # Handle identifiers - moved outside the separator check
                             elif element[0] == 'identifier':
-                                # Check if the identifier exists
-                                symbol_entry = self.symbol_table.lookup(element[1])
-                                
-                                if symbol_entry:
-                                    # If we're in the inner array (nesting_level == 2) AND
-                                    # the identifier is an array, that's not allowed
-                                    print(f'nesting level = {nesting_level} {node.value}')
-                                    if nesting_level == 2 and symbol_entry.array_dimensions:
-                                        raise ValueError(f"Array identifier '{element[1]}' not allowed inside 2nd dimension")
-                                    elif nesting_level == 1 and symbol_entry.array_dimensions:
-                                        actual_rows += 1
-                                
-                                id_elements.append(element)
-                                
-                                # Add to current element collection if we're in the inner array
-                                if nesting_level == 2:
-                                    cur_element.append(element)
-                            else:
-                                # Any other element types - add to current element if in an inner array
-                                if nesting_level == 2:
-                                    cur_element.append(element)
-                    
-                    # Check row count
-                    if expected_rows != actual_rows:
-                        raise ValueError(f"Mismatch in array size during initialization, declared as {expected_rows-1} rows but initialized with {actual_rows-1} rows")
+                                elements_val.append(element)
+                                count += 2
+                                continue
+                            
+                            # Collect actual value elements (only if not a separator or identifier)
+                            cur_element.append(element)
+
+                    # Check if there's a remaining cur_element to add at the end
+                    if cur_element:
+                        elements_val.append(cur_element)
+
+                    # Bracket depth check
+                    if curly != count:
+                        self.errors.append(SemanticError(
+                                SemanticErrorType.Invalid_Assignment,
+                                f"Mismatch in array size during initialization, declared as {int(curly/2)} row but as initialized {int(count/2)} row"))
+                        
+
+                    print(elements_val, "++++++++++++++++++++++")
 
                     for element in elements_val:
                         if element[0] == 'identifier':
@@ -344,24 +310,17 @@ class SemanticAnalyzer:
                                 raise ValueError(f"Undeclared identifier '{id}' at line {node.line+1}.")
                             
                             if symbol_entry.datatype != node.datatype[1]:
-                                raise ValueError(f"2Type mismatch: Cannot initialize {node.datatype[0]} with {symbol_entry.datatype} at line {node.line+1}.")
+                                raise ValueError(f"Mismatched data type at line {node.line+1}. Expected {node.datatype[1]} but got {symbol_entry.datatype} array.")
                             
-                            if symbol_entry.array_dimensions:
+                            if not symbol_entry.array_dimensions:
+                                raise ValueError(f"Invalid array value '{id}', must be an array list at line {node.line+1}.")
                             
-                                if len(symbol_entry.array_dimensions) != 1:
-                                    raise ValueError(f"Invalid ID format at line {node.line+1}. Expected 1-dimensional array but received 2-dimensional array.")
-                                
-                                if num_elements != int(symbol_entry.array_dimensions[0][1]):
-                                    raise ValueError(f"ID index mismatch at line {node.line+1}. The provided index '{symbol_entry.array_dimensions[0][1]}' does not match the expected '{num_elements}' initialization variable.")
-                                
-                            else:
-                                # check if same datatype
-                                if symbol_entry.datatype != node.datatype[0]:
-                                    raise ValueError(f"3Type mismatch: Cannot initialize {node.datatype[0]} with {symbol_entry.datatype} at line {node.line+1}.")
-                                #check if initialized with value
-                                if not symbol_entry.is_initialized:
-                                    raise ValueError(f"Uninitialized identifier '{identifier_name}' at line {node.line+1}.")
-    
+                            if len(symbol_entry.array_dimensions) != 1:
+                                raise ValueError(f"Invalid ID format at line {node.line+1}. Expected 1-dimensional array but received 2-dimensional array.")
+                            
+                            if num_elements != int(symbol_entry.array_dimensions[0][1]):
+                                raise ValueError(f"ID index mismatch at line {node.line+1}. The provided index '{symbol_entry.array_dimensions[0][1]}' does not match the expected '{num_elements}' initialization variable.")
+                            
 
                             # id_elements += int(symbol_entry.array_dimensions[0][1])
                         elif element[0] != 'identifier':
@@ -384,7 +343,9 @@ class SemanticAnalyzer:
                                     ))
 
                         if num_elements != len(element):
-                            raise ValueError(f"Array size does not match, expected {num_elements} elements but got {len(element)}") 
+                            self.errors.append(SemanticError(
+                                SemanticErrorType.Invalid_Assignment,
+                                f"Array size does not match, expected {num_elements} elements but got {len(element)}")) 
 
                     return True
             else:
@@ -394,7 +355,7 @@ class SemanticAnalyzer:
             print('data_type ---- ', datatype)
             if datatype == 'treasures':
                 print('enetered treasures')
-                self.validate_treasures(node.value, datatype, node)
+                self.validate_treasures( node.value, datatype, node)
             elif datatype == 'ocean':
                 self.validate_ocean(node.value, datatype, node)
             elif datatype == 'scroll':
@@ -410,22 +371,22 @@ class SemanticAnalyzer:
             ))
 
         print('vardec passed ')
-
     #============================= Value validation based on data type =================================#
 
     def validate_treasures(self, value, datatype, node):
         print('entered validate treasuress', value)
         value_type = value[0][0]
         content = [] 
+        # symbol_entry = self.symbol_table.lookup(node.name)
 
         print(value_type, value)
 
-        # determine if the value is an expression and what type of expression
         for val in value:   
             content.append(val[1]) 
+
+        # determine if the value is an expression and what type of expression
         value_string = ' '.join(content)
         expr_type = self.type_expr(content)
-        # ===================================================================
 
         print('expression', expr_type, content, value, value_string,)
 
@@ -468,12 +429,12 @@ class SemanticAnalyzer:
 
         print(value_type, value)
 
-        # determine if the value is an expression and what type of expression
         for val in value:   
             content.append(val[1]) 
+
+        # determine if the value is an expression and what type of expression
         value_string = ' '.join(content)
         expr_type = self.type_expr(content)
-        # ===================================================================
 
         print('expression', expr_type, content, value, value_string,)
 
@@ -497,6 +458,7 @@ class SemanticAnalyzer:
             elif value_type == 'wish':
                 return True
             
+            
             elif value_type == 'phantom':
                 return True
             
@@ -514,12 +476,12 @@ class SemanticAnalyzer:
 
         print(value_type, value)
 
-        # determine if the value is an expression and what type of expression
         for val in value:   
             content.append(val[1]) 
+
+        # determine if the value is an expression and what type of expression
         value_string = ' '.join(content)
         expr_type = self.type_expr(content)
-        # ===================================================================
 
         print('expression', expr_type, content, value, value_string,)
 
@@ -556,12 +518,12 @@ class SemanticAnalyzer:
 
         print(value_type, value)
 
-        # determine if the value is an expression and what type of expression
         for val in value:   
             content.append(val[1]) 
+
+        # determine if the value is an expression and what type of expression
         value_string = ' '.join(content)
         expr_type = self.type_expr(content)
-        # ===================================================================
 
         print('expression', expr_type, content, value, value_string,)
 
@@ -595,12 +557,12 @@ class SemanticAnalyzer:
 
         print(value_type, value)
 
-        # determine if the value is an expression and what type of expression
         for val in value:   
             content.append(val[1]) 
+
+        # determine if the value is an expression and what type of expression
         value_string = ' '.join(content)
         expr_type = self.type_expr(content)
-        # ===================================================================
 
         print('expression', expr_type, content, value, value_string,)
 
@@ -632,9 +594,7 @@ class SemanticAnalyzer:
         
         else:
             raise ValueError(f"Invalid mirror initialization '{value_string}' at line {node.line+1}.")
-        
 
-    #============================= Value validation for type conversion =================================#
     def validate_conversion_func(self, value, value_type, node):
         val = value[2]
 
@@ -654,36 +614,29 @@ class SemanticAnalyzer:
                     raise ValueError(f"Invalid value '{val[1]}' for type conversion totreasure at line {node.line+1}.")
                 
             if val[0] == 'identifier':
-                # check if nageexist
+            # check if nageexist
                 identifier_name = value[2][1]
         
                 # Look up the symbol in the symbol table
                 symbol_entry = self.symbol_table.lookup(identifier_name)
 
                 # Check if the identifier is declared
-                if not symbol_entry or identifier_name == node.identifier:
+                if not symbol_entry or identifier_name == node.identifier[1]:
                     raise ValueError(f"Undeclared identifier '{identifier_name}'")
                 
                 if not symbol_entry.value:
                         raise ValueError(f"Uninitialized identifier '{identifier_name}'")
-                
                 # if mirror / treasures
                 datatype = symbol_entry.datatype
 
                 if datatype == "mirror":
-                    if not symbol_entry.value:
-                        raise ValueError(f"Uninitialized identifier '{identifier_name}' at line {node.line+1}.")
                     return True
 
                 # if treasures yung val = 1 or 0
                 if datatype == "treasures":
-                    if not symbol_entry.value:
-                        raise ValueError(f"Uninitialized identifier '{identifier_name}' at line {node.line+1}.")
                     return True
                 
                 if datatype == "ocean":
-                    if not symbol_entry.value:
-                        raise ValueError(f"Uninitialized identifier '{identifier_name}' at line {node.line+1}.")
                     return True
 
                 if datatype == "rose":
@@ -710,12 +663,12 @@ class SemanticAnalyzer:
             
             if val[0] in ['treasures_lit', 'ocean_lit', '1', '0']:
                 return True
-            if val[0] in ["rose_lit", "mirror_lit"]:
-                raise ValueError(f"Invalid value '{node.value[2][1]}' for type conversion toocean at line {node.line+1}.")
+            if val[0] == "rose_lit":
+                if val[1].strip("'") in ["1", "0"]:
+                    return True
+                raise ValueError(f"Invalid value '{identifier_name}' for type conversion toocean at line {node.line+1}.")
             if val[0] == 'scroll_lit':
-                is_float = self.is_float(val[1])
-                if is_float == False:
-                    raise ValueError(f"Invalid value '{node.value[2][1]}' for type conversion toocean at line {node.line+1}.")
+                self.is_float(val[1])
                 return True
             if val[0] == 'identifier':
             # check if nageexist
@@ -730,31 +683,28 @@ class SemanticAnalyzer:
                 
                 if not symbol_entry.value:
                         raise ValueError(f"Uninitialized identifier '{identifier_name}' at line {node.line+1}.")
-                
-                # if treasures
+                # if mirror / treasures
                 datatype = symbol_entry.datatype
 
                 if datatype == "mirror":
-                    raise ValueError(f"Invalid value '{identifier_name}' for type conversion toocean at line {node.line+1}.")
+                    if symbol_entry.value[0][1] not in ["1", "0"]:
+                        raise ValueError(f"Invalid value '{identifier_name}' for type conversion toocean at line {node.line+1}.")
 
-                # if treasures yung val 
+                # if treasures yung val = 1 or 0
                 if datatype == "treasures":
-                    if not symbol_entry.value:
-                        raise ValueError(f"Uninitialized identifier '{identifier_name}' at line {node.line+1}.")
                     return True
                 
                 if datatype == "ocean":
-                    if not symbol_entry.value:
-                        raise ValueError(f"Uninitialized identifier '{identifier_name}' at line {node.line+1}.")
                     return True
 
                 if datatype == "rose":
-                    raise ValueError(f"Invalid value '{identifier_name}' for type conversion toocean at line {node.line+1}.")
+                    val_rose = symbol_entry.value[0][1].strip("'")
+                    if val_rose not in ["1", "0"]:
+                        raise ValueError(f"Invalid value '{identifier_name}' for type conversion toocean at line {node.line+1}.")
                 
                 if datatype == "scroll":
                     val_scroll = symbol_entry.value[0][1].strip('"')
                     self.is_float(val_scroll)
-
             else:
                 print(float(val[1]), '----------------------')
                 raise ValueError(f"Invalid value '{val[1]}' for type conversion toocean at line {node.line+1}.")
@@ -776,18 +726,15 @@ class SemanticAnalyzer:
                 
                 if not symbol_entry.value:
                         raise ValueError(f"Uninitialized identifier '{identifier_name}' at line {node.line+1}.")
-                
         #torose
         elif value_type == 'rose':
             if val[0] == 'treasures_lit':
-                if len(str(val[1])) != 1:
-                    raise ValueError(f"Invalid value '{val[1]}' for type conversion torose at line {node.line+1}.")
-                return True
+                if len(str(val[1])) == 1:
+                    return True
+                raise ValueError(f"Invalid value '{val[1]}' for type conversion torose at line {node.line+1}.")
             elif val[0] == 'scroll_lit':
-                if len(val[1]) != 3:
-                    raise ValueError(f"Invalid value '{val[1]}' for type conversion torose at line {node.line+1}.")
-                return True
-            elif val[0] in ['ocean_lit', 'mirror_lit']:
+                if len(val[1]) == 3:
+                    return True
                 raise ValueError(f"Invalid value '{val[1]}' for type conversion torose at line {node.line+1}.")
             elif val[0] in ['rose_lit', '1', '0']:
                 return True
@@ -802,8 +749,6 @@ class SemanticAnalyzer:
                     raise ValueError(f"Undeclared identifier '{identifier_name}' at line {node.line+1}.")
                 
                 if symbol_entry.datatype == "rose":
-                    if not symbol_entry.value:
-                        raise ValueError(f"Uninitialized identifier '{identifier_name}' at line {node.line+1}.")
                     return True
                 
                 # if id is scroll
@@ -837,15 +782,9 @@ class SemanticAnalyzer:
                     if not symbol_entry.value:
                         raise ValueError(f"Uninitialized identifier '{identifier_name}'")
                     
-                    if ('totreasures', 'totreasures') in symbol_entry.value:
-                        if len(symbol_entry.value[2][1]) != 1:
-                            raise ValueError(f"Invalid value '{identifier_name}' for type conversion torose")
-                    elif len(symbol_entry.value[0][1]) != 1:
+                    if len(symbol_entry.value[0][1]) != 1:
                         raise ValueError(f"Invalid value '{identifier_name}' for type conversion torose")
                     return True
-                
-                if symbol_entry.datatype in ['ocean', 'mirror']:
-                    raise ValueError(f"Invalid value '{identifier_name}' for type conversion torose")
 
                 # if yung index less than the len of the scroll
             else:
@@ -867,8 +806,6 @@ class SemanticAnalyzer:
                 if val[1] in ['1', '0']:
                     return True
                 raise ValueError(f"Invalid value '{val[1]}' for type conversion tomirror at line {node.line+1}.")
-            elif val[0] == 'ocean_lit':
-                raise ValueError(f"Invalid value '{val[1]}' for type conversion tomirror at line {node.line+1}.")
             elif val[0] == 'identifier':
                 # check if nageexist
                 identifier_name = value[2][1]
@@ -886,8 +823,6 @@ class SemanticAnalyzer:
                 datatype = symbol_entry.datatype
 
                 if datatype == "mirror":
-                    if not symbol_entry.value:
-                        raise ValueError(f"Uninitialized identifier '{identifier_name}'")
                     return True
 
                 # if treasures yung val = 1 or 0
@@ -904,9 +839,7 @@ class SemanticAnalyzer:
                     val_scroll = symbol_entry.value[0][1].strip('"')
                     if val_scroll not in ['true', 'false', '1', '0']:
                         raise ValueError(f"Invalid value '{identifier_name}' for type conversion tomirror at line {node.line+1}.")
-                
-                if datatype == 'ocean':
-                    raise ValueError(f"Invalid value '{identifier_name}' for type conversion tomirror at line {node.line+1}.")
+                # if 
                 
             else:
                 raise ValueError(f"Invalid value '{val[1]}' for type conversion tomirror at line {node.line+1}.")
@@ -914,24 +847,16 @@ class SemanticAnalyzer:
         else:
                 raise ValueError(f"Invalid value '{val[1]}' for type conversion at line {node.line+1}.")
 
-    # check if yung scroll in toocean is floating number/decimal
     def is_float(self, value_string):
-        # Strip quotes if present
+        
         string = value_string.strip('"').strip("'")
         print(string, '++++++++++++++===========')
-        
-        # First check if it has a decimal point
-        if '.' not in string:
-            return False
-        
-        # Then verify it can be parsed as a valid float
         try:
             float(string)
             return True
         except ValueError:
             return False
-    
-    # check if string concatenation is correct
+        
     def string_op(self, content, value, node):
         value_string = ' '.join(content)
         identifiers= []
@@ -1046,11 +971,9 @@ class SemanticAnalyzer:
                 print("others: ",other)
                 if other[0] not in ['scroll_lit', 'rose_lit']:
                     raise ValueError(f"Invalid string operand '{other[1]}' at line {node.line+1}.")
-                
-        
+                    
         return True
     
-        
     def validate_arithmetic(self, value, datatype, node):
         print('entered arith validate')
         result = []
@@ -1136,8 +1059,10 @@ class SemanticAnalyzer:
                 operand = []  # Reset for right operand
             elif value[i][0] != '!':
                 operand.append(value[i])  # Accumulate tokens for this operand
+            # You may want to handle the negation case here
             i += 1
         
+        # Don't forget to add the last operand
         if operand:
             operand_log.append(operand)
             
@@ -1475,7 +1400,9 @@ class SemanticAnalyzer:
     
         
     def unary(self, value, datatype, node, is_varVal):
-        content = []
+        content = [
+
+        ]
         for val in value:   
             content.append(val[1]) 
         value_string = ' '.join(content)
@@ -1613,6 +1540,12 @@ class SemanticAnalyzer:
         symbol_entry = self.symbol_table.lookup(identifier_name)
         
         print(expr_type, "+++++++", identifier_name)
+        # Check if the identifier is declared
+        # if hasattr(node, 'identifier') and node.identifier is not None:
+        #     if not symbol_entry or identifier_name == node.identifier[1]:
+        #         raise ValueError(f"Undeclared identifier '{identifier_name}'")
+        # else:
+        #     print('entered 1')
         if not symbol_entry:
             raise ValueError(f"Undeclared identifier '{identifier_name}' at line {node.line +1}.")
 
@@ -1620,6 +1553,9 @@ class SemanticAnalyzer:
         
         # If it's a function, perform additional checks
         if symbol_entry.is_function:
+            if expr_type == 'Function':
+                value = node.return_val
+                datatype = node.return_type[0]
     
             # Check if the function has parameters
             print('1 ==================', value)
@@ -1682,25 +1618,30 @@ class SemanticAnalyzer:
                             raise ValueError(f"Invalid set precission value '{symbol_entry.name}' of '{symbol_entry.datatype}' data type at line {node.line+1}.")
                         
                     elif expr_type == "Granted":
-                        if symbol_entry.datatype[0] not in ['treasures', 'ocean', 'scroll', 'rose', 'mirror', 'chamber']:
-                            raise ValueError(f"Invalid granted content '{symbol_entry.name}' of '{symbol_entry.datatype[0]}' data type at line {node.line+1}.")
+                        if symbol_entry.datatype[0] not in datatype:
+                            raise ValueError(f"Invalid granted content '{symbol_entry.name}' of '{symbol_entry.datatype}' data type at line {node.line+1}.")
                         
                     elif expr_type == "Relational":
                         if symbol_entry.datatype[0] not in datatype:
                             return False, symbol_entry.datatype[0]
+                                        
+                    elif expr_type == 'Function':
+                        # Check type compatibility
+                        if not self.validate_type_compatibility(datatype, symbol_entry.datatype[0]):
+                            raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype[0]} at line {node.line+1}.")
                         
                     elif expr_type == 'String_op':
                         if symbol_entry.datatype not in datatype:
                             raise ValueError(f"Invalid string operand '{symbol_entry.name}' of '{symbol_entry.datatype}' data type at line {node.line+1}.")
                     
                     elif expr_type == "Condition":
-                        if symbol_entry.datatype[0] != 'mirror':
+                        if symbol_entry.datatype[0] not in ['mirror']:
                             raise ValueError(f"Invalid condition '{symbol_entry.name}' of '{symbol_entry.datatype}' data type, must be mirror at line {node.line+1}.")
                         
                     else:
                         # Check type compatibility
                         if not self.validate_type_compatibility(datatype, symbol_entry.datatype[0]):
-                            raise ValueError(f"4Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype[0]} at line {node.line+1}.")
+                            raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype[0]} at line {node.line+1}.")
                     
                 return True, symbol_entry.datatype[0]
             
@@ -1738,13 +1679,18 @@ class SemanticAnalyzer:
                     raise ValueError(f"Invalid set precission value '{symbol_entry.name}' of '{symbol_entry.datatype}' data type at line {node.line+1}.")
                 
             elif expr_type == "Granted":
-                if symbol_entry.datatype[0] not in ['treasures', 'ocean', 'scroll', 'rose', 'mirror', 'chamber']:
-                    raise ValueError(f"Invalid granted content '{symbol_entry.name}' of '{symbol_entry.datatype[0]}' data type at line {node.line+1}.")
+                if symbol_entry.datatype[0] not in datatype:
+                    raise ValueError(f"Invalid granted content '{symbol_entry.name}' of '{symbol_entry.datatype}' data type at line {node.line+1}.")
                 
             elif expr_type == "Relational":
                 print(datatype, '==============+++============', symbol_entry.datatype)
                 if symbol_entry.datatype[0] not in datatype:
                     return False, symbol_entry.datatype[0]
+                                
+            elif expr_type == 'Function':
+                # Check type compatibility
+                if not self.validate_type_compatibility(datatype, symbol_entry.datatype[0]):
+                    raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype[0]} at line {node.line+1}.")
                 
             elif expr_type == 'String_op':
                 if symbol_entry.datatype not in datatype:
@@ -1757,19 +1703,23 @@ class SemanticAnalyzer:
             else:
                 # Check type compatibility
                 if not self.validate_type_compatibility(datatype, symbol_entry.datatype[0]):
-                    raise ValueError(f"5Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype[0]} at line {node.line+1}.")
+                    raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype[0]} at line {node.line+1}.")
             
             print('function call passed')
             
             return True, symbol_entry.datatype[0]
         
 
+
         # If it's an array, perform array-specific checks
-        elif symbol_entry.array_dimensions: 
+        elif symbol_entry is not None and symbol_entry.array_dimensions and symbol_entry.array_dimensions is not None:  # Added 'elif' here instead of separate if
             print('array check -----------------', identifier_name)
             dimensions = 0
             array_size = []
             id_index = symbol_entry.array_dimensions
+            if expr_type == 'Function':
+                value = node.return_val
+                datatype = node.return_type[0]
 
             # print(node.datatype[1], '==========', symbol_entry.datatype)
             if expr_type == "Arithmetic":
@@ -1781,8 +1731,8 @@ class SemanticAnalyzer:
                     raise ValueError(f"Invalid set precission value '{symbol_entry.name}' of '{symbol_entry.datatype}' data type at line {node.line+1}.")
                 
             elif expr_type == "Granted":
-                if symbol_entry.datatype[0] not in ['treasures', 'ocean', 'scroll', 'rose', 'mirror', 'chamber']:
-                    raise ValueError(f"Invalid granted content '{symbol_entry.name}' of '{symbol_entry.datatype[0]}' data type at line {node.line+1}.")
+                if symbol_entry.datatype not in ['treasures', 'ocean', 'scroll', 'rose', 'mirror', 'chamber']:
+                    raise ValueError(f"Invalid granted content '{symbol_entry.name}' of '{symbol_entry.datatype}' data type at line {node.line+1}.")
                 
                 
             elif expr_type == "Relational":
@@ -1793,7 +1743,7 @@ class SemanticAnalyzer:
             elif expr_type == 'Function':
                 # Check type compatibility
                 if not self.validate_type_compatibility(datatype, symbol_entry.datatype):
-                    raise ValueError(f"6Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype} at line {node.line+1}.")
+                    raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype} at line {node.line+1}.")
                 
             elif expr_type == 'String_op':
                 if symbol_entry.datatype not in datatype:
@@ -1839,10 +1789,11 @@ class SemanticAnalyzer:
 
         
         # Regular variable (not a function or array)
-        else:  
+        else:  # Added 'else' here for clarity
             print('regular variable check -----------------', identifier_name)
             if expr_type == 'Function':
                 value = node.return_val
+                datatype = node.return_type[0]
 
             print(datatype, 'datatype=============', expr_type)
 
@@ -1915,20 +1866,16 @@ class SemanticAnalyzer:
                     return True, "scroll"
                 
                 else:
-                    # print(f"Using variable  as array index", value, node.identifier, node.value)
-                    if value is not None:
+    
+                    if hasattr(node, 'value') and node.value is not None:
                         # Then check if it has length > 1
-                        if len(value) > 1:
-                            if value[1][0] in ['(', '[']:
-                                raise ValueError(f"{symbol_entry.name} is declared as a variable but is used as an array or function. ")
+                        if len(node.value) > 1:
+                            if node.value[1][0] in ['(', '[']:
+                                raise ValueError(f"{symbol_entry.name} is declared as a variable but is used as an array or function.")
+                                pass
                         # Check type compatibility
-                        if len(datatype) > 0:
-                            if symbol_entry.datatype not in datatype:
-                                raise ValueError(f"Invalid granted content '{symbol_entry.name}' of '{symbol_entry.datatype}' data type at line {node.line+1}.")
-                            
-                        else:
-                            if not self.validate_type_compatibility(datatype, symbol_entry.datatype):
-                                raise ValueError(f"7Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype}")
+                        if not self.validate_type_compatibility(datatype, symbol_entry.datatype):
+                            raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype}")
                     
                     return True, symbol_entry.datatype
             
@@ -1978,9 +1925,8 @@ class SemanticAnalyzer:
                     if value[1][0] in ['(', '[']:
                         raise ValueError(f"{symbol_entry.name} is declared as a variable but is used as an array or function at line {node.line+1}.")
 
-                elif expr_type == "Granted":
-                    if symbol_entry.datatype not in ['treasures', 'ocean', 'scroll', 'rose', 'mirror', 'chamber']:
-                        raise ValueError(f"Invalid granted content '{symbol_entry.name}' of '{symbol_entry.datatype}' data type at line {node.line+1}.")
+                if symbol_entry.datatype not in datatype:
+                    raise ValueError(f"Invalid granted '{symbol_entry.name}' of '{symbol_entry.datatype}' data type at line {node.line+1}.")
                 
                 # Check if the identifier is initialized
                 if not symbol_entry.is_initialized:
@@ -1993,7 +1939,7 @@ class SemanticAnalyzer:
             
                 # Check type compatibility
                 if not self.validate_type_compatibility(datatype, symbol_entry.datatype):
-                    raise ValueError(f"8Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype} at line {node.line+1}.")
+                    raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype} at line {node.line+1}.")
             
             elif expr_type == 'String_op':
                 if len(value) > 1:
@@ -2020,15 +1966,12 @@ class SemanticAnalyzer:
                     raise ValueError(f"Uninitialized identifier '{identifier_name}' at line {node.line+1}.")
                 
             else:
-                    if len(value) > 1:
-                        if value[1][0] in ['(', '[']:
-                            raise ValueError(f"{symbol_entry.name} is declared as a variable but is used as an array or function.")
+                # First check if node.value exists and is not None
+                if hasattr(node, 'value') and node.value is not None:
                     
                     # Check type compatibility
-                    if isinstance(datatype, tuple):
-                        datatype = datatype[0]
                     if not self.validate_type_compatibility(datatype, symbol_entry.datatype):
-                        raise ValueError(f"9Type mismatch: Cannot initialize '{datatype}' with {symbol_entry.datatype} at line {node.line+1}.")
+                        raise ValueError(f"Type mismatch: Cannot initialize {datatype} with {symbol_entry.datatype} at line {node.line+1}.")
             
             return True, symbol_entry.datatype
 
@@ -2045,7 +1988,7 @@ class SemanticAnalyzer:
         symbol_entry = self.symbol_table.lookup(node.name)
         
         if not symbol_entry or not symbol_entry.is_function:
-            raise ValueError(f"Function '{node.name}' is not declared at line {node.line+1}.")
+            raise ValueError(f"Function '{node.name}' not declared at line {node.line+1}.")
         
         identifier_name = node.name
 
@@ -2099,11 +2042,20 @@ class SemanticAnalyzer:
                         raise ValueError(f"Invalid argument for function '{identifier_name}': {str(e)} at line {node.line+1}.")
                     
                     # Add the parameter with its argument value to the symbol table
+                    # self.symbol_table.insert(param_name, {
+                    #     'type': param_type,
+                    #     'value': arg_value,
+                    #     'is_function': False,
+                    #     'line': node.line if hasattr(node, 'line') else None
+                    # })
                     param_entry = self.symbol_table.lookup(param_name)
                     if param_entry:
                         param_entry.value = arg_value
+                   
         
         return True
+
+    #===================================================================================================#
 
     def validate_FunctionNode(self, node):
         """
@@ -2160,8 +2112,7 @@ class SemanticAnalyzer:
             # Register type in the global flat symbol table
             self.global_variable_types[param_name[1]] = param_type[0]
             print("[DEBUG] Added to global types:", param_name[1], "->", param_type[0])
-    
-        # print(node.body, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhh", param_type[0])
+            
         # Validate function body
         if  node.body or len(node.body) > 0:
             print("entered body not none")
@@ -2205,64 +2156,16 @@ class SemanticAnalyzer:
         datatype = node.return_type[0]
         print(datatype)
 
-        # determine if the value is an expression and what type of expression
         for val in value:   
             content.append(val[1]) 
+
+        # determine if the value is an expression and what type of expression
         value_string = ' '.join(content)
         expr_type = self.type_expr(content)
-        # ===================================================================
 
         if expr_type == 'assignment':
-            #check if yung assignment operand is nageexist
-
-            identifier = value[0][1]
-
-            symbol = self.symbol_table.lookup(identifier)
-
-            if not symbol:
-                raise ValueError(f"Undeclared identifier '{identifier}' at line {node.line+1}.")
-            
-            if symbol.datatype not in ['ocean', 'treasures']:
-                raise ValueError(f"Cannot use identifier with datatype '{symbol.datatype}' for assignment expression at line {node.line+1}.")
-
-            # determine if the value is an expression and what type of expression
-            list = value[2:]
-            list_cont = []
-            print(f"new list {list}, {datatype}")
-            for val in list :   
-                list_cont.append(val[1]) 
-            value_string = ' '.join(list_cont)
-            expr_type = self.type_expr(list_cont)
-            # ===================================================================  
-            # if arithmetic yung 2nd operand of the assignment expression      
-            if expr_type == 'arithmetic':
-                self.validate_arithmetic(list, datatype, node)
-            elif expr_type == 'Not Valid':
-                if value[2][0] == 'identifier':
-                    self.validate_id(list, datatype, node, 'Function')
-                else:
-                    try:
-                        print('data_type ---- ', datatype)
-                        if datatype == 'treasures':
-                            print('enetered treasures')
-                            self.validate_treasures( list, datatype, node)
-                        elif datatype == 'ocean':
-                            self.validate_ocean(list, datatype, node)
-                        elif datatype == 'scroll':
-                            self.validate_scroll(list, datatype, node)
-                        elif datatype == 'rose':
-                            self.validate_rose(list, datatype, node)
-                        elif datatype == 'mirror':
-                            self.validate_mirror(list, datatype, node)
-                    except Exception as e:
-                        self.errors.append(SemanticError(
-                            SemanticErrorType.Invalid_Assignment,
-                            f"{str(e)}"
-                        ))
-            else:
-                raise ValueError(f"Cannot use {expr_type} in assignment expression at line {node.line+1}.")
-
-
+            return True
+        
         elif expr_type == 'arithmetic':
             if datatype in ['ocean', 'treasures']:
                 self.validate_arithmetic(value, datatype, node)
@@ -2309,15 +2212,14 @@ class SemanticAnalyzer:
         print("++++++++++++++++++++",node.return_val, node.return_type)
         return True
 
-
     def validate_MainFunctionNode(self, node):
-        self.symbol_table.enter_scope()  
+        self.symbol_table.enter_scope()  # ✅ add this
 
         for stmt in node.body:
-            
+            # Make sure variable declarations get processed within this scope
             self.validate_function_body([stmt])
 
-        self.symbol_table.exit_scope() 
+        self.symbol_table.exit_scope()  # ✅ add this
 
 
     def validate_VariableReassignmentNode(self, node):
@@ -2329,14 +2231,12 @@ class SemanticAnalyzer:
         - Type compatibility
         """
         symbol = self.symbol_table.lookup(node.identifier[1])
-        
-        # check if nageexist yung variable
-        if not symbol:
-            raise ValueError(f"Undeclared identifier '{node.identifier[1]}' at line {node.line+1}.")
 
         if hasattr(symbol, 'array_dimensions') and symbol.array_dimensions:
             raise ValueError(f"Cannot use array variable '{node.identifier[1]}' without an index in variable initialization. Array elements must be accessed using an index at line {node.line+1}.")
-    
+        
+        if not symbol:
+            raise ValueError(f"Undeclared identifier '{node.identifier[1]}' at line {node.line+1}.")
         
         if symbol.is_dynasty:
             raise ValueError(f"Cannot reassign dynasty (constant) variable '{node.identifier[1]}' at line {node.line+1}.")
@@ -2380,99 +2280,33 @@ class SemanticAnalyzer:
         return True
 
     def validate_ArrayAssignmentNode(self, node):
-        """
-            Validate array assignment.
-            Checks:
-            - Array exists
-            - Index validity
-            - Type compatibility
-            """
+        index = 0
+        column = 0
         flat_indices = [item for sublist in node.indices for item in sublist]
-        
+        """
+        Validate array assignment.
+        Checks:
+        - Array exists
+        - Index validity
+        - Type compatibility
+        """
         symbol = self.symbol_table.lookup(node.identifier[1])
         if not symbol:
-            raise ValueError(f"Undeclared array '{node.identifier[1]}' at line {node.line+1}.")
-            
+            self.errors.append(SemanticError(
+                SemanticErrorType.Undeclared,
+                f"Array '{node.identifier[1]}' not declared"
+            ))
+            return
         datatype = symbol.datatype
+        if len(symbol.array_dimensions) == 1:
 
-        if len(flat_indices) != len(symbol.array_dimensions):
-            raise ValueError(f"Mismatched array dimensions for '{node.identifier[1]}'. Declared as a {len(symbol.array_dimensions)}-dimensional array, but used as a {len(flat_indices)}-dimensional array at line {node.line+1}.")
-        if len(flat_indices) == 1:
-            if flat_indices[0][0] == 'identifier':
-                symbol = self.symbol_table.lookup(flat_indices[0][1])
-                #check if nageexist
-                if not symbol:
-                    raise ValueError(f"Undeclared identifier '{flat_indices[0][0]}' at line {node.line+1}.")
-                #check if int
-                if symbol.datatype != 'treasures':
-                    raise ValueError(f"Invalid array index '{flat_indices[0][0]}' at line {node.line+1}.")
-                #check if may value
-                if symbol.is_initialized == False:
-                    raise ValueError(f"Uninitialized identifier '{flat_indices[0][0]}' at line {node.line+1}.")
+            if len(flat_indices) != 1:
+                raise ValueError(f"Mismatched array dimensions for '{symbol.identifier}'. Declared as a 1-dimensional array, but used as a {len(flat_indices)}-dimensional array at line {node.line+1}.")
+            if isinstance(flat_indices[0][1], str):
+                    pass
             else:
-                if int(flat_indices[0][1]) >= int(symbol.array_dimensions[0][1]):
+                if int(flat_indices[0][1]) > int(symbol.array_dimensions[0][1]):
                     raise ValueError(f"Array index out of bounds. Attempted to access index {flat_indices[0][1]} in an array of size {symbol.array_dimensions[0][1]} at line {node.line+1}.")
-        else:
-            if flat_indices[0][0] == 'identifier' or flat_indices[1][0] == 'identifier':
-                # same index ay id_lit
-                if flat_indices[0][0] == 'identifier' and flat_indices[1][0] == 'identifier':
-                    symbol = self.symbol_table.lookup(flat_indices[0][1])
-                    #check if nageexist
-                    if not symbol:
-                        raise ValueError(f"Undeclared identifier '{flat_indices[0][0]}' at line {node.line+1}.")
-                    #check if int
-                    if symbol.datatype != 'treasures':
-                        raise ValueError(f"Invalid array index '{flat_indices[0][0]}' at line {node.line+1}.")
-                    #check if may value
-                    if symbol.is_initialized == False:
-                        raise ValueError(f"Uninitialized identifier '{flat_indices[0][0]}' at line {node.line+1}.")
-                    
-                    symbol = self.symbol_table.lookup(flat_indices[1][1])
-                    #check if nageexist
-                    if not symbol:
-                        raise ValueError(f"Undeclared identifier '{flat_indices[1][1]}' at line {node.line+1}.")
-                    #check if int
-                    if symbol.datatype != 'treasures':
-                        raise ValueError(f"Invalid array index '{flat_indices[1][1]}' at line {node.line+1}.")
-                    #check if may value
-                    if symbol.is_initialized == False:
-                        raise ValueError(f"Uninitialized identifier '{flat_indices[1][1]}' at line {node.line+1}.") 
-                    
-                elif flat_indices[0][0] == 'identifier' and flat_indices[1][0] != 'identifier':
-                    symbol = self.symbol_table.lookup(flat_indices[0][1])
-                    #check if nageexist
-                    if not symbol:
-                        raise ValueError(f"Undeclared identifier '{flat_indices[0][0]}' at line {node.line+1}.")
-                    #check if int
-                    if symbol.datatype != 'treasures':
-                        raise ValueError(f"Invalid array index '{flat_indices[0][0]}' at line {node.line+1}.")
-                    #check if may value
-                    if symbol.is_initialized == False:
-                        raise ValueError(f"Uninitialized identifier '{flat_indices[0][0]}' at line {node.line+1}.")
-                    
-                    if int(flat_indices[1][1]) >= int(symbol.array_dimensions[1][1]):
-                        raise ValueError(f"Array index out of bounds. Attempted to access index {flat_indices[1][1]} in an array of size {symbol.array_dimensions[1][1]} at line {node.line+1}.")
-                    
-                elif flat_indices[0][0] != 'identifier' and flat_indices[1][0] == 'identifier':
-                    
-                    if int(flat_indices[0][1]) >= int(symbol.array_dimensions[0][1]):
-                        raise ValueError(f"Array index out of bounds. Attempted to access index {flat_indices[0][1]} in an array of size {symbol.array_dimensions[0][1]} at line {node.line+1}.")
-                
-                    symbol = self.symbol_table.lookup(flat_indices[1][1])
-                    #check if nageexist
-                    if not symbol:
-                        raise ValueError(f"Undeclared identifier '{flat_indices[1][1]}' at line {node.line+1}.")
-                    #check if int
-                    if symbol.datatype != 'treasures':
-                        raise ValueError(f"Invalid array index '{flat_indices[1][1]}' at line {node.line+1}.")
-                    #check if may value
-                    if symbol.is_initialized == False:
-                        raise ValueError(f"Uninitialized identifier '{flat_indices[1][1]}' at line {node.line+1}.") 
-            else:
-                if int(flat_indices[0][1]) >= int(symbol.array_dimensions[0][1]):
-                    raise ValueError(f"Array index out of bounds. Attempted to access index {flat_indices[0][1]} in an array of size {symbol.array_dimensions[0][1]} at line {node.line+1}.")
-                elif int(flat_indices[1][1]) >= int(symbol.array_dimensions[1][1]):
-                    raise ValueError(f"Array index out of bounds. Attempted to access index {flat_indices[1][1]} in an array of size {symbol.array_dimensions[1][1]} at line {node.line+1}.")
 
             try:
                 print('data_type ---- ', datatype)
@@ -2495,16 +2329,16 @@ class SemanticAnalyzer:
 
         return True
 
+    # di pa nagagawa
     def validate_DoWhileNode(self, node):
         # condition
         conditions = node.condition
         condition = []
-        #check if condition is an expression
         for exp in conditions:
-            condition.append(exp[0])
-        value_string = ' '.join(condition)
+                condition.append(exp[0])
+
+                
         expr_type = self.type_expr(condition)
-        # ===================================
 
         print(condition, expr_type)
 
@@ -2517,8 +2351,6 @@ class SemanticAnalyzer:
         elif expr_type == 'Not Valid':
             if conditions[0][0] == 'identifier':
                 self.validate_id(conditions, ('mirror', 'mirror'), node, 'Condition')
-        else:
-            raise ValueError(f"Invalid condition '{value_string}' at {node.line+1}")
 
         # body
         self.validate_function_body(node.loop_body)
@@ -2529,12 +2361,10 @@ class SemanticAnalyzer:
         # condition
         conditions = node.condition
         condition = []
-        #check if condition is an expression
         for exp in conditions:
-            condition.append(exp[0])
-        value_string = ' '.join(condition)
+                condition.append(exp[0])
+                        
         expr_type = self.type_expr(condition)
-        # ===================================
         print(conditions, ">>>>>>>>>>>>")
         print(condition, expr_type)
 
@@ -2547,24 +2377,21 @@ class SemanticAnalyzer:
         elif expr_type == 'Not Valid':
             if conditions[0][0] == 'identifier':
                 self.validate_id(conditions, ('mirror', 'mirror'), node, 'Condition')
-        else:
-            raise ValueError(f"Invalid condition '{value_string}' at {node.line+1}")
 
         # body
         self.validate_function_body(node.loop_body)
 
         return True
 
+
     def validate_IfNode(self,node):
         # condition
         conditions = node.condition
         condition = []
-        #check if condition is an expression
         for exp in conditions:
-            condition.append(exp[0])
-        value_string = ' '.join(condition)
+                condition.append(exp[0])
+                        
         expr_type = self.type_expr(condition)
-        # ===================================
         print(conditions, ">>>>>>>>>>>>")
         print(condition, expr_type)
 
@@ -2577,9 +2404,7 @@ class SemanticAnalyzer:
         elif expr_type == 'Not Valid':
             if conditions[0][0] == 'identifier':
                 self.validate_id(conditions, ('mirror', 'mirror'), node, 'Condition')
-        else:
-            raise ValueError(f"Invalid condition '{value_string}' at {node.line+1}")
-        
+
         # body
         self.validate_function_body(node.body)
 
@@ -2599,12 +2424,10 @@ class SemanticAnalyzer:
             # condition
             conditions = node.condition
             condition = []
-            #check if condition is an expression
             for exp in conditions:
                 condition.append(exp[0])
-            value_string = ' '.join(condition)
+                        
             expr_type = self.type_expr(condition)
-            # ===================================
             print(conditions, ">>>>>>>>>>>>")
             print(condition, expr_type)
 
@@ -2615,8 +2438,7 @@ class SemanticAnalyzer:
             elif expr_type == 'Not Valid':
                 if conditions[0][0] == 'identifier':
                     self.validate_id(conditions, ('mirror', 'mirror'), node, 'Condition')
-            else:
-                raise ValueError(f"Invalid condition '{value_string}' at {node.line+1}")
+
             # body
             self.validate_function_body(node.body)
 
@@ -2625,6 +2447,7 @@ class SemanticAnalyzer:
         self.validate_function_body(node.body)
 
         return True
+
 
     def validate_BreakNode(self, node):
         return True
@@ -2654,6 +2477,7 @@ class SemanticAnalyzer:
                 self.errors.append(redecl_error)
                 raise ValueError(self.errors, "at line {node.line+1}.")
         
+
         else:
             print("FALSE")
             self.validate_id([loop_var[0]], ('treasures', 'treasures'), node, 'Not expr')
@@ -2672,6 +2496,7 @@ class SemanticAnalyzer:
         self.validate_function_body(node.loop_body)
 
         return True
+
 
     def validate_OutputNode(self, node):
         expr = node.expressions
@@ -2698,7 +2523,7 @@ class SemanticAnalyzer:
                             paren_count -= 1
                         expression.append(expr[i])
                         i += 1
-                    continue 
+                    continue  # Skip the normal increment since we've already incremented i
             
             if i < n:  # Check bounds before accessing
                 if expr[i][0] == ',':
@@ -2836,6 +2661,7 @@ class SemanticAnalyzer:
         print(expressions)
 
         return True
+        # pass
 
     def type_expr(self, content):
         """

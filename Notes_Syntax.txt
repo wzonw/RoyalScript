@@ -1,0 +1,89 @@
+RoyalScriptParser Semantic Analyzer: Function-by-Function Guide
+
+Overview:
+
+This is a Lark grammar string that defines the syntax of the RoyalScript language.  
+
+How it works:
+    => Each rule (e.g., program, var_dec, if, for_loop) describes how tokens and other rules combine to form valid code.
+    => Terminals (like IDENTIFIER, TREASURES_LIT, MIRROR_LIT) are defined at the bottom, using regex or string patterns.
+    => Special tokens (like "ADD", "EQUAL", "TILDE") are mapped to their actual symbols in the parser class.
+    => %ignore WS and %ignore COMMENTS tell Lark to ignore whitespace and comments.
+
+1. Parser Class: RoyalScriptParser
+    Initialization
+        => __init__(self, reconstructed_code, token_positions)
+    Purpose:
+        => Sets up the parser with the code to parse and a mapping of token positions (for error reporting).
+    Key attributes:
+        => self.reconstructed_code: The code string to parse.
+        => self.token_map: Maps token names (like "ADD") to their actual symbols ("+").
+
+2. Token Mapping and Extraction
+    _map_token(self, token)
+        Purpose:
+            => Converts a token name (like "ADD") to its symbol ("+"), if possible.
+    _extract_token_at_column(self, line_content, col)
+        Purpose:
+            => Given a line and a column, extracts the word/token at that position for error reporting.
+
+3. Anonymous Token Handling
+    _extract_anon_values(self, parser)
+        Purpose:
+            => Extracts the actual values of anonymous tokens (like string/char literals) from the Lark parser.
+        How it works:
+            => Looks for terminals starting with __ANON_ and tries to get their pattern/value.
+            => Provides fallback mappings for common anonymous tokens.
+
+4. Bracket Checking
+    _check_unclosed_brackets(self, code)
+    Purpose:
+            => Checks for unclosed or mismatched brackets, braces, or parentheses in the code.
+    How it works:
+            => Uses a stack to track opening and closing brackets.
+            => Returns a syntax error message if any are unclosed or mismatched.
+
+5. Expected Token Filtering
+    _filter_expected_tokens(self, expected_values_set)
+    Purpose:
+            => Cleans up the set of expected tokens for error messages, removing redundant values if special literals are present.
+
+
+6. Parsing Method
+    parse(self)
+        Purpose:
+            => The main method to parse the code using the Lark parser and handle errors gracefully.
+        Step-by-step:
+            1. Create the Lark parser with the RoyalScript grammar.
+            2. Extract anonymous token values for better error messages.
+            3. Check for unclosed brackets before parsing.
+            4. Try to parse the code:
+                => If successful, returns the parse tree and None for error.
+                => If a syntax error occurs (UnexpectedToken, UnexpectedCharacters, UnexpectedInput):
+                => Extracts the actual token at the error position.
+                => Maps it to its symbol if possible.
+                => Collects the set of expected tokens, mapping them to symbols or values.
+                => Filters the expected tokens for clarity.
+                => Constructs a detailed error message with line/column info and what was expected.
+                => Returns None and the error message.
+
+7. Error Handling
+    Handles three main Lark exceptions:
+        => UnexpectedToken: The parser found a token it didn't expect.
+        => UnexpectedCharacters: The parser found a character it didn't expect.
+        => UnexpectedInput: A more general error for invalid input.
+    For each error:
+        => Extracts the actual token at the error position.
+        => Maps expected tokens to their symbols or values.
+        => Returns a user-friendly error message with line/column and what was expected.       
+
+Summary Table
+| Function Name | What It Does |
+|------------------------------|-------------------------------------------------------------------|
+| __init__ | Initializes parser with code and token map |
+| _map_token | Maps token names to their symbols |
+| _extract_token_at_column | Gets the token at a specific column in a line |
+| _extract_anon_values | Gets values for anonymous tokens (like string/char literals) |
+| _check_unclosed_brackets | Checks for unclosed/mismatched brackets in the code |
+| _filter_expected_tokens | Cleans up expected token set for error messages |
+| parse | Parses the code, returns parse tree or detailed error message |

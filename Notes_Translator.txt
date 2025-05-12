@@ -1,0 +1,139 @@
+RoyalScriptToPython Translator: Function-by-Function Guide
+
+Overview:
+
+This class translates an AST (Abstract Syntax Tree) for the RoyalScript language into valid, formatted Python code. It handles variable declarations, assignments, control structures, functions, arrays, and more.
+
+1. Initialization
+    __init__(self, global_variable_types=None)
+    Initializes:
+        => indent_level: Tracks current indentation for pretty-printing code.
+        => symbol_table: Stores variable names and types for type-aware translation.
+        => global_variable_types: Optionally, a global type table for variables.
+
+2. Indentation Helper
+    indent(self, text)
+        => Indents a string by the current indent_level using 4 spaces per level.
+        => Uses textwrap.indent for multi-line support.
+
+3. Translation Dispatcher
+    translate(self, node)
+        => Core dispatcher.
+        => Determines the node’s type and calls the corresponding translate_* method.
+        => If no method exists, calls unsupported_node.
+
+4. Error for Unsupported Nodes
+        => unsupported_node(self, node)
+        => Raises a NotImplementedError if a node type isn’t supported.
+
+5. Code Formatting and Validation
+    format_code(self, code)
+        => Uses the black library to auto-format the generated Python code.
+        => If formatting fails, returns the original code with a warning.
+    validate_code(self, code)
+        => Uses Python’s ast module to check if the generated code is syntactically valid.
+
+6.  Program Translation
+    translate_ProgramNode(self, node)
+        => Translates the root node of the AST (the whole program).
+        => Adds import sys at the top.
+        => Translates global variable declarations, functions, and the main function.
+        => Joins all code and formats it.
+
+7. Variable Declarations
+    translate_VariableDeclarationNode(self, node)
+        => Handles both single and multiple variable declarations.
+        => Updates the symbol table with variable types.
+        => Handles arrays via translate_array_declaration.
+        => For regular variables, translates the value using translate_expression.
+    translate_array_declaration(self, node)
+        => Handles array (list) declarations.
+        => For initialized arrays, converts curly-brace syntax to Python lists.
+        => For uninitialized arrays, creates lists of None with the correct dimensions.
+
+8. Variable Reassignment
+    translate_VariableReassignmentNode(self, node)
+        => Handles assignments like x = 5 or x += 1.
+        => Looks up the variable type for type-aware translation (e.g., integer division for treasures).
+        => Translates the right-hand expression.
+
+9. Function Definitions
+    translate_FunctionNode(self, node)
+        => Translates function definitions.
+        => Extracts function name and parameters.
+        => Translates the function body and return statement.
+        => Handles empty functions (with pass).
+    translate_MainFunctionNode(self, node)
+        => Translates the main function.
+        => Adds code to call the main function if the script is run directly.
+
+10. Control Structures
+    translate_IfNode(self, node)
+        => Translates if, elif, and else branches.
+        => Handles conditions and bodies, including empty bodies (pass).
+    translate_WhileNode(self, node)
+        => Translates while loops.
+    translate_DoWhileNode(self, node)
+        => Emulates do-while loops using while True and a conditional break.
+    translate_ForLoopNode(self, node)
+        => Emulates C-style for loops using a while loop in Python.
+        => Handles initialization, condition, update, and body.
+
+11. Loop Control
+    translate_BreakNode(self, node)
+        => Translates to Python’s break.
+    translate_ContinueNode(self, node)
+        => Translates to Python’s continue.
+    
+12. Output Statements
+    translate_OutputNode(self, node)
+        => Translates output/print statements.
+        => Handles multiple expressions, precision formatting, and special value replacements (e.g., None to phantom).
+        => Constructs a print(..., end='') statement.
+
+13. Function Calls
+    translate_FunctionCallNode(self, node)
+        => Translates function calls with arguments.
+
+14. Array Assignments
+    translate_ArrayAssignmentNode(self, node)
+        => Handles assignments to array elements (e.g., arr[0] = 5).
+
+15. Unary Operations
+    translate_UnaryOperationNode(self, node)
+        => Handles increment (++) and decrement (--) operations.
+
+16. Expression Translation
+    translate_expression(self, tokens, name)
+        => Core expression handler.
+        Handles:
+        => Input (wish())
+        => Array initializers (curly braces)
+        => Type conversions (totreasures, etc.)
+        => Literals, identifiers, operators, and more.
+        => Converts RoyalScript tokens to valid Python expressions.
+    translate_array_initializer(self, tokens)
+        => Converts RoyalScript array initializers (curly braces) to Python list syntax.
+    translate_wish_function(self, tokens, datatype)
+        => Handles the RoyalScript wish() function (input).
+        => Adds type casting based on the expected datatype.
+
+17. Assignment Target Helper
+    get_assignment_target(self, tokens)
+        => Placeholder for determining the variable being assigned to (not fully implemented).
+
+How the Translation Process Works (Step-by-Step)
+    1. Start with the AST root node.
+    2. Call translate(root_node).
+    3. Dispatcher (translate) calls the appropriate translate_* method for the node type.
+    4. Each node is recursively translated:
+        => Variable declarations/assignments → Python assignments
+        => Functions → Python def blocks
+       =>  Control structures → Python if, while, etc.
+        => Expressions → Python expressions (with type conversions as needed)
+        => Arrays → Python lists
+        => Input/output → Python input()/print()
+    5. Code is indented and formatted for readability.
+    6. The final code is validated and returned.
+
+
