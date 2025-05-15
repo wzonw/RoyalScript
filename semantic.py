@@ -256,7 +256,7 @@ class SemanticAnalyzer:
                             if symbol_entry:
                                     # check if same datatype
                                     if symbol_entry.datatype != node.datatype[0]:
-                                         raise ValueError(f"1Type mismatch: Cannot initialize {node.datatype[0]} with {symbol_entry.datatype} at line {node.line+1}.")
+                                         raise ValueError(f"Type mismatch: Cannot initialize {node.datatype[0]} with {symbol_entry.datatype} at line {node.line+1}.")
                                     #check if initialized with value
                                     print("heree0", symbol_entry.value)
                                     if not symbol_entry.value:

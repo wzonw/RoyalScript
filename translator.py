@@ -617,7 +617,7 @@ class RoyalScriptToPythonTranslator:
     def translate_array_initializer(self, tokens):
         """Translates array initializer expressions with curly braces to Python list syntax."""
         result = []
-        in_array = False
+        self.in_array = False
         
         for token in tokens:
             if isinstance(token, tuple):
@@ -625,10 +625,10 @@ class RoyalScriptToPythonTranslator:
                 
                 if token_type == '{' or (token_type == 'identifier' and token_val == '{'):
                     result.append('[')
-                    in_array = True
+                    self.in_array= True
                 elif token_type == '}' or (token_type == 'identifier' and token_val == '}'):
                     result.append(']')
-                    in_array = False
+                    self.in_array = False
                 elif token_type == ',':
                     result.append(',')
                 else:
@@ -673,22 +673,16 @@ class RoyalScriptToPythonTranslator:
 
         # Handle appropriate type casting based on datatype
         if datatype == "treasures":     # int
+            # return f"(lambda v: v if v.isdigit() else raise ValueError('Semantic Error: Invalid value for treasures datatype, must be whole number only'))(input({prompt_text}).strip())"
+            # return f"(lambda v: v if v.isdigit() else (print('Semantic Error: Invalid input value for treasures datatype.') or __import__('sys').exit()))(input({prompt_text}).strip())"
             return f"int(input({prompt_text}))"
         elif datatype == "ocean":       # float
+            # return f"(lambda v: v if (v.count('.') == 1 and v.replace('.', '', 1).replace('-', '', 1).isdigit() and v != '.' and v != '-.' and v[0] != '.' and v != '-0.' and v[0] in '-0123456789' and not v.replace('.', '', 1).replace('-', '', 1).isdigit() == v.lstrip('-')) else (print('Semantic Error: Invalid input value for ocean datatype.') or __import__('sys').exit()))(input({prompt_text}).strip())"
             return f"float(input({prompt_text}))"
         elif datatype == "rose":  # char
-            return f"(lambda: (lambda v: v if len(v)==1 else (_ for _ in ()).throw(ValueError('Semantic Error: Invalid value for rose datatype, must be a single character only.')))(input({prompt_text}).strip()))()"
+            return f"(lambda v: v if len(v)==1 else (print('Semantic Error: Invalid input value for rose datatype.') or __import__('sys').exit()))(input({prompt_text}).strip())"
         elif datatype == "mirror":      # bool
-            return f"input({prompt_text}).lower() in ['true', '1', 'false', '0']"
+            return f"(lambda v: v if v in ['true', '1', 'false', '0'] else (print('Semantic Error: Invalid input value for mirror datatype.') or __import__('sys').exit()))(input({prompt_text}).strip().lower())"
         else:
             # Default to string if we can't determine type
             return f"input({prompt_text})"
-
-    def get_assignment_target(self, tokens):
-        """
-        Try to determine the variable being assigned to in the current context.
-        Used to guide type casting for input functions.
-        """
-        # This is a simplified approach - actual implementation would need
-        # to look at the parent node in the AST
-        return True # Placeholder

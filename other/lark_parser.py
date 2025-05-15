@@ -557,10 +557,7 @@ class RoyalScriptParser:
         return expected_values_set
     
     def parse(self):
-        parser = Lark(castle_grammar, parser="earley", lexer='dynamic_complete', 
-                      propagate_positions=True, maybe_placeholders=False, 
-                      start="start", priority="normal", 
-                      ambiguity="explicit")
+        parser = Lark(castle_grammar, parser="earley")
         anon_values = self._extract_anon_values(parser)
         
         # First check for unclosed brackets

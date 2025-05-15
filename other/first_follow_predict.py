@@ -5,425 +5,727 @@ class CFG:
         self.productions = productions
         self.non_terminals = set(productions.keys())
         self.terminals = set()
-        for rhs_list in productions.values():
+        
+        # More thorough identification of terminals
+        for lhs, rhs_list in productions.items():
             for rhs in rhs_list:
                 for symbol in rhs:
-                    if symbol not in self.non_terminals and symbol != 'λ':
+                    if symbol != 'λ' and symbol not in self.non_terminals:
                         self.terminals.add(symbol)
+        
+        print(f"Non-terminals: {len(self.non_terminals)}")
+        print(f"Terminals: {len(self.terminals)}")
 
     def compute_first(self):
+        """
+        Compute FIRST sets for all symbols in the grammar
+        """
         first = defaultdict(set)
-
-        # Initialize FIRST for terminals
+        
+        # Step 1: Initialize FIRST for terminals
         for terminal in self.terminals:
-            first[terminal].add(terminal)
-
-        # Initialize FIRST for non-terminals
-        for non_terminal in self.non_terminals:
-            first[non_terminal] = set()
-
+            first[terminal] = {terminal}
+        
+        # Step 2: Handle epsilon productions
+        for non_terminal, rhs_list in self.productions.items():
+            for rhs in rhs_list:
+                if not rhs or rhs == ['λ'] or rhs == []:  # Empty production
+                    first[non_terminal].add('λ')
+        
+        # Step 3: Iteratively compute FIRST sets
         changed = True
         while changed:
             changed = False
             for non_terminal, rhs_list in self.productions.items():
                 for rhs in rhs_list:
-                    for symbol in rhs:
+                    if not rhs or rhs == ['λ'] or rhs == []:  # Empty production
+                        continue
+                    
+                    # Calculate first of the RHS
+                    k = 0
+                    all_can_derive_lambda = True
+                    
+                    while k < len(rhs) and all_can_derive_lambda:
+                        symbol = rhs[k]
+                        all_can_derive_lambda = False
+                        
                         if symbol in self.terminals:
+                            # If symbol is a terminal, add it to FIRST(non_terminal)
                             if symbol not in first[non_terminal]:
                                 first[non_terminal].add(symbol)
                                 changed = True
                             break
                         elif symbol in self.non_terminals:
+                            # Add all non-lambda symbols from FIRST(symbol) to FIRST(non_terminal)
                             before_size = len(first[non_terminal])
-                            first[non_terminal].update(first[symbol] - {'λ'})
+                            for s in first[symbol]:
+                                if s != 'λ':
+                                    first[non_terminal].add(s)
+                            
                             if before_size != len(first[non_terminal]):
                                 changed = True
-                            if 'λ' not in first[symbol]:
+                            
+                            # Check if symbol can derive lambda
+                            if 'λ' in first[symbol]:
+                                all_can_derive_lambda = True
+                                k += 1
+                            else:
                                 break
-                    else:
+                    
+                    # If all symbols in the RHS can derive lambda, add lambda to FIRST(non_terminal)
+                    if all_can_derive_lambda and k == len(rhs):
                         if 'λ' not in first[non_terminal]:
                             first[non_terminal].add('λ')
                             changed = True
+                            
         return first
 
     def compute_follow(self, first):
+        """
+        Compute FOLLOW sets for all non-terminals in the grammar
+        """
         follow = defaultdict(set)
+        
+        # Step 1: Add $ to FOLLOW(start_symbol)
         start_symbol = next(iter(self.productions))
         follow[start_symbol].add('$')
-
+        
+        # Step 2: Iteratively compute FOLLOW sets
         changed = True
+        iterations = 0  # To track iterations for debugging
+        
         while changed:
             changed = False
+            iterations += 1
+            
             for non_terminal, rhs_list in self.productions.items():
                 for rhs in rhs_list:
                     for i, symbol in enumerate(rhs):
                         if symbol in self.non_terminals:
-                            next_symbols = rhs[i+1:]
-                            if not next_symbols:
+                            # Case 1: A -> αBβ, add FIRST(β) - {λ} to FOLLOW(B)
+                            if i < len(rhs) - 1:
+                                remaining = rhs[i+1:]
+                                first_of_remaining = self.compute_first_of_sequence(remaining, first)
+                                
+                                # Add everything except lambda
+                                for s in first_of_remaining:
+                                    if s != 'λ' and s not in follow[symbol]:
+                                        follow[symbol].add(s)
+                                        changed = True
+                                
+                                # Case 2: If FIRST(β) contains λ, add FOLLOW(A) to FOLLOW(B)
+                                if 'λ' in first_of_remaining:
+                                    before_size = len(follow[symbol])
+                                    follow[symbol].update(follow[non_terminal])
+                                    if before_size != len(follow[symbol]):
+                                        changed = True
+                            
+                            # Case 3: A -> αB or A -> αBβ where β =>* λ, add FOLLOW(A) to FOLLOW(B)
+                            else:  # B is at the end of the production
                                 before_size = len(follow[symbol])
                                 follow[symbol].update(follow[non_terminal])
                                 if before_size != len(follow[symbol]):
                                     changed = True
-                            else:
-                                first_of_next = self.compute_first_of_sequence(next_symbols, first)
-                                if 'λ' in first_of_next:
-                                    before_size = len(follow[symbol])
-                                    follow[symbol].update(first_of_next - {'λ'})
-                                    follow[symbol].update(follow[non_terminal])
-                                    if before_size != len(follow[symbol]):
-                                        changed = True
-                                else:
-                                    before_size = len(follow[symbol])
-                                    follow[symbol].update(first_of_next)
-                                    if before_size != len(follow[symbol]):
-                                        changed = True
+            
+            # Safety check to prevent infinite loops
+            if iterations > 100:
+                print(f"Warning: Exiting after {iterations} iterations")
+                break
+                
         return follow
 
     def compute_first_of_sequence(self, sequence, first):
+        """
+        Compute FIRST set for a sequence of symbols
+        """
+        if not sequence:
+            return {'λ'}
+        
         result = set()
+        can_derive_lambda = True
+        
         for symbol in sequence:
-            result.update(first[symbol] - {'λ'})
-            if 'λ' not in first[symbol]:
+            if symbol in self.terminals:
+                result.add(symbol)
+                can_derive_lambda = False
                 break
-        else:
+            elif symbol in self.non_terminals:
+                # Add all non-lambda symbols
+                for s in first[symbol]:
+                    if s != 'λ':
+                        result.add(s)
+                
+                # If this symbol cannot derive lambda, we're done
+                if 'λ' not in first[symbol]:
+                    can_derive_lambda = False
+                    break
+        
+        # If all symbols can derive lambda, add lambda to the result
+        if can_derive_lambda:
             result.add('λ')
+            
         return result
 
     def compute_predict(self, first, follow):
+        """
+        Compute PREDICT sets for all productions in the grammar
+        """
         predict = {}
+        
         for non_terminal, rhs_list in self.productions.items():
             predict[non_terminal] = {}
+            
             for rhs in rhs_list:
+                if not rhs:  # Handle empty production
+                    predict[non_terminal][tuple([])] = set(follow[non_terminal])
+                    continue
+                    
                 first_of_rhs = self.compute_first_of_sequence(rhs, first)
-                predict_set = first_of_rhs - {'λ'}
+                predict_set = set(s for s in first_of_rhs if s != 'λ')
+                
                 if 'λ' in first_of_rhs:
                     predict_set.update(follow[non_terminal])
+                
                 predict[non_terminal][tuple(rhs)] = predict_set
+                
         return predict
 
+    def print_sets(self, first, follow, predict):
+        """
+        Print FIRST, FOLLOW, and PREDICT sets in a more readable format
+        """
+        # Print FIRST sets
+        print("\n===== FIRST SETS =====")
+        for nt in sorted(self.non_terminals):
+            print(f"FIRST({nt}) = {sorted(first[nt])}")
+        
+        # Print FOLLOW sets  
+        print("\n===== FOLLOW SETS =====")
+        for nt in sorted(self.non_terminals):
+            print(f"FOLLOW({nt}) = {sorted(follow[nt])}")
+        
+        # Print PREDICT sets
+        print("\n===== PREDICT SETS =====")
+        for nt in sorted(self.non_terminals):
+            if nt in predict:
+                for rhs, p_set in predict[nt].items():
+                    rhs_str = ' '.join(rhs) if rhs else 'λ'
+                    print(f"PREDICT({nt} -> {rhs_str}) = {sorted(p_set)}")
+
 # Define your CFG productions
-productions = {
-    '<program>': [['crown', '~', '<global_dec>', '<user-defined_func>', 'castle', 'treasures', 'id_lit', '{', '<body>', 'return', '0', '~', '}', 'reign', '~']],
-    
-    '<global_dec>': [['<var_dec>', '<global_dec>']],
-    '<global_dec>': [['λ']],
-
-    '<var_dec>': [['<data_type>', 'id_lit', '<vardec_def>']],
-    '<var_dec>': [['λ']],
-
-    '<vardec_def>': [['<initialization>', '<vardec_more>', '~']],
-    '<vardec_def>': [['[', 'num', ']', '<column>', '<array_initialization>', '<array_more>', '~']],
-
-    '<initialization>': [['=', '<val>']],
-    '<initialization>': [['λ']],
-
-    '<vardec_more>': [[',', 'id_lit', '<initialization>', '<vardec_more>']],
-    '<vardec_more>': [['λ']],
-
-    '<column>': [['[', 'num', ']']],
-    '<column>': [['λ']],
-
-    '<array_initialization>': [['=', '<array_list>']],
-    '<array_initialization>': [['λ']],
-
-    '<array_list>': [['<single>']],
-    '<array_list>': [['<multi>']],
-
-    '<single>': [['{', '<array_lit>', '<list_more>', '}']],
-
-    '<multi>': [['{', '<single>', '<multi_more>', '}']],
-    '<multi>': [['λ']],
-
-    '<multi_more>': [[',', '<single>', '<multi_more>']],
-    '<multi_more>': [['λ']],
-
-    '<list_more>': [[',', '<array_lit>', '<list_more>']],
-    '<list_more>': [['λ']],
-
-    '<array_more>': [[',', 'id_lit', '[', 'num', ']', '<column>', '<array_initialization>', '<array_more>']],
-    '<array_more>': [['λ']],
-
-    '<array_lit>': [['scroll_lit']],
-    '<array_lit>': [['rose_lit']],
-    '<array_lit>': [['treasures_lit']],
-    '<array_lit>': [['ocean_lit']],
-    '<array_lit>': [['mirror_lit']],
-
-    '<assignment_exp>': [['id_lit', '<assignment_operator>', '<assignment_operand>']],
-
-    '<assignment_operator>': [['+=']],
-    '<assignment_operator>': [['-=']],
-    '<assignment_operator>': [['*=']],
-    '<assignment_operator>': [['/=']],
-    '<assignment_operator>': [['%=']],
-    
-    '<assignment_operand>': [['id_lit']],
-    '<assignment_operand>': [['treasures_lit']],
-    '<assignment_operand>': [['ocean_lit']],
-    '<assignment_operand>': [['<array_element>']],
-    '<assignment_operand>': [['<arithmetic_exp>']],
-    '<assignment_operand>': [['<func_call>']],
-
-    '<array_element>': [['id_lit', '<index>']],
-
-    '<logical_exp>': [['<logical_operand>', '<logical_operator>', '<logical_operand>', '<more_log>']],
-    '<logical_exp>': [['<logical_operator1>', '<logical_operand>', '<more_log>']],
-
-    '<logical_operand>': [['id_lit']],
-    '<logical_operand>': [['mirror_lit']],
-    '<logical_operand>': [['<treasures_mirror>']],
-    '<logical_operand>': [['<relational_exp>']],
-    '<logical_operand>': [['(', '<relational_exp>', ')']],
-    '<logical_operand>': [['<func_call>']],
-    '<logical_operand>': [['<array_element>']],
-
-    '<logical_operator>': [['&&']],
-    '<logical_operator>': [['||']],
-
-    '<logical_operator1>': [['!']],
-
-    '<more_log>': [['<logical_operator>', '<logical_operand>', '<more_log>']],
-    '<more_log>': [['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>']],
-    '<more_log>': [['λ']],
-
-    '<func_call>': [['id_lit', '(', '<args>', ')']],
-
-    '<args>': [['<args_val>', '<args_more>']],
-    '<args>': [['λ']],
-
-    '<args_val>': [['id_lit']],
-    '<args_val>': [['scroll_lit']],
-    '<args_val>': [['rose_lit']],
-    '<args_val>': [['treasures_lit']],
-    '<args_val>': [['ocean_lit']],
-    '<args_val>': [['mirror_lit']],
-
-    '<args_more>': [[',', '<args>', '<args_more>']],
-    '<args_more>': [['λ']],
-
-    '<treasures_mirror>': [['1']],
-    '<treasures_mirror>': [['0']],
-
-    '<arithmetic_exp>': [['<arithmetic_operand>', '<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>']],
-
-    '<arithmetic_operand>': [['id_lit']],
-    '<arithmetic_operand>': [['ocean_lit']],
-    '<arithmetic_operand>': [['treasures_lit']],
-    '<arithmetic_operand>': [['<arithmetic_exp>']],
-    '<arithmetic_operand>': [['(', '<arithmetic_exp>', ')']],
-    '<arithmetic_operand>': [['<func_call>']],
-    '<arithmetic_operand>': [['<array_element>']],
-
-    '<arithmetic_operator>': [['+']],
-    '<arithmetic_operator>': [['-']],
-    '<arithmetic_operator>': [['/']],
-    '<arithmetic_operator>': [['*']],
-    '<arithmetic_operator>': [['%']],
-
-    '<more_arith>': [['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>']],
-    '<more_arith>': [['λ']],
-
-    '<relational_exp>': [['<relational_operand>', '<relational_operator>', '<relational_operand>', '<relational_more>']],
-
-    '<relational_operand>': [['id_lit']],
-    '<relational_operand>': [['scroll_lit']],
-    '<relational_operand>': [['treasures_lit']],
-    '<relational_operand>': [['ocean_lit']],
-    '<relational_operand>': [['(', '<arithmetic_exp>', ')']],
-    '<relational_operand>': [['<arithmetic_exp>']],
-    '<relational_operand>': [['<func_call>']],
-    '<relational_operand>': [['<array_element>']],
-
-    '<relational_operator>': [['<']],
-    '<relational_operator>': [['>']],
-    '<relational_operator>': [['<=']],
-    '<relational_operator>': [['>=']],
-    '<relational_operator>': [['==']],
-    '<relational_operator>': [['!=']],
-
-    '<relational_more>': [['<relational_operator>', '<relational_operand>', '<relational_more>']],
-    '<relational_more>': [['λ']],
-
-    '<unary>': [['id_lit', '<unary_operator>']],
-
-    '<unary_operator>': [['++']],
-    '<unary_operator>': [['--']],
-
-    '<concat>': [['<string_operand>', '+', '<string_operand>', '<string_more>']],
-
-    '<string_operand>': [['scroll_lit']],
-    '<string_operand>': [['id_lit']],
-    '<string_operand>': [['rose_lit']],
-    '<string_operand>': [['<array_element>']],
-    '<string_operand>': [['<func_call>']],
-    '<string_operand>': [['toscroll', '(', '<conver_value>', ')']],
-
-    '<string_more>': [['+', '<string_operand>', '<string_more>']],
-    '<string_more>': [['λ']],
-
-    '<user-defined_func>': [['spell', '<return_type>', 'id_lit', '(', '<param>', ')', '{', '<body>', '<ret_statement>', '}', '<user-defined_func>']],
-    '<user-defined_func>': [['λ']],
-
-    '<return_type>': [['<data_type>']],
-    '<return_type>': [['chamber']],
-
-    '<param>': [['<datatype>', 'id_lit', '<param_more>']],
-    '<param>': [['λ']],
-
-    '<param_more>': [[',', '<datatype>', 'id_lit', '<param_more>']],
-    '<param_more>': [['λ']],
-
-    '<body>': [['<var_dec>', '<body>']],
-    '<body>': [['<output>', '<body>']],
-    '<body>': [['<func_call>', '~', '<body>']],
-    '<body>': [['<user-defined_func>', '<body>']],
-    '<body>': [['<condi_statement>', '<body>']],
-    '<body>': [['<for_loop>', '<body>']],
-    '<body>': [['<coronation>', '<body>']],
-    '<body>': [['<unary>', '~', '<body>']],
-    '<body>': [['<assignment_exp>', '~', '<body>']],
-    '<body>': [['<comments>', '<body>']],
-    '<body>': [['λ']],
-
-    '<comments>': [['<single_line>']],
-    '<comments>': [['<multi_line>']],
-
-    '<single_line>': [['?', 'scroll_lit']],
-
-    '<multi_line>': [['?', '*', 'scroll_lit', '*', '?']],
-
-    '<ret_statement>': [['return', '<val1>', '~']],
-    '<ret_statement>': [['λ']],
-
-    '<coronation>': [['id_lit', '=', '<val>', '~']],
-    '<coronation>': [['λ']],
-
-    '<condi_statement>': [['<if>']],
-    '<condi_statement>': [['<while>']],
-    '<condi_statement>': [['<do_while>']],
-    '<condi_statement>': [['λ']],
-
-    '<for_loop>': [['tale', '(', '<loop_var>', '~', '<relational_exp>', '~', '<unary>', ')', '{', '<loop_body>', '}']],
-
-    '<loop_var>': [['treasures', 'id_lit', '=', '<loop_val>']],
-    '<loop_var>': [['id_lit', '=', '<loop_val>']],
-    '<loop_var>': [['id_lit']],
-
-    '<loop_val>': [['id_lit']],
-    '<loop_val>': [['treasures_lit']],
-
-    '<loop_body>': [['<body>']],
-    '<loop_body>': [['<if_break>']],
-
-    '<if_break>': [['cast', '(', '<if-elif_condition>', ')', '{', '<body>', '<flow_control>', '}', '<elif_break>', '<else_break>']],
-
-    '<elif_break>': [['twist', '(', '<if-elif_condition>', ')', '{', '<body>', '<flow_control>', '}', '<elif_break>']],
-    '<elif_break>': [['λ']],
-
-    '<else_break>': [['curse', '{', '<body>', '<flow_control>', '}']],
-    '<else_break>': [['λ']],
-
-    '<flow_control>': [['break', '~']],
-    '<flow_control>': [['continue', '~']],
-    '<flow_control>': [['λ']],
-
-    '<do_while>': [['believe', '{', '<loop_body>', '}', 'forever', '(', 'if-elif_condition', ')', '~']],
-
-    '<if-elif_condition>': [['id_lit']],
-    '<if-elif_condition>': [['<treasures_mirror>']],
-    '<if-elif_condition>': [['id_lit', '<mirror_init>']],
-    '<if-elif_condition>': [['<relational_exp>']],
-    '<if-elif_condition>': [['<logical_exp>']],
-    '<if-elif_condition>': [['<logical_operator1>', '(', '<if-elif_condition>', ')']],
-    '<if-elif_condition>': [['<func_call>']],
-
-    '<mirror_init>': [['==', 'mirror_lit']],
-    '<mirror_init>': [['!=', 'mirror_lit']],
-    '<mirror_init>': [['λ']],
-
-    '<while>': [['forever', '(', 'if-elif_condition', ')', '{', '<loop_body>', '}']],
-
-    '<if>': [['cast', '(', '<if-elif_condition>', ')', '{', '<body>', '}', '<elif>', '<else>']],
-
-    '<elif>': [['twist', '(', '<if-elif_condition>', ')', '{', '<body>', '}', '<elif>']],
-    '<elif>': [['λ']],
-
-    '<else>': [['curse', '{', '<body>', '}']],
-    '<else>': [['λ']],
-
-    '<output>': [['granted', '(', '<queen>', '<more_queen>', ')', '~']],
-
-    '<queen>': [['id_lit']],
-    '<queen>': [['scroll_lit']],
-    '<queen>': [['rose_lit']],
-    '<queen>': [['treasures_lit']],
-    '<queen>': [['ocean_lit']],
-    '<queen>': [['mirror_lit']],
-    '<queen>': [['phantom']],
-    '<queen>': [['<set_precision>']],
-    '<queen>': [['<conversion_func>', '(', '<conver_value>', ')']],
-    '<queen>': [['<concat>']],
-    '<queen>': [['<relational_exp>']],
-    '<queen>': [['<logical_exp>']],
-    '<queen>': [['<unary>']],
-    '<queen>': [['<arithmetic_exp>']],
-    '<queen>': [['<array_element>']],
-    '<queen>': [['<func_call>']],
-
-    '<set_precision>': [['"', '%', '.', '"', '[', 'treasures_lit', ']', 'f']],
-
-    '<more_queen>': [[',', '<queen>', '<more_queen>']],
-    '<more_queen>': [['λ']],
-
-    '<data_type>': [['scroll']],
-    '<data_type>': [['treasures']],
-    '<data_type>': [['mirror']],
-    '<data_type>': [['ocean']],
-    '<data_type>': [['rose']],
-
-    '<val>': [['scroll_lit']],
-    '<val>': [['treasures_lit']],
-    '<val>': [['mirror_lit']],
-    '<val>': [['ocean_lit']],
-    '<val>': [['rose_lit']],
-    '<val>': [['id_lit']],
-    '<val>': [['phantom']],
-    '<val>': [['<concat>']],
-    '<val>': [['<arithmetic_exp>']],
-    '<val>': [['<input>']],
-    '<val>': [['<type_conversion>']],
-    '<val>': [['<relational_exp>']],
-    '<val>': [['<logical_exp>']],
-    '<val>': [['<treasures_mirror>']],
-    '<val>': [['<func_call>']],
-
-    '<val1>': [['<val>']],
-    '<val1>': [['<unary>']],
-    '<val1>': [['<assignment_exp>']],
-
-    '<type_conversion>': [['<conversion_func>', '(', '<conver_value>', ')']],
-
-    '<conversion_func>': [['toscroll']],
-    '<conversion_func>': [['torose']],
-    '<conversion_func>': [['totreasures']],
-    '<conversion_func>': [['toocean']],
-
-    '<conver_value>': [['scroll_lit']],
-    '<conver_value>': [['rose_lit']],
-    '<conver_value>': [['ocean_lit']],
-    '<conver_value>': [['treasures_lit']],
-    '<conver_value>': [['id_lit', '<index>']],
-    '<conver_value>': [['<func_call>']],
-
-    '<index>': [['[', 'treasures_lit', ']', '<column1>']],
-    '<index>': [['λ']],
-
-    '<column1>': [['[', 'treasures_lit', ']']],
-    '<column1>': [['λ']],
-
-    '<input>': [['wish', '(', 'scroll_lit', ')']]
+productions =  {
+    '<program>': [
+        ['crown', '~', '<global_dec>', '<user-defined_func>', 'castle', 'treasures', 'id_lit', '(', ')', '{', '<body>', 'return', '0', '~', '}', 'reign', '~'],
+    ],
+    '<global_dec>': [
+        ['<var_dec>', '<global_dec>'],
+        ['λ'],
+    ],
+    '<var_dec>': [
+        ['<dynasty>', '<data_type>', 'id_lit', '<vardec_def>'],
+    ],
+    '<dynasty>': [
+        ['dynasty'],
+        ['λ'],
+    ],
+    '<vardec_def>': [
+        ['<initialization>', '<vardec_more>', '~'],
+        ['[', '<array_size>', ']', '<column>', '<array_initialization>', '<array_more>', '~'],
+    ],
+    '<initialization>': [
+        ['=', '<val>'],
+        ['λ'],
+    ],
+    '<vardec_more>': [
+        [',', 'id_lit', '<initialization>', '<vardec_more>'],
+        ['λ'],
+    ],
+    '<column>': [
+        ['[', '<array_size>', ']'],
+        ['λ'],
+    ],
+    '<array_initialization>': [
+        ['=', '<array_list>'],
+        ['λ'],
+    ],
+    '<array_list>': [
+        ['{', '<array_content>', '}'],
+    ],
+    '<array_content>': [
+        ['<array_lit>', '<lit_more>'],
+        ['{', '<array_row>', '}', '<row_more>'],
+    ],
+    '<array_row>': [
+        ['<array_lit>', '<lit_more>'],
+    ],
+    '<row_more>': [
+        [',', '<row_more_ext>'],
+        ['λ'],
+    ],
+    '<row_more_ext>': [
+        ['{', '<array_row>', '}', '<row_more>'],
+        ['id_lit', '<row_more>'],
+    ],
+    '<lit_more>': [
+        [',', '<lit_more_ext>'],
+        ['λ'],
+    ],
+    '<lit_more_ext>': [
+        ['<array_lit>', '<lit_more>'],
+        ['{', '<array_row>', '}', '<row_more>'],
+    ],
+    '<array_more>': [
+        [',', 'id_lit', '[', '<array_size>', ']', '<column>', '<array_initialization>', '<array_more>'],
+        ['λ'],
+    ],
+    '<array_lit>': [
+        ['<lit4>'],
+        ['id_lit'],
+    ],
+    '<assignment_operator>': [
+        ['+='],
+        ['-='],
+        ['*='],
+        ['/='],
+        ['%='],
+    ],
+    '<assignment_operand>': [
+        ['id_lit', '<id_ext>', '<more_arith>'],
+        ['<lit3>', '<more_arith>'],
+        ['<arithmetic_operand_2>', '<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>'],
+    ],
+    '<logical_exp>': [
+        ['<logical_operator1>', '<logical_operand>', '<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
+    ],
+    '<logical_operand>': [
+        ['id_lit', '<id_ext>', '<logical_operand_ext>'],
+        ['<lit3>', '<more_arith>', '<relational_operator>', '<relational_operand>', '<relational_more>'],
+        ['scroll_lit', '<relational_operator>', '<relational_operand>', '<relational_more>'],
+        ['rose_lit', '<relational_operator>', '<relational_operand>', '<relational_more>'],
+        ['mirror_lit', '<relational_more>'],
+        ['<treasures_mirror>', '<relational_more>'],
+        ['(', '<logical_operator1>', '<expression>'],
+    ],
+    '<expression>': [
+        ['id_lit', '<id_ext>', '<expression_ext_1>'],
+        ['<lit3>', '<expression_ext_1>'],
+        ['scroll_lit', '<expression_ext_2>'],
+        ['rose_lit', '<expression_ext_2>'],
+        ['mirror_lit', '<expression_ext_2>'],
+        ['<treasures_mirror>', '<expression_ext_2>'],
+        ['(', '<logical_operator1>', '<expression>', '<more_log>', ')', '<logical_operand_ext>'],
+    ],
+    '<expression_ext_1>': [
+        ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>', ')', '<relational_more>'],
+        ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>', ')'],
+        ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>', '<relational_more>', ')', '<more_arith>', '<relational_more>'],
+    ],
+    '<expression_ext_2>': [
+        ['<relational_operator>', '<relational_operand>', '<relational_more>', ')', '<relational_more>'],
+        ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>', ')'],
+    ],
+    '<logical_operand_ext>': [
+        ['<more_arith>', '<relational_operator>', '<relational_operand>', '<relational_more>'],
+        ['λ'],
+    ],
+    '<logical_operator>': [
+        ['&&'],
+        ['||'],
+    ],
+    '<logical_operator1>': [
+        ['!'],
+        ['λ'],
+    ],
+    '<more_log>': [
+        ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
+        ['λ'],
+    ],
+    '<treasures_mirror>': [
+        ['1'],
+        ['0'],
+    ],
+    '<arithmetic_exp>': [
+        ['<arithmetic_operand>', '<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>'],
+    ],
+    '<arithmetic_operand_1>': [
+        ['id_lit', '<id_ext>'],
+        ['<lit3>'],
+    ],
+    '<arithmetic_operand_2>': [
+        ['(', '<arithmetic_exp>', ')'],
+    ],
+    '<arithmetic_operand>': [
+        ['<arithmetic_operand_1>'],
+        ['<arithmetic_operand_2>'],
+    ],
+    '<arithmetic_operator>': [
+        ['+'],
+        ['-'],
+        ['/'],
+        ['*'],
+        ['%'],
+    ],
+    '<more_arith>': [
+        ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>'],
+        ['λ'],
+    ],
+    '<relational_exp>': [
+        ['<relational_operand>', '<relational_operator>', '<relational_operand>', '<relational_more>'],
+    ],
+    '<relational_operand>': [
+        ['id_lit', '<id_ext>', '<more_arith>'],
+        ['<lit3>', '<more_arith>'],
+        ['scroll_lit'],
+        ['rose_lit'],
+        ['mirror_lit'],
+        ['treasures_mirror'],
+        ['(', '<expression_2>'],
+    ],
+    '<expression_2>': [
+        ['id_lit', '<id_ext>', '<expression_2_ext>'],
+        ['<lit3>', '<expression_2_ext>'],
+        ['scroll_lit', '<relational_operator>', '<relational_operand>', '<relational_more>', ')'],
+        ['rose_lit', '<relational_operator>', '<relational_operand>', '<relational_more>', ')'],
+        ['mirror_lit', '<relational_operator>', '<relational_operand>', '<relational_more>', ')'],
+        ['treasures_mirror', '<relational_operator>', '<relational_operand>', '<relational_more>', ')'],
+        ['(', '<expression_2>', ')'],
+    ],
+    '<expression_2_ext>': [
+        ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>', ')', '<more_arith>'],
+        ['<relational_operator>', '<relational_operand>', '<relational_more>', ')'],
+    ],
+    '<relational_operator>': [
+        ['<'],
+        ['>'],
+        ['<='],
+        ['>='],
+        ['=='],
+        ['!='],
+    ],
+    '<relational_more>': [
+        ['<relational_operator>', '<relational_operand>', '<relational_more>'],
+        ['λ'],
+    ],
+    '<unary>': [
+        ['id_lit', '<unary_operator>'],
+    ],
+    '<unary_operator>': [
+        ['++'],
+        ['--'],
+    ],
+    '<string_operand>': [
+        ['<lit1>'],
+        ['id_lit', '<id_ext>'],
+        ['toscroll', '(', '<conversion_value>', ')'],
+    ],
+    '<string_more>': [
+        ['+', '<string_operand>', '<string_more>'],
+        ['λ'],
+    ],
+    '<user-defined_func>': [
+        ['spell', '<return_type>', 'id_lit', '(', '<param>', ')', '{', '<body>', '<ret_statement>', '}', '<user-defined_func>'],
+        ['λ'],
+    ],
+    '<return_type>': [
+        ['<data_type>'],
+        ['chamber'],
+    ],
+    '<param>': [
+        ['<data_type>', 'id_lit', '<param_more>'],
+        ['λ'],
+    ],
+    '<param_more>': [
+        [',', '<data_type>', 'id_lit', '<param_more>'],
+        ['λ'],
+    ],
+    '<body>': [
+        ['<dynasty>', '<data_type>', 'id_lit', '<vardec_def>', '<body>'],
+        ['granted', '(', '<granted_content>', '<more_granted>', ')', '~', '<body>'],
+        ['id_lit', '<body_1_ext>', '<body>'],
+        ['spell', '<return_type>', 'id_lit', '(', '<param>', ')', '{', '<body>', '<ret_statement>', '}', '<body>'],
+        ['tale', '(', '<loop_var>', '~', '<relational_exp>', '~', '<unary>', ')', '{', '<loop_body>', '}', '<body>'],
+        ['cast', '(', '<condition>', ')', '{', '<body>', '}', '<elif>', '<else>', '<body>'],
+        ['forever', '(', '<condition>', ')', '{', '<loop_body>', '}', '<body>'],
+        ['believe', '{', '<loop_body>', '}', 'forever', '(', '<condition>', ')', '~', '<body>'],
+        ['λ'],
+    ],
+    '<body_1_ext>': [
+        ['(', '<args>', ')', '~'],
+        ['<index>', '<body_1_other_ext>'],
+        ['<unary_operator>', '~'],
+    ],
+    '<body_1_other_ext>': [
+        ['=', '<val>', '~'],
+        ['<assignment_operator>', '<assignment_operand>', '~'],
+    ],
+    '<ret_statement>': [
+        ['return', '<val1>', '~'],
+        ['λ'],
+    ],
+    '<loop_var>': [
+        ['treasures', 'id_lit', '=', '<loop_val>'],
+        ['id_lit', '<loop_init>'],
+    ],
+    '<loop_init>': [
+        ['=', '<loop_val>'],
+        ['λ'],
+    ],
+    '<loop_val>': [
+        ['id_lit'],
+        ['treasures_lit'],
+    ],
+    '<loop_body>': [
+        ['<dynasty>', '<data_type>', 'id_lit', '<vardec_def>', '<loop_body>'],
+        ['granted', '(', '<granted_content>', '<more_granted>', ')', '~', '<loop_body>'],
+        ['id_lit', '<body_1_ext>', '<loop_body>'],
+        ['spell', '<return_type>', 'id_lit', '(', '<param>', ')', '{', '<body>', '<ret_statement>', '}', '<loop_body>'],
+        ['tale', '(', '<loop_var>', '~', '<relational_exp>', '~', '<unary>', ')', '{', '<loop_body>', '}', '<loop_body>'],
+        ['cast', '(', '<condition>', ')', '{', '<loop_body>', '<flow_control>', '}', '<elif_break>', '<else_break>', '<loop_body>'],
+        ['forever', '(', '<condition>', ')', '{', '<loop_body>', '}', '<loop_body>'],
+        ['believe', '{', '<loop_body>', '}', 'forever', '(', '<condition>', ')', '~', '<loop_body>'],
+        ['λ'],
+    ],
+    '<elif_break>': [
+        ['twist', '(', '<condition>', ')', '{', '<body>', '<flow_control>', '}', '<elif_break>'],
+        ['λ'],
+    ],
+    '<else_break>': [
+        ['curse', '{', '<body>', '<flow_control>', '}'],
+        ['λ'],
+    ],
+    '<flow_control>': [
+        ['break', '~'],
+        ['continue', '~'],
+        ['λ'],
+    ],
+    '<condition>': [
+        ['<treasures_mirror>', '<more_log>'],
+        ['id_lit', '<condi_id_ext>'],
+        ['!', '<logical_operand>', '<more_log>'],
+        ['mirror_lit', '<relational_more>', '<more_log>'],
+        ['<lit3>', '<more_arith>', '<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
+        ['scroll_lit', '<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
+        ['rose_lit', '<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
+        ['(', '<logical_operator1>', '<expression>', '<more_log>'],
+    ],
+    '<condi_id_ext>': [
+        ['<func_call>', '<other_id_ext>'],
+        ['[', '<array_size>', ']', '<column1>', '<other_id_ext>'],
+        ['<other_id_ext>'],
+    ],
+    '<other_id_ext>': [
+        ['<more_arith>', '<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
+        ['λ'],
+    ],
+    '<elif>': [
+        ['twist', '(', '<condition>', ')', '{', '<body>', '}', '<elif>'],
+        ['λ'],
+    ],
+    '<else>': [
+        ['curse', '{', '<body>', '}'],
+        ['λ'],
+    ],
+    '<granted_content_1>': [
+        ['set_precision'],
+        ['id_lit', '<granted_id_ext>'],
+    ],
+    '<granted_content_2>': [
+        ['phantom'],
+        ['lengthof', '(', 'id_lit', '<index>', ')'],
+        ['<conversion_func>', '(', '<conversion_value>', ')'],
+        ['toscroll', '(', '<conversion_value>', ')', '<string_more>'],
+        ['<treasures_mirror>', '<more_log>'],
+        ['mirror_lit', '<relational_more>', '<more_log>'],
+        ['scroll_lit', '<granted_scroll_ext>'],
+        ['rose_lit', '<granted_rose_ext>'],
+        ['<lit3>', '<granted_lit3_ext>'],
+        ['(', '<logical_operator1>', '<granted_open_paren_ext>'],
+        ['!', '<logical_operand>', '<more_log>'],
+    ],
+    '<granted_content>': [
+        ['<granted_content_1>'],
+        ['<granted_content_2>'],
+    ],
+    '<granted_open_paren_ext>': [
+        ['id_lit', '<id_ext>', '<idlit3_granted_ext>'],
+        ['<lit3>', '<idlit3_granted_ext>'],
+        ['scroll_lit', '<expression_ext_2>', '<more_log>', ')'],
+        ['rose_lit', '<expression_ext_2>', '<more_log>', ')'],
+        ['mirror_lit', '<expression_ext_2>', '<more_log>', ')'],
+        ['<treasures_mirror>', '<expression_ext_2>', '<more_log>', ')'],
+        ['(', '<logical_operator1>', '<granted_open_paren_ext>', ')', '<close_paren_ext>'],
+    ],
+    '<idlit3_granted_ext>': [
+        ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>', ')', '<relational_more>', '<more_log>'],
+        ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>', ')', '<more_log>'],
+        ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>', '<relational_more>', '<more_log>', ')', '<more_arith>', '<open_paren_other_ext>'],
+    ],
+    '<open_paren_other_ext>': [
+        ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
+        ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
+        ['λ'],
+    ],
+    '<close_paren_ext>': [
+        ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
+        ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
+        ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>', '<open_paren_other_ext>'],
+        ['λ'],
+    ],
+    '<granted_id_ext>': [
+        ['<unary_operator>'],
+        ['<func_call>', '<granted_other_id_ext>'],
+        ['[', '<array_size>', ']', '<column1>', '<granted_other_id_ext>'],
+        ['<granted_other_id_ext>'],
+    ],
+    '<granted_other_id_ext>': [
+        ['+', '<plus_ext>'],
+        ['-', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
+        ['*', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
+        ['/', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
+        ['%', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
+        ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
+        ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
+        ['λ'],
+    ],
+    '<granted_other_id_ext2>': [
+        ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
+        ['λ'],
+    ],
+    '<plus_ext>': [
+        ['id_lit', '<plus_ext_1>'],
+        ['toscroll', '(', '<conversion_value>', ')', '<string_more>'],
+        ['scroll_lit', '<string_more>'],
+        ['rose_lit', '<string_more>'],
+        ['(', '<arithmetic_exp>', ')', '<more_arith>', '<granted_other_id_ext2>'],
+        ['treasures_lit', '<more_arith>', '<granted_other_id_ext2>'],
+        ['ocean_lit', '<more_arith>', '<granted_other_id_ext2>'],
+    ],
+    '<plus_ext_1>': [
+        ['+', '<plus_ext>'],
+        ['-', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
+        ['*', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
+        ['/', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
+        ['%', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
+        ['λ'],
+    ],
+    '<granted_scroll_ext>': [
+        ['+', '<string_operand>', '<string_more>'],
+        ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
+        ['λ'],
+    ],
+    '<granted_rose_ext>': [
+        ['+', '<string_operand>', '<string_more>'],
+        ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
+        ['λ'],
+    ],
+    '<granted_lit3_ext>': [
+        ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>', '<granted_lit3_ext1>'],
+        ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
+        ['λ'],
+    ],
+    '<granted_lit3_ext1>': [
+        ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
+        ['λ'],
+    ],
+    '<more_granted>': [
+        [',', '<granted_content>', '<more_granted>'],
+        ['λ'],
+    ],
+    '<data_type>': [
+        ['scroll'],
+        ['treasures'],
+        ['mirror'],
+        ['ocean'],
+        ['rose'],
+    ],
+    '<val>': [
+        ['<granted_content_2>'],
+        ['id_lit', '<granted_id_ext>'],
+        ['<input>'],
+    ],
+    '<val1>': [
+        ['<granted_content_2>'],
+        ['id_lit', '<val1_ext>'],
+    ],
+    '<val1_ext>': [
+        ['<val1_id_ext>'],
+        ['<func_call>', '<val1_id_ext>'],
+        ['[', '<array_size>', ']', '<column1>', '<val1_id_ext>'],
+        ['<unary_operator>'],
+        ['+', '<plus_ext>'],
+        ['-', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
+        ['*', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
+        ['/', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
+        ['%', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
+        ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
+        ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
+    ],
+    '<val1_id_ext>': [
+        ['<assignment_operator>', '<assignment_operand>'],
+        ['λ'],
+    ],
+    '<conversion_func>': [
+        ['torose'],
+        ['totreasures'],
+        ['toocean'],
+        ['tomirror'],
+    ],
+    '<conversion_value>': [
+        ['<lit4>'],
+        ['id_lit', '<id_ext>'],
+    ],
+    '<index>': [
+        ['[', '<array_size>', ']', '<column1>'],
+        ['λ'],
+    ],
+    '<column1>': [
+        ['[', '<array_size>', ']'],
+        ['λ'],
+    ],
+    '<input>': [
+        ['wish', '(', 'scroll_lit', ')'],
+    ],
+    '<lit1>': [
+        ['scroll_lit'],
+        ['rose_lit'],
+    ],
+    '<lit2>': [
+        ['mirror_lit'],
+    ],
+    '<lit3>': [
+        ['ocean_lit'],
+        ['treasures_lit'],
+    ],
+    '<lit4>': [
+        ['<lit1>'],
+        ['<lit2>'],
+        ['<lit3>'],
+    ],
+    '<func_call>': [
+        ['(', '<args>', ')'],
+    ],
+    '<args>': [
+        ['<args_val>', '<args_more>'],
+        ['λ'],
+    ],
+    '<args_val>': [
+        ['id_lit', '<id_ext>'],
+        ['<lit4>'],
+    ],
+    '<args_more>': [
+        [',', '<args_val>', '<args_more>'],
+        ['λ'],
+    ],
+    '<id_ext>': [
+        ['<func_call>'],
+        ['[', '<array_size>', ']', '<column1>'],
+        ['λ'],
+    ],
+    '<array_size>': [
+        ['id_lit'],
+        ['positive_treasures_lit'],
+    ],
 }
-
 # Create CFG object
 cfg = CFG(productions)
 
@@ -432,20 +734,17 @@ first = cfg.compute_first()
 follow = cfg.compute_follow(first)
 predict = cfg.compute_predict(first, follow)
 
-# Print FIRST sets for non-terminals
-print("First Sets for Non-Terminals:")
-for non_terminal in cfg.non_terminals:
-    print(f"FIRST({non_terminal}) = {first[non_terminal]}")
+print("\n===== FIRST SETS =====")
+for nt in cfg.productions:  # preserves the order of appearance
+    print(f"FIRST({nt}) = {{{', '.join(first[nt])}}}")
 
-# Print FOLLOW sets for non-terminals
-print("\nFollow Sets for Non-Terminals:")
-for non_terminal in cfg.non_terminals:
-    print(f"FOLLOW({non_terminal}) = {follow[non_terminal]}")
+print("\n===== FOLLOW SETS =====")
+for nt in cfg.productions:
+    print(f"FOLLOW({nt}) = {{{', '.join(follow[nt])}}}")
 
-# Print PREDICT sets for non-terminals
-print("\nPredict Sets for Non-Terminals:")
-for non_terminal in cfg.non_terminals:
-    if non_terminal in predict:
-        for rhs, predict_set in predict[non_terminal].items():
-            print(f"PREDICT({non_terminal} -> {' '.join(rhs)}) = {predict_set}")
-
+print("\n===== PREDICT SETS =====")
+for nt in cfg.productions:
+    if nt in predict:
+        for rhs, p_set in predict[nt].items():
+            rhs_str = ' '.join(rhs) if rhs else 'λ'
+            print(f"PREDICT({nt}) → {rhs_str} → {{{', '.join(p_set)}}}")

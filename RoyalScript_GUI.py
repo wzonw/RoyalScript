@@ -9,7 +9,8 @@ from PIL import Image, ImageTk, ImageSequence
 from lexer import RoyalScriptLexer
 from lexer import Token
 from pygame import mixer
-from lark_parser import  RoyalScriptParser
+from parser import  RoyalScriptParser
+# from lark_parser import  RoyalScriptParser
 from ast_builder import RoyalScriptASTBuilder, ASTBuildingException
 from semantic import SemanticAnalyzer, SemanticError
 from translator import RoyalScriptToPythonTranslator
@@ -183,10 +184,10 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.tokens = [] 
         self.terminal = None  # Will be initialized later
 
-        def intro_music():
-            mixer.music.load("Gui_elements/fairytale_intro.mp3")
-            mixer.music.play(-1) 
-        intro_music()
+        # def intro_music():
+        #     mixer.music.load("Gui_elements/fairytale_intro.mp3")
+        #     mixer.music.play(-1) 
+        # intro_music()
             
         self.title("RoyalScript")
         self.iconphoto(False, PhotoImage(file="Gui_elements/crown_logo2.png")) 
@@ -527,157 +528,97 @@ class RoyalScriptLexerGUI(tk.Tk):
 
     def run_code(self, event=None):
         """Run the generated Python code with input capabilities"""
-        # Clear terminal
+        code = self.input_text.get("1.0", tk.END)
+        lexer = RoyalScriptLexer(code)
+        
+        # Clear previous output
+        self.output_listbox.delete(0, tk.END)
+        self.token_listbox.delete(0, tk.END)
         self.terminal_text.config(state=tk.NORMAL)
         self.terminal_text.delete(1.0, tk.END)
         self.terminal_text.config(state=tk.DISABLED)
-        
-        # Clear output and token listboxes
-        self.output_listbox.delete(0, tk.END)
-        self.token_listbox.delete(0, tk.END)
-        
-        code = self.input_text.get("1.0", tk.END)
-        if not code.strip():
-            self.show_terminal_message("No code to run!")
-            return
+        self.tokens = []  # Reset tokens list
+        all_tokens = [] 
+        #lexical
+        try:
+            token_lines = lexer.get_tokens() or []
+            self.tokens = token_lines  # Save tokens for later use
             
-        # Run lexical, syntax, and semantic analysis first
-        lexer = RoyalScriptLexer(code)
-        token_lines = lexer.get_tokens() or []
-        
-        # Check for lexical errors
-        if lexer.errors:
-            self.show_terminal_message("❌ Lexical errors detected. Please fix before running.")
-            for error in lexer.errors:
-                self.show_terminal_message(f"  - {error}")
-            return
-        
-        # Display tokens in output_listbox and token_listbox
-        for line_idx, line_tokens in enumerate(token_lines):
-            for token in line_tokens:
-                if isinstance(token, Token) and hasattr(token, 'token_type'):
-                    self.output_listbox.insert(tk.END, token.value)
-                    self.token_listbox.insert(tk.END, token.token_type)
-            
-        # Flatten token structure for parser
-        all_tokens = []
+            if lexer.errors:
+                self.show_terminal_message("❌ Lexical errors detected:")
+                for error in lexer.errors:
+                    self.show_terminal_message(f"  - {error}")
+                    return
+
+            # Display tokens in output_listbox and token_listbox
+            for line_idx, line_tokens in enumerate(token_lines):
+                for token in line_tokens:
+                    if isinstance(token, Token) and hasattr(token, 'token_type'):
+                        self.output_listbox.insert(tk.END, token.value)
+                        self.token_listbox.insert(tk.END, token.token_type)
+
+        except Exception as e:
+            import traceback
+            self.show_terminal_message(f"❌ Error during lexical analysis: {str(e)}")
+            self.show_terminal_message(traceback.format_exc())
+                
+        # Prepare tokens for ast
         for line_tokens in token_lines:
             tokens = []
             for token in line_tokens:
                 if isinstance(token, Token) and hasattr(token, 'token_type'):
                     tokens.append((token.token_type, token.value))
             all_tokens.append(tokens)
-            
-        symbol_to_word = {
-                # Arithmetic Operators
-                "+": "ADD",
-                "-": "SUB",
-                "*": "MUL",
-                "/": "DIV",
-                "%": "MOD",
-
-                # Logical Operators
-                "!": "NOT",
-                "&&": "AND",
-                "||": "OR",
-
-                # Assignment Operators
-                "=": "EQUAL",
-                "+=": "ADD_EQUAL",
-                "-=": "SUB_EQUAL",
-                "*=": "MUL_EQUAL",
-                "/=": "DIV_EQUAL",
-                "%=": "MOD_EQUAL",
-
-                # Unary Operators
-                "++": "INC",
-                "--": "DEC",
-
-                # Relational Operators
-                "==": "EQUAL_EQUAL",
-                "!=": "NOT_EQUAL",
-                "<": "LESS",
-                ">": "GREATER",
-                ">=": "GREATER_EQUAL",
-                "<=": "LESS_EQUAL",
-
-                # Other Symbols
-                "(": "LPAREN",
-                ")": "RPAREN",
-                "{": "LCUR",
-                "}": "RCUR",
-                "[": "LSQR",
-                "]": "RSQR",
-                "~": "TILDE",
-                ",": "COMMA",
-            }
-
-        # Flatten tokens and collect line/column info
+        
+        
         flat_tokens = []
-        token_positions = []
-
+        
         for line_tokens in token_lines:
             for token in line_tokens:
-                # Include ALL tokens, including comments and EOF
                 if hasattr(token, 'token_type'):
-                    flat_tokens.append(token)
-                    token_positions.append((token.line, token.position))
-
-        print(token_positions)
-        
-        value_token_types = {
-            "identifier", "1", "0", "scroll_lit", "mirror_lit", "treasures_lit", "ocean_lit", "rose_lit"
-        }
-        def reconstruct_code(tokens, value_token_types, symbol_to_word):
-            # Group tokens by line number
-            tokens_by_line = {}
-            for token in tokens:
-                tokens_by_line.setdefault(token.line, []).append(token)
-
-            max_line = max(token.line for token in tokens)
-            lines = ['' for _ in range(max_line)]
-
-            for line_num in range(1, max_line + 1):
-                line_tokens = tokens_by_line.get(line_num, [])
-                line_str = ' '.join(
-                    token.value if token.token_type in value_token_types
-                    else symbol_to_word.get(token.value, token.token_type)
-                    for token in line_tokens
-                )
-                lines[line_num - 1] = line_str
-
-            return '\n'.join(lines)
-        reconstructed_code = reconstruct_code(flat_tokens, value_token_types, symbol_to_word)
-
-        try: 
-            parser = RoyalScriptParser(reconstructed_code, token_positions)
-            tree, error_message = parser.parse()
+                    flat_tokens.append(token)  # token should have .line and .position
+        #syntax
+        try:
+            parser = RoyalScriptParser('<program>')
+            tree, error_message = parser.parse(flat_tokens)
             if tree:
-                    try:
-                        ast_builder = RoyalScriptASTBuilder(all_tokens)
-                        ast = ast_builder.build_ast()
-                        # self.show_terminal_message("\nAbstract Syntax Tree:")
-                        # ast_string = print_ast(ast)
-                        # self.show_terminal_message(ast_string)
-                    except Exception as e:
-                        self.show_terminal_message(f"AST building not performed - {str(e)}")
+                try:
+                    ast_builder = RoyalScriptASTBuilder(all_tokens)
+                    ast = ast_builder.build_ast()
+                except Exception as e:
+                    self.show_terminal_message(f"AST building not performed - {str(e)}")
             else:
                 self.show_terminal_message("❌ Syntax errors detected. Check your code structure.")
                 if error_message:
                     self.show_terminal_message(error_message)
-                    return 
+                    return
 
+        except Exception as e:
+            import traceback
+            self.show_terminal_message(f"❌ Error during syntax analysis: {str(e)}")
+            self.show_terminal_message(traceback.format_exc())
+
+        
+        try:
+                
+            # Perform semantic analysis
             semantic_analyzer = SemanticAnalyzer()
             semantic_errors = semantic_analyzer.analyze(ast)
             
             if semantic_errors:
-                self.show_terminal_message("❌ Semantic errors detected. Please fix before running.")
+                self.show_terminal_message("❌ Semantic errors detected:")
                 for error in semantic_errors:
                     self.show_terminal_message(f"  - {error}")
-                return
+                    return
+                
+        except Exception as e:
+            import traceback
+            self.show_terminal_message(f"❌ Error during semantic analysis: {str(e)}")
+            self.show_terminal_message(traceback.format_exc())
 
-            # Translate to Python
-            # analyzer = SemanticAnalyzer()
+        # Translate to Python
+        # analyzer = SemanticAnalyzer()
+        try:
             print("GLOBAL TYPE MAP:", semantic_analyzer .global_variable_types)
             translator = RoyalScriptToPythonTranslator(global_variable_types=semantic_analyzer.global_variable_types)
             python_code = translator.translate(ast)
@@ -841,7 +782,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.semantic_button.bind("<Leave>", self.on_leave_semantic)
 
     def analyze_semantic(self, event=None):
-        """Analyze the code and display syntax analysis results"""
+        """Analyze the code and display semantic analysis results"""
         code = self.input_text.get("1.0", tk.END)
         lexer = RoyalScriptLexer(code)
         
@@ -852,18 +793,21 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.terminal_text.delete(1.0, tk.END)
         self.terminal_text.config(state=tk.DISABLED)
         self.tokens = []  # Reset tokens list
-        all_tokens = []  # Store tokens (type and value) for additional analysis
+        all_tokens = [] 
         
         try:
             token_lines = lexer.get_tokens() or []
+            self.tokens = token_lines  # Save tokens for later use
             
-            # Check for lexical errors first
             if lexer.errors:
                 self.show_terminal_message("❌ Lexical errors detected:")
                 for error in lexer.errors:
                     self.show_terminal_message(f"  - {error}")
-                return
-            
+                    return
+            else:
+                self.show_terminal_message("✅ Lexical analysis completed successfully!")
+                self.show_terminal_message("No lexical errors found.")
+
             # Display tokens in output_listbox and token_listbox
             for line_idx, line_tokens in enumerate(token_lines):
                 for token in line_tokens:
@@ -871,98 +815,27 @@ class RoyalScriptLexerGUI(tk.Tk):
                         self.output_listbox.insert(tk.END, token.value)
                         self.token_listbox.insert(tk.END, token.token_type)
                 
-            # Prepare tokens for parser
+            # Prepare tokens for ast
             for line_tokens in token_lines:
                 tokens = []
                 for token in line_tokens:
                     if isinstance(token, Token) and hasattr(token, 'token_type'):
                         tokens.append((token.token_type, token.value))
                 all_tokens.append(tokens)
-                
-            symbol_to_word = {
-                # Arithmetic Operators
-                "+": "ADD",
-                "-": "SUB",
-                "*": "MUL",
-                "/": "DIV",
-                "%": "MOD",
-
-                # Logical Operators
-                "!": "NOT",
-                "&&": "AND",
-                "||": "OR",
-
-                # Assignment Operators
-                "=": "EQUAL",
-                "+=": "ADD_EQUAL",
-                "-=": "SUB_EQUAL",
-                "*=": "MUL_EQUAL",
-                "/=": "DIV_EQUAL",
-                "%=": "MOD_EQUAL",
-
-                # Unary Operators
-                "++": "INC",
-                "--": "DEC",
-
-                # Relational Operators
-                "==": "EQUAL_EQUAL",
-                "!=": "NOT_EQUAL",
-                "<": "LESS",
-                ">": "GREATER",
-                ">=": "GREATER_EQUAL",
-                "<=": "LESS_EQUAL",
-
-                # Other Symbols
-                "(": "LPAREN",
-                ")": "RPAREN",
-                "{": "LCUR",
-                "}": "RCUR",
-                "[": "LSQR",
-                "]": "RSQR",
-                "~": "TILDE",
-                ",": "COMMA",
-            }
-
+           
+            
             # Flatten tokens and collect line/column info
             flat_tokens = []
-            token_positions = []
+
 
             for line_tokens in token_lines:
                 for token in line_tokens:
-                    # Include ALL tokens, including comments and EOF
                     if hasattr(token, 'token_type'):
-                        flat_tokens.append(token)
-                        token_positions.append((token.line, token.position))
+                        flat_tokens.append(token)  # token should have .line and .position
 
-            print(token_positions)
-         
-            value_token_types = {
-                "identifier", "1", "0", "scroll_lit", "mirror_lit", "treasures_lit", "ocean_lit", "rose_lit"
-            }
-            def reconstruct_code(tokens, value_token_types, symbol_to_word):
-                # Group tokens by line number
-                tokens_by_line = {}
-                for token in tokens:
-                    tokens_by_line.setdefault(token.line, []).append(token)
+            parser = RoyalScriptParser('<program>')
+            tree, error_message = parser.parse(flat_tokens)
 
-                max_line = max(token.line for token in tokens)
-                lines = ['' for _ in range(max_line)]
-
-                for line_num in range(1, max_line + 1):
-                    line_tokens = tokens_by_line.get(line_num, [])
-                    line_str = ' '.join(
-                        token.value if token.token_type in value_token_types
-                        else symbol_to_word.get(token.value, token.token_type)
-                        for token in line_tokens
-                    )
-                    lines[line_num - 1] = line_str
-
-                return '\n'.join(lines)
-            reconstructed_code = reconstruct_code(flat_tokens, value_token_types, symbol_to_word)
-            print(reconstructed_code)
-
-            parser = RoyalScriptParser(reconstructed_code, token_positions)
-            tree, error_message = parser.parse()
             if tree:
                 self.show_terminal_message("✅ Syntax analysis completed successfully!")
                 self.show_terminal_message("No syntax errors found.")
@@ -971,9 +844,6 @@ class RoyalScriptLexerGUI(tk.Tk):
                 try:
                     ast_builder = RoyalScriptASTBuilder(all_tokens)
                     ast = ast_builder.build_ast()
-                    # self.show_terminal_message("\nAbstract Syntax Tree:")
-                    # ast_string = print_ast(ast)
-                    # self.show_terminal_message(ast_string)
                 except Exception as e:
                     self.show_terminal_message(f"AST building not performed - {str(e)}")
             else:
@@ -981,10 +851,7 @@ class RoyalScriptLexerGUI(tk.Tk):
                 if error_message:
                     self.show_terminal_message(error_message)
                     return
-            # AST building
             try:
-                ast_builder = RoyalScriptASTBuilder(all_tokens)
-                ast = ast_builder.build_ast()
                 
                 # Perform semantic analysis
                 semantic_analyzer = SemanticAnalyzer()
@@ -998,13 +865,6 @@ class RoyalScriptLexerGUI(tk.Tk):
                     self.show_terminal_message("✅ Semantic analysis completed successfully!")
                     self.show_terminal_message("No semantic errors found.")
                     
-                    # Show the AST structure
-                    # self.show_terminal_message("\nAbstract Syntax Tree:")
-                    # ast_string = print_ast(ast)
-                    # self.show_terminal_message(ast_string)
-                    
-            except ASTBuildingException as e:
-                self.show_terminal_message(f"❌ AST Building Error: {str(e)}")
             except Exception as e:
                 import traceback
                 self.show_terminal_message(f"❌ Error during semantic analysis: {str(e)}")
@@ -1091,15 +951,29 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.tokens = []  # Reset tokens list
         all_tokens = []  # Store tokens (type and value) for additional analysis
         
+        code = self.input_text.get("1.0", tk.END)
+        lexer = RoyalScriptLexer(code)
+        
+        # Clear previous output
+        self.output_listbox.delete(0, tk.END)
+        self.token_listbox.delete(0, tk.END)
+        self.terminal_text.config(state=tk.NORMAL)
+        self.terminal_text.delete(1.0, tk.END)
+        self.terminal_text.config(state=tk.DISABLED)
+        self.tokens = []  # Reset tokens list
+        
         try:
             token_lines = lexer.get_tokens() or []
+            self.tokens = token_lines  # Save tokens for later use
             
-            # Check for lexical errors first
             if lexer.errors:
                 self.show_terminal_message("❌ Lexical errors detected:")
                 for error in lexer.errors:
                     self.show_terminal_message(f"  - {error}")
                 return
+            else:
+                self.show_terminal_message("✅ Lexical analysis completed successfully!")
+                self.show_terminal_message("No lexical errors found.")
             
             # Display tokens in output_listbox and token_listbox
             for line_tokens in token_lines:
@@ -1116,90 +990,18 @@ class RoyalScriptLexerGUI(tk.Tk):
                         tokens.append((token.token_type, token.value))
                 all_tokens.append(tokens)
            
-            symbol_to_word = {
-                # Arithmetic Operators
-                "+": "ADD",
-                "-": "SUB",
-                "*": "MUL",
-                "/": "DIV",
-                "%": "MOD",
-
-                # Logical Operators
-                "!": "NOT",
-                "&&": "AND",
-                "||": "OR",
-
-                # Assignment Operators
-                "=": "EQUAL",
-                "+=": "ADD_EQUAL",
-                "-=": "SUB_EQUAL",
-                "*=": "MUL_EQUAL",
-                "/=": "DIV_EQUAL",
-                "%=": "MOD_EQUAL",
-
-                # Unary Operators
-                "++": "INC",
-                "--": "DEC",
-
-                # Relational Operators
-                "==": "EQUAL_EQUAL",
-                "!=": "NOT_EQUAL",
-                "<": "LESS",
-                ">": "GREATER",
-                ">=": "GREATER_EQUAL",
-                "<=": "LESS_EQUAL",
-
-                # Other Symbols
-                "(": "LPAREN",
-                ")": "RPAREN",
-                "{": "LCUR",
-                "}": "RCUR",
-                "[": "LSQR",
-                "]": "RSQR",
-                "~": "TILDE",
-                ",": "COMMA",
-            }
-
+            
             # Flatten tokens and collect line/column info
             flat_tokens = []
-            token_positions = []
+
 
             for line_tokens in token_lines:
                 for token in line_tokens:
-                    # Include ALL tokens, including comments and EOF
                     if hasattr(token, 'token_type'):
-                        flat_tokens.append(token)
-                        token_positions.append((token.line, token.position))
+                        flat_tokens.append(token)  # token should have .line and .position
 
-            print(token_positions)
-         
-            value_token_types = {
-                "identifier", "1", "0", "scroll_lit", "mirror_lit", "treasures_lit", "ocean_lit", "rose_lit"
-            }
-            def reconstruct_code(tokens, value_token_types, symbol_to_word):
-                # Group tokens by line number
-                tokens_by_line = {}
-                for token in tokens:
-                    tokens_by_line.setdefault(token.line, []).append(token)
-
-                max_line = max(token.line for token in tokens)
-                lines = ['' for _ in range(max_line)]
-
-                for line_num in range(1, max_line + 1):
-                    line_tokens = tokens_by_line.get(line_num, [])
-                    line_str = ' '.join(
-                        token.value if token.token_type in value_token_types
-                        else symbol_to_word.get(token.value, token.token_type)
-                        for token in line_tokens
-                    )
-                    lines[line_num - 1] = line_str
-
-                return '\n'.join(lines)
-            reconstructed_code = reconstruct_code(flat_tokens, value_token_types, symbol_to_word)
-            print(reconstructed_code)
-
-            parser = RoyalScriptParser(reconstructed_code, token_positions)
-            tree, error_message = parser.parse()
+            parser = RoyalScriptParser('<program>')
+            tree, error_message = parser.parse(flat_tokens)
             if tree:
                 self.show_terminal_message("✅ Syntax analysis completed successfully!")
                 self.show_terminal_message("No syntax errors found.")

@@ -22,7 +22,6 @@ class Token:
     
 
 
-
 # Define token types for RoyalScript
 class TokenType:
     # Reserved words for RoyalScript
@@ -171,10 +170,6 @@ class RoyalScriptLexer:
             char = self.current_char()
 
             if char in ['\n', ' ', '\t']:
-                match = self.match(r'\s+')
-                # if match and self.position < len(self.code) - 1:  # Avoid trailing whitespace
-                    # token = Token(match, TokenType.WHITESPACE, self.position)
-                    # self.tokens.append(token)
                 self.advance()  # Move to the next character
                 continue
 
@@ -186,9 +181,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['witch_delim'] and self.current_char() not in Delims['gate_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
 
             #RESERVED WORDS
             if char == 'c':
@@ -199,9 +192,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['genie_delim'] and self.current_char() not in Delims['gate_delim'] and self.current_char() != ' ':
-                        self.advance()
-                    continue
+                    return self.tokens
                 
             if char == 'd':
                 pos_start = self.position
@@ -211,9 +202,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() != ' ':
-                        self.advance()
-                    continue
+                    return self.tokens
                 
             if char == 'f':
                 pos_start = self.position
@@ -223,9 +212,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['mirror-lit_delim'] and self.current_char() not in Delims['genie_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
                 
             if char == 'g':
@@ -236,9 +223,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['genie_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
             if char == 'l':
                 pos_start = self.position
@@ -248,9 +233,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() != ' ':
-                        self.advance()
-                    continue
+                    return self.tokens
 
             if char == 'm':
                 pos_start = self.position
@@ -260,9 +243,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() != ' ':
-                        self.advance()
-                    continue
+                    return self.tokens
                 
 
             if char == 'o':
@@ -273,9 +254,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() != ' ':
-                        self.advance()
-                    continue
+                    return self.tokens
                 
                 
             if char == 'p':
@@ -286,9 +265,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['gate_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
             if char == 'r':
                 pos_start = self.position
@@ -298,9 +275,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['gate_delim'] and self.current_char() != ' ':
-                        self.advance()
-                    continue
+                    return self.tokens
                 
 
             if char == 's':
@@ -311,9 +286,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() != ' ':
-                        self.advance()
-                    continue
+                    return self.tokens
                   
 
             if char == 't':
@@ -324,9 +297,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['genie_delim'] and self.current_char() != '(' and self.current_char() != ' ' and self.current_char() not in Delims['mirror-lit_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
 
             if char == 'w':
@@ -337,9 +308,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['genie_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
 
 
             #RESERVED SYMBOL
@@ -351,9 +320,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['equal_delim'] and self.current_char() not in Delims['relational_operator_delim']:
-                        self.advance()
-                    continue  
+                    return self.tokens
             
             if char == '+':
                 pos_start = self.position
@@ -363,9 +330,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['plus_delim'] and self.current_char() not in Delims['unary_operator_delim'] and self.current_char() not in Delims['other_assignment_operator_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
     
 
             if char == '-':
@@ -376,9 +341,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['minus_delim'] and self.current_char() not in Delims['unary_operator_delim'] and self.current_char() not in Delims['other_assignment_operator_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
                 
             if char == '*':
@@ -389,9 +352,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['arithmetic_operator_delim'] and self.current_char() not in Delims['other_assignment_operator_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
             if char == '/':
                 pos_start = self.position
@@ -401,9 +362,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['arithmetic_operator_delim'] and self.current_char() not in Delims['other_assignment_operator_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
                 
             if char == '%':
@@ -414,9 +373,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['arithmetic_operator_delim'] and self.current_char() not in Delims['other_assignment_operator_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
 
             if char == '!':
@@ -427,9 +384,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['not_logical_delim'] and self.current_char() not in Delims['relational_operator_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
                 
             if char == '&':
@@ -440,9 +395,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['logical_operator_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
                 
             if char == '|':
@@ -453,9 +406,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and  self.current_char() not in Delims['logical_operator_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
 
             if char == '>':
@@ -466,9 +417,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['relational_operator_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
             
             if char == '<':
@@ -479,10 +428,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['relational_operator_delim']:
-                        self.advance()
-                    continue
-
+                    return self.tokens
 
             if char == '(':
                 pos_start = self.position
@@ -492,9 +438,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['open_parentheses_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
             if char == ')':
                 pos_start = self.position
@@ -504,9 +448,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['close_parentheses_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
             
             
             if char == '{':
@@ -517,9 +459,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['open_curly_bracket_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
                 
             if char == '}':
@@ -530,9 +470,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in RegDef['whitespace'] and self.current_char() not in RegDef['alpha_small']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
             if char == '[':
                 pos_start = self.position
@@ -542,9 +480,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['open_square_bracket_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
             if char == ']':
                 pos_start = self.position
@@ -554,9 +490,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['close_square_bracket_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
             
                 
             if char == '~':
@@ -567,9 +501,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in RegDef['whitespace'] and self.current_char() not in RegDef['alpha_small'] and self.current_char() != '?' and self.current_char() != '}':
-                        self.advance()
-                    continue
+                    return self.tokens
                 
             
             if char == ',':
@@ -580,9 +512,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['comma_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
             #IDENTIFIER    
             if char in RegDef['alpha_big']:
@@ -593,9 +523,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['id_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
                 
             #COMMENTS
@@ -607,9 +535,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['multi-comment_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
 
             #SCROLL LITERALS 
@@ -621,9 +547,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['book_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
 
 
@@ -636,9 +560,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['book_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
 
             #TREASURES & FLOAT LITERALS
@@ -650,9 +572,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['number_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
                 
             
             
@@ -665,9 +585,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    while self.current_char() is not None and self.current_char() not in Delims['number_delim']:
-                        self.advance()
-                    continue
+                    return self.tokens
 
             # After all the if-block checks for known states, handle invalid character:
             if (char not in allowed_symbols 
@@ -675,16 +593,12 @@ class RoyalScriptLexer:
                 and char not in RegDef['number']):
                 
                 pos_start = self.position
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 
                 self.advance()  # Move forward
 
-                # Consume invalid characters until we hit a valid whitespace or end of input
-                while self.current_char() is not None and self.current_char() not in RegDef['whitespace']:
-                    self.advance()
-                
-                continue
+                return self.tokens
         
               # Assume lexer.errors stores the encountered errors
         if not self.errors:  # Proceed only if no errors occurred during lexing
@@ -708,7 +622,7 @@ class RoyalScriptLexer:
     #            STATES => RESERVED WORDS              #
     #==================================================#
     #   STATE 1 - STATE 8 => BELIEVE                   #
-    #   STATE 1 & STATE 9-13 => continue                  #
+    #   STATE 1 & STATE 9-13 => continue               #
     #   STATE 14 - STATE 18 => CAST                    #
     #   STATE 17 & STATE 19-21 => CASTLE               #
     #   STATE 14 & STATE 22-28 => CHAMBER              #
@@ -749,7 +663,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state9(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -762,7 +676,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state3(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -775,7 +689,7 @@ class RoyalScriptLexer:
             case "i":
                 return self.state4(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
                 
@@ -789,7 +703,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state5(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -802,7 +716,7 @@ class RoyalScriptLexer:
             case "v":
                 return self.state6(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -815,7 +729,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state7(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -847,7 +761,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state10(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -860,7 +774,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state11(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -873,7 +787,7 @@ class RoyalScriptLexer:
             case "k":
                 return self.state12(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -913,7 +827,7 @@ class RoyalScriptLexer:
             case "u":
                 return self.state42(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -926,7 +840,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state16(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -939,7 +853,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state17(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -973,7 +887,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state20(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1004,7 +918,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state23(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1017,7 +931,7 @@ class RoyalScriptLexer:
             case "m":
                 return self.state24(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1030,7 +944,7 @@ class RoyalScriptLexer:
             case "b":
                 return self.state25(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1043,7 +957,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state26(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1056,7 +970,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state27(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1087,7 +1001,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state30(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1100,7 +1014,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state31(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1113,7 +1027,7 @@ class RoyalScriptLexer:
             case "i":
                 return self.state32(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1126,7 +1040,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state33(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1139,7 +1053,7 @@ class RoyalScriptLexer:
             case "u":
                 return self.state34(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1152,7 +1066,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state35(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1184,7 +1098,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state38(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1197,7 +1111,7 @@ class RoyalScriptLexer:
             case "w":
                 return self.state39(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1210,7 +1124,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state40(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1241,7 +1155,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state43(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1254,7 +1168,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state44(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1267,7 +1181,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state45(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1299,7 +1213,7 @@ class RoyalScriptLexer:
             case "y":
                 return self.state48(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1312,7 +1226,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state49(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1325,7 +1239,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state50(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1339,7 +1253,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state51(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1352,7 +1266,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state52(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1365,7 +1279,7 @@ class RoyalScriptLexer:
             case "y":
                 return self.state53(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1399,7 +1313,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state61(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1412,7 +1326,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state57(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1425,7 +1339,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state58(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1439,7 +1353,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state59(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1470,7 +1384,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state62(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1483,7 +1397,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state63(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1497,7 +1411,7 @@ class RoyalScriptLexer:
             case "v":
                 return self.state64(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1510,7 +1424,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state65(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1523,7 +1437,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state66(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1556,7 +1470,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state69(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1569,7 +1483,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state70(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1582,7 +1496,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state71(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1595,7 +1509,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state72(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1608,7 +1522,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state73(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1621,7 +1535,7 @@ class RoyalScriptLexer:
             case "d":
                 return self.state74(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1653,7 +1567,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state77(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1666,7 +1580,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state78(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1679,7 +1593,7 @@ class RoyalScriptLexer:
             case "g":
                 return self.state79(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1693,7 +1607,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state80(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1706,7 +1620,7 @@ class RoyalScriptLexer:
             case "h":
                 return self.state81(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 
@@ -1718,7 +1632,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state82(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None			
 
@@ -1730,7 +1644,7 @@ class RoyalScriptLexer:
             case "f":
                 return self.state83(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 
@@ -1761,7 +1675,7 @@ class RoyalScriptLexer:
                 case "i":
                     return self.state86(input_str)
                 case _:
-                    error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                    error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                     self.errors.append(error_message)
                     return False, input_str, None
 			
@@ -1774,7 +1688,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state87(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1787,7 +1701,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state88(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1801,7 +1715,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state89(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1814,7 +1728,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state90(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
     
@@ -1845,7 +1759,7 @@ class RoyalScriptLexer:
             case "c":
                 return self.state93(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1858,7 +1772,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state94(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1871,7 +1785,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state95(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1884,7 +1798,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state96(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1916,7 +1830,7 @@ class RoyalScriptLexer:
             case "h":
                 return self.state99(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1929,7 +1843,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state100(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1942,7 +1856,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state101(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1956,7 +1870,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state102(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1969,7 +1883,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state103(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -1982,7 +1896,7 @@ class RoyalScriptLexer:
             case "m":
                 return self.state104(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2017,7 +1931,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state117(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2032,7 +1946,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state112(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2045,7 +1959,7 @@ class RoyalScriptLexer:
             case "g":
                 return self.state109(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2059,7 +1973,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state110(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2090,7 +2004,7 @@ class RoyalScriptLexer:
             case "u":
                 return self.state113(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2103,7 +2017,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state114(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2116,7 +2030,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state115(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2147,7 +2061,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state118(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2161,7 +2075,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state119(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2196,7 +2110,7 @@ class RoyalScriptLexer:
             case "p":
                 return self.state128(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			   
@@ -2209,7 +2123,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state123(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2222,7 +2136,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state124(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2235,7 +2149,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state125(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2248,7 +2162,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state126(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2281,7 +2195,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state129(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2294,7 +2208,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state130(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2307,7 +2221,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state131(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2345,7 +2259,7 @@ class RoyalScriptLexer:
             case "w":
                 return self.state186(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2358,7 +2272,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state135(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2371,7 +2285,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state136(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2410,7 +2324,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state164(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 
@@ -2422,7 +2336,7 @@ class RoyalScriptLexer:
             case "i":
                 return self.state140(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2435,7 +2349,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state141(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2448,7 +2362,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state142(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2461,7 +2375,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state143(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
     
@@ -2473,7 +2387,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state144(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2504,7 +2418,7 @@ class RoyalScriptLexer:
             case "c":
                 return self.state147(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2517,7 +2431,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state148(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2530,7 +2444,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state149(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2543,7 +2457,7 @@ class RoyalScriptLexer:
             case "n":
                 return self.state150(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2575,7 +2489,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state153(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2588,7 +2502,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state154(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2601,7 +2515,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state155(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2633,7 +2547,7 @@ class RoyalScriptLexer:
             case "c":
                 return self.state158(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2646,7 +2560,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state159(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2659,7 +2573,7 @@ class RoyalScriptLexer:
             case "o":
                 return self.state160(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2672,7 +2586,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state161(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2685,7 +2599,7 @@ class RoyalScriptLexer:
             case "l":
                 return self.state162(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2716,7 +2630,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state165(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2729,7 +2643,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state166(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2742,7 +2656,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state167(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2755,7 +2669,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state168(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2768,7 +2682,7 @@ class RoyalScriptLexer:
             case "u":
                 return self.state169(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2781,7 +2695,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state170(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2794,7 +2708,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state171(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2807,7 +2721,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state172(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2840,7 +2754,7 @@ class RoyalScriptLexer:
             case "u":
                 return self.state183(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2853,7 +2767,7 @@ class RoyalScriptLexer:
             case "a":
                 return self.state176(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2866,7 +2780,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state177(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2879,7 +2793,7 @@ class RoyalScriptLexer:
             case "u":
                 return self.state178(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2892,7 +2806,7 @@ class RoyalScriptLexer:
             case "r":
                 return self.state179(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2905,7 +2819,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state180(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2918,7 +2832,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state181(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2949,7 +2863,7 @@ class RoyalScriptLexer:
             case "e":
                 return self.state184(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2980,7 +2894,7 @@ class RoyalScriptLexer:
             case "i":
                 return self.state187(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -2993,7 +2907,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state188(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -3006,7 +2920,7 @@ class RoyalScriptLexer:
             case "t":
                 return self.state189(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -3038,7 +2952,7 @@ class RoyalScriptLexer:
             case "i":
                 return self.state192(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -3051,7 +2965,7 @@ class RoyalScriptLexer:
             case "s":
                 return self.state193(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -3064,7 +2978,7 @@ class RoyalScriptLexer:
             case "h":
                 return self.state194(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -3427,7 +3341,7 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state226(input_str)
         else:
-            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
 			
@@ -3466,7 +3380,7 @@ class RoyalScriptLexer:
             case "&":
                 return self.state229(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -3498,7 +3412,7 @@ class RoyalScriptLexer:
             case "|":
                 return self.state232(input_str)
             case _:
-                error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
                 return False, input_str, None
 			
@@ -3531,7 +3445,7 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state236(input_str)
         else:
-            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
 			
@@ -3571,7 +3485,7 @@ class RoyalScriptLexer:
         elif self.current_char() == "=":
             return self.state240(input_str)
         else:
-            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
 			
@@ -3878,7 +3792,7 @@ class RoyalScriptLexer:
             self.errors.append(error_message)
             return False, input_str, None
         else:
-            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
 			
@@ -3920,7 +3834,7 @@ class RoyalScriptLexer:
             self.errors.append(error_message)
             return False, input_str, None
         else:
-            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
 			
@@ -3959,7 +3873,7 @@ class RoyalScriptLexer:
         if self.current_char() in RegDef['number']:
             return self.state272(input_str) 
         else:
-            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
     
@@ -3972,7 +3886,7 @@ class RoyalScriptLexer:
         elif self.current_char() == 'f':
             return self.state273(input_str) 
         else:
-            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
 			
@@ -4039,7 +3953,7 @@ class RoyalScriptLexer:
         elif self.current_char() == "'":
             return self.state280(input_str)  
         else:
-            error_message = f"Invalid input '{self.current_char()}' at line {self.line}, position {self.position}"
+            error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
 			
