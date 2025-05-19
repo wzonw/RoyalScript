@@ -1,20 +1,18 @@
 import tkinter as tk
 import subprocess
 import sys
-import os
 import threading
-import queue
 from tkinter import PhotoImage, scrolledtext
 from PIL import Image, ImageTk, ImageSequence
 from lexer import RoyalScriptLexer
 from lexer import Token
 from pygame import mixer
 from parser import  RoyalScriptParser
-# from lark_parser import  RoyalScriptParser
-from ast_builder import RoyalScriptASTBuilder, ASTBuildingException
-from semantic import SemanticAnalyzer, SemanticError
+from ast_builder import RoyalScriptASTBuilder
+from semantic import SemanticAnalyzer
 from translator import RoyalScriptToPythonTranslator
 import time 
+import traceback
 from ast_display import print_ast
 
 class InteractiveTerminal:
@@ -128,12 +126,6 @@ class InteractiveTerminal:
                 # If still running after timeout, force kill
                 if self.process.poll() is None:
                     self.process.kill()
-                    
-                # Update terminal to show process was terminated
-                self.output_widget.config(state=tk.NORMAL)
-                self.output_widget.insert(tk.END, "\n[Process terminated]\n", "system")
-                self.output_widget.see(tk.END)
-                self.output_widget.config(state=tk.DISABLED)
                 
                 # Reset flags
                 self.is_waiting_for_input = False
@@ -160,7 +152,6 @@ class InteractiveTerminal:
             self.output_widget.insert(tk.END, text)
         self.output_widget.see(tk.END)
         self.output_widget.config(state=tk.DISABLED)
-
 
 class RoyalScriptLexerGUI(tk.Tk):
     
@@ -520,15 +511,17 @@ class RoyalScriptLexerGUI(tk.Tk):
             self.terminal_text.delete(1.0, tk.END)
             self.terminal_text.config(state=tk.DISABLED)
             
-            # Show a message indicating the terminal was cleared
-            self.terminal_text.config(state=tk.NORMAL)
-            self.terminal_text.insert(tk.END, "[Terminal cleared]\n", "system")
-            self.terminal_text.see(tk.END)
-            self.terminal_text.config(state=tk.DISABLED)
+            # # Show a message indicating the terminal was cleared
+            # self.terminal_text.config(state=tk.NORMAL)
+            # self.terminal_text.insert(tk.END, "[Terminal cleared]\n", "system")
+            # self.terminal_text.see(tk.END)
+            # self.terminal_text.config(state=tk.DISABLED)
 
     def run_code(self, event=None):
         """Run the generated Python code with input capabilities"""
+        # take the input and store it in code variable para gawing input sa lexical analysis 
         code = self.input_text.get("1.0", tk.END)
+        # initialize lexical analyzer (imported lexer)
         lexer = RoyalScriptLexer(code)
         
         # Clear previous output
@@ -537,23 +530,41 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.terminal_text.config(state=tk.NORMAL)
         self.terminal_text.delete(1.0, tk.END)
         self.terminal_text.config(state=tk.DISABLED)
-        self.tokens = []  # Reset tokens list
-        all_tokens = [] 
-        #lexical
+        all_tokens = []  # Store tokens (type and value) for additional analysis used for ast [[(token.token_type, token.value), (token.token_type, token.value)], [(token.token_type, token.value), (token.token_type, token.value)]]
+
+
+        ############### lexical ###############
         try:
-            token_lines = lexer.get_tokens() or []
-            self.tokens = token_lines  # Save tokens for later use
+            # for each tokens per line, store in token_line var, if wala empty
+            token_lines = lexer.get_tokens() or [] #[[(token.token_type, token.value, token.line, token.position), (token.token_type, token.value, token.line, token.position)], [(token.token_type, token.value, token.line, token.position), (token.token_type, token.value, token.line, token.position)]]
             
+            # check if may naencounte ne errors
             if lexer.errors:
+                # if meron idisplay sa terminal
                 self.show_terminal_message("❌ Lexical errors detected:")
                 for error in lexer.errors:
                     self.show_terminal_message(f"  - {error}")
-                    return
 
-            # Display tokens in output_listbox and token_listbox
+                for line_idx, line_tokens in enumerate(token_lines):
+                    # processes each individual token within a line.
+                    for token in line_tokens:
+                        # check if the token is an instance of Token class (from lexical analyzer) & check if the token have an attribute called token_type
+                        if isinstance(token, Token) and hasattr(token, 'token_type'):
+                            # if meron then display the token value (lexeme) and token type
+                            self.output_listbox.insert(tk.END, token.value)
+                            self.token_listbox.insert(tk.END, token.token_type)
+
+                return
+            
+            # Display tokens in output_listbox and token_listbox (lexeme and token)
+            """The outer loop (for line_idx, line_tokens in enumerate(token_lines)) 
+            is going through each line in token_lines, getting both the index and the line's tokens."""
             for line_idx, line_tokens in enumerate(token_lines):
+                # processes each individual token within a line.
                 for token in line_tokens:
+                    # check if the token is an instance of Token class (from lexical analyzer) & check if the token have an attribute called token_type
                     if isinstance(token, Token) and hasattr(token, 'token_type'):
+                        # if meron then display the token value (lexeme) and token type
                         self.output_listbox.insert(tk.END, token.value)
                         self.token_listbox.insert(tk.END, token.token_type)
 
@@ -562,31 +573,54 @@ class RoyalScriptLexerGUI(tk.Tk):
             self.show_terminal_message(f"❌ Error during lexical analysis: {str(e)}")
             self.show_terminal_message(traceback.format_exc())
                 
-        # Prepare tokens for ast
+        # Prepare tokens for ast (ast input)
+        """It iterates through each line of tokens in token_lines 
+        (each line_tokens is a collection of tokens from a single line of text/code)"""
         for line_tokens in token_lines:
+            # For each line, creates an empty list called tokens to store processed token information
             tokens = []
+            # loops through each individual token within the current line
             for token in line_tokens:
+                # check if the token is an instance of Token class (from lexical analyzer) & check if the token have an attribute called token_type
                 if isinstance(token, Token) and hasattr(token, 'token_type'):
+                    """If both conditions are met, creates a tuple containing the token's type and value 
+                    (token.token_type, token.value) and add its tuple to the tokens list"""
                     tokens.append((token.token_type, token.value))
-            all_tokens.append(tokens)
+            # After processing all tokens in the current line, adds the collected tokens list to the all_tokens list
+            all_tokens.append(tokens) 
         
-        
-        flat_tokens = []
-        
+        # Flatten tokens and collect line/column info
+        flat_tokens = [] # [(token.token_type, token.value, token.line, token.position), (token.token_type, token.value, token.line, token.position), (token.token_type, token.value, token.line, token.position)]
+
+        """It iterates through each line of tokens in token_lines 
+        (each line_tokens is a collection of tokens from a single line of text/code)"""
         for line_tokens in token_lines:
+            # loops through each individual token within the current line
             for token in line_tokens:
                 if hasattr(token, 'token_type'):
-                    flat_tokens.append(token)  # token should have .line and .position
-        #syntax
+                    """If token have attribute token_type add its tuple to the tokens list"""
+                    flat_tokens.append(token) 
+
+        ############### syntax ###############
         try:
-            parser = RoyalScriptParser('<program>')
+            # initialize parser with argument <'program'> to specify the start of the reading of cfg
+            parser = RoyalScriptParser('<program>') 
+            # store the result and the error_message from the parser
             tree, error_message = parser.parse(flat_tokens)
+
+            # if tree is true meaning successful yung pag parse
             if tree:
+
+                # then since walang syntax error try to build ast 
                 try:
+
+                    # initialize ast builder pass the all_tokens as input
                     ast_builder = RoyalScriptASTBuilder(all_tokens)
                     ast = ast_builder.build_ast()
                 except Exception as e:
                     self.show_terminal_message(f"AST building not performed - {str(e)}")
+            
+            # if may syntax error during parsing then display the errors
             else:
                 self.show_terminal_message("❌ Syntax errors detected. Check your code structure.")
                 if error_message:
@@ -598,18 +632,18 @@ class RoyalScriptLexerGUI(tk.Tk):
             self.show_terminal_message(f"❌ Error during syntax analysis: {str(e)}")
             self.show_terminal_message(traceback.format_exc())
 
-        
-        try:
-                
-            # Perform semantic analysis
+        ############### semantic ###############
+        try:        
+            # Perform semantic analysis if walang lexical and syntax errors
+            # initialize semantic analyzer and past the ast as input for semantic analysis
             semantic_analyzer = SemanticAnalyzer()
             semantic_errors = semantic_analyzer.analyze(ast)
             
+            # if may semantic errors then display the erros the terminal
             if semantic_errors:
                 self.show_terminal_message("❌ Semantic errors detected:")
                 for error in semantic_errors:
                     self.show_terminal_message(f"  - {error}")
-                    return
                 
         except Exception as e:
             import traceback
@@ -617,29 +651,33 @@ class RoyalScriptLexerGUI(tk.Tk):
             self.show_terminal_message(traceback.format_exc())
 
         # Translate to Python
-        # analyzer = SemanticAnalyzer()
         try:
-            print("GLOBAL TYPE MAP:", semantic_analyzer .global_variable_types)
+            # Initialize the translator object with global variable type information from the semantic analyzer
             translator = RoyalScriptToPythonTranslator(global_variable_types=semantic_analyzer.global_variable_types)
+            
+            # Translate the Abstract Syntax Tree (AST) into Python code
             python_code = translator.translate(ast)
             
-            # Ensure python_code is a string with newlines
+            # Check if the returned Python code is a list of code lines instead of a single string
+            # If it's a list, join the lines with newline characters to create a proper Python script
             if isinstance(python_code, list):
                 python_code = "\n".join(python_code)
                 
-            # Save to file
+            # Define the output file path for the generated Python code
             output_file = "output.py"
+            
+            # Write the generated Python code to the output file
+            # The 'utf-8' encoding ensures proper handling of special characters
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(python_code)
                     
-            # Create a new terminal if needed, or ensure existing one is ready
+            # Check if the terminal object exists and create it if needed
+            # The terminal is used to run the generated Python code and display its output
             if not hasattr(self, 'terminal') or self.terminal is None:
                 self.terminal = InteractiveTerminal(self.terminal_text)
-            else:
-                # The terminal's start_process method will handle terminating any existing process
-                pass
             
-            # Start the process and handle I/O
+            # Start the Python interpreter process with the generated code file
+            # The "-u" flag enables unbuffered output, which is helpful for real-time display
             self.terminal.start_process(["python", "-u", output_file])
 
         except Exception as e:
@@ -649,88 +687,101 @@ class RoyalScriptLexerGUI(tk.Tk):
 
     def show_terminal_message(self, message):
         """Display a message in the terminal"""
+        # Enable editing of the terminal text widget temporarily
         self.terminal_text.config(state=tk.NORMAL)
+        
+        # Add the message to the terminal with a newline character
         self.terminal_text.insert(tk.END, message + "\n")
+        
+        # Scroll to show the latest message (scrolls to the end)
         self.terminal_text.see(tk.END)
+        
+        # Disable editing of the terminal text widget to prevent user modification
         self.terminal_text.config(state=tk.DISABLED)
 
     def on_input_scroll(self, *args):
         """Synchronize input text and line numbers scrolling"""
+        # Apply the same scrolling parameters to both the input text editor
+        # and the line numbers widget to keep them aligned
         self.input_text.yview(*args)
         self.line_numbers.yview(*args)
-    
+
     def on_lr_scroll(self, *args):
         """Synchronize lexer and tokens scrolling including line numbers"""
-        # Update all components
+        # Update all components in the lexer/token output area to scroll together
+        # This ensures all three components stay aligned when scrolling
         self.output_listbox.yview(*args)
         self.token_listbox.yview(*args)
         self.lexer_line_numbers.yview(*args)
-    
+
     def sync_lr_scroll(self, *args):
         """Update scrollbar position and sync all components"""
+        # Set the scrollbar position based on the provided arguments
         self.lr_scrollbar.set(*args)
         
-        # Get the fraction of scrolling
+        # Get the fraction of scrolling (the position as a decimal between 0 and 1)
         fraction = float(args[0])
         
-        # Apply the same scroll fraction to all components
+        # Apply the same scroll fraction to all components in the lexer/token area
+        # This ensures synchronized scrolling when using the scrollbar
         self.output_listbox.yview_moveto(fraction)
         self.token_listbox.yview_moveto(fraction)
         self.lexer_line_numbers.yview_moveto(fraction) 
-    
+
     def sync_input_scrollbar(self, *args):
         """Update scrollbar position and sync all components"""
+        # Set the input area scrollbar position based on the provided arguments
         self.input_scrollbar.set(*args)
         
-        # Get the fraction of scrolling
+        # Get the fraction of scrolling (the position as a decimal between 0 and 1)
         fraction = float(args[0])
         
-        # Apply the same scroll fraction to all components
+        # Apply the same scroll fraction to all components in the input area
+        # This ensures the text editor and line numbers scroll together
         self.input_text.yview_moveto(fraction)
         self.line_numbers.yview_moveto(fraction)
 
+    # updating line numbers in input section
     def update_line_numbers(self, event=None):
         """Update line numbers and reset modified flag"""
+        # Reset the modified flag on the text widget to indicate changes have been processed
         self.input_text.edit_modified(False)
         
+        # Get the current content of the text editor
         content = self.input_text.get("1.0", "end-1c")
+        
+        # Count the number of lines in the content (number of newlines plus 1)
         num_lines = content.count('\n') + 1
+        
+        # Create a string containing line numbers (1, 2, 3, etc.) 
+        # Each number is right-justified with width of 3 characters
         numbers = '\n'.join(str(i).rjust(3) for i in range(1, num_lines + 1))
         
+        # Store the current scroll position to restore it later
         scroll_position = self.input_text.yview()
 
+        # Make the line numbers text widget editable temporarily
         self.line_numbers.config(state='normal')
+        
+        # Clear all existing content in the line numbers widget
         self.line_numbers.delete("1.0", "end")
+        
+        # Insert the newly created line numbers string
         self.line_numbers.insert("1.0", numbers)
+        
+        # Configure a tag for right-alignment
         self.line_numbers.tag_configure("right", justify="right")
+        
+        # Apply the right-alignment tag to all content in the line numbers widget
         self.line_numbers.tag_add("right", "1.0", "end")
+        
+        # Make the line numbers widget non-editable again
         self.line_numbers.config(state='disable')
 
-        # Restore scroll position to avoid jumping
+        # Restore the previous scroll position for both widgets to maintain synchronization
+        # This prevents the UI from jumping when line numbers are updated
         self.input_text.yview_moveto(scroll_position[0])
         self.line_numbers.yview_moveto(scroll_position[0])
-
-    def update_lexer_token_line_numbers(self):
-        """Update line numbers for lexer section only"""
-        numbers = []
-
-        # Ensure each line is accounted for, even if it has no tokens
-        for line_idx, line_tokens in enumerate(self.tokens):
-            if not line_tokens:
-                numbers.append(str(line_idx + 1))  # Line number for empty token line
-            else:
-                numbers.extend([str(line_idx + 1)] * len(line_tokens))  # Line number for each token
-
-        # Convert numbers to string with newlines
-        numbers_str = "\n".join(numbers)
-
-        # Update lexer line numbers only
-        self.lexer_line_numbers.config(state='normal')
-        self.lexer_line_numbers.delete("1.0", "end")
-        self.lexer_line_numbers.insert("1.0", numbers_str)
-        self.lexer_line_numbers.tag_configure("right", justify="right")
-        self.lexer_line_numbers.tag_add("right", "1.0", "end")
-        self.lexer_line_numbers.config(state='disabled')
 
     def setup_analyze_button(self):
         # Create analyze button using Canvas
@@ -761,7 +812,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         )
 
         # Bind button events
-        self.syntax_button.bind("<Button-1>", self.analyze_syntax)  # This is the corrected line
+        self.syntax_button.bind("<Button-1>", self.analyze_syntax)  
         self.syntax_button.bind("<Enter>", self.on_hover_syntax)
         self.syntax_button.bind("<Leave>", self.on_leave_syntax)
     
@@ -783,7 +834,9 @@ class RoyalScriptLexerGUI(tk.Tk):
 
     def analyze_semantic(self, event=None):
         """Analyze the code and display semantic analysis results"""
+        # take the input and store it in code variable para gawing input sa lexical analysis 
         code = self.input_text.get("1.0", tk.END)
+        # initialize lexical analyzer (imported lexer)
         lexer = RoyalScriptLexer(code)
         
         # Clear previous output
@@ -792,75 +845,115 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.terminal_text.config(state=tk.NORMAL)
         self.terminal_text.delete(1.0, tk.END)
         self.terminal_text.config(state=tk.DISABLED)
-        self.tokens = []  # Reset tokens list
-        all_tokens = [] 
+        all_tokens = []  # Store tokens (type and value) for additional analysis used for ast
         
         try:
+            # for each tokens per line, store in token_line var, if wala empty
             token_lines = lexer.get_tokens() or []
-            self.tokens = token_lines  # Save tokens for later use
             
+            # check if may naencounte ne errors
             if lexer.errors:
+                # if meron idisplay sa terminal
                 self.show_terminal_message("❌ Lexical errors detected:")
                 for error in lexer.errors:
                     self.show_terminal_message(f"  - {error}")
-                    return
+
+                for line_idx, line_tokens in enumerate(token_lines):
+                    # processes each individual token within a line.
+                    for token in line_tokens:
+                        # check if the token is an instance of Token class (from lexical analyzer) & check if the token have an attribute called token_type
+                        if isinstance(token, Token) and hasattr(token, 'token_type'):
+                            # if meron then display the token value (lexeme) and token type
+                            self.output_listbox.insert(tk.END, token.value)
+                            self.token_listbox.insert(tk.END, token.token_type)
+
+                return
             else:
+                # if wala display yung success message
                 self.show_terminal_message("✅ Lexical analysis completed successfully!")
                 self.show_terminal_message("No lexical errors found.")
-
-            # Display tokens in output_listbox and token_listbox
+            
+            # Display tokens in output_listbox and token_listbox (lexeme and token)
+            """The outer loop (for line_idx, line_tokens in enumerate(token_lines)) 
+            is going through each line in token_lines, getting both the index and the line's tokens."""
             for line_idx, line_tokens in enumerate(token_lines):
+                # processes each individual token within a line.
                 for token in line_tokens:
+                    # check if the token is an instance of Token class (from lexical analyzer) & check if the token have an attribute called token_type
                     if isinstance(token, Token) and hasattr(token, 'token_type'):
+                        # if meron then display the token value (lexeme) and token type
                         self.output_listbox.insert(tk.END, token.value)
                         self.token_listbox.insert(tk.END, token.token_type)
-                
-            # Prepare tokens for ast
+
+            # Prepare tokens for ast (ast input)
+            """It iterates through each line of tokens in token_lines 
+            (each line_tokens is a collection of tokens from a single line of text/code)"""
             for line_tokens in token_lines:
+                # For each line, creates an empty list called tokens to store processed token information
                 tokens = []
+                # loops through each individual token within the current line
                 for token in line_tokens:
+                    # check if the token is an instance of Token class (from lexical analyzer) & check if the token have an attribute called token_type
                     if isinstance(token, Token) and hasattr(token, 'token_type'):
+                        """If both conditions are met, creates a tuple containing the token's type and value 
+                        (token.token_type, token.value) and add its tuple to the tokens list"""
                         tokens.append((token.token_type, token.value))
+                # After processing all tokens in the current line, adds the collected tokens list to the all_tokens list
                 all_tokens.append(tokens)
            
             
             # Flatten tokens and collect line/column info
             flat_tokens = []
 
-
+            """It iterates through each line of tokens in token_lines 
+            (each line_tokens is a collection of tokens from a single line of text/code)"""
             for line_tokens in token_lines:
+                # loops through each individual token within the current line
                 for token in line_tokens:
                     if hasattr(token, 'token_type'):
-                        flat_tokens.append(token)  # token should have .line and .position
+                        """If token have attribute token_type add its tuple to the tokens list"""
+                        flat_tokens.append(token) 
 
-            parser = RoyalScriptParser('<program>')
+            # initialize parser with argument <'program'> to specify the start of the reading of cfg
+            parser = RoyalScriptParser('<program>') 
+            # store the result and the error_message from the parser
             tree, error_message = parser.parse(flat_tokens)
 
+            # if tree is true meaning successful yung pag parser
             if tree:
+                # display the success message
                 self.show_terminal_message("✅ Syntax analysis completed successfully!")
                 self.show_terminal_message("No syntax errors found.")
-                
-                # Try to build and display AST structure
+
+                # then since walang syntax error try to build ast 
                 try:
+
+                    # initialize ast builder pass the all_tokens as input
                     ast_builder = RoyalScriptASTBuilder(all_tokens)
                     ast = ast_builder.build_ast()
                 except Exception as e:
                     self.show_terminal_message(f"AST building not performed - {str(e)}")
+            
+            # if may syntax error during parsing then display the errors
             else:
                 self.show_terminal_message("❌ Syntax errors detected. Check your code structure.")
                 if error_message:
                     self.show_terminal_message(error_message)
                     return
-            try:
                 
-                # Perform semantic analysis
+            try:
+                # Perform semantic analysis if walang lexical and syntax errors
+                # initialize semantic analyzer and past the ast as input for semantic analysis
                 semantic_analyzer = SemanticAnalyzer()
                 semantic_errors = semantic_analyzer.analyze(ast)
                 
+                # if may semantic errors then display the erros the terminal
                 if semantic_errors:
                     self.show_terminal_message("❌ Semantic errors detected:")
                     for error in semantic_errors:
                         self.show_terminal_message(f"  - {error}")
+
+                # if wala display success message
                 else:
                     self.show_terminal_message("✅ Semantic analysis completed successfully!")
                     self.show_terminal_message("No semantic errors found.")
@@ -875,71 +968,11 @@ class RoyalScriptLexerGUI(tk.Tk):
             self.show_terminal_message(f"❌ Error during analysis: {str(e)}")
             self.show_terminal_message(traceback.format_exc())
 
-    # def analyze_syntax(self, event=None):
-    #     """Analyze the code and display syntax analysis results"""
-    #     code = self.input_text.get("1.0", tk.END)
-    #     lexer = RoyalScriptLexer(code)
-        
-    #     # Clear previous output
-    #     self.output_listbox.delete(0, tk.END)
-    #     self.token_listbox.delete(0, tk.END)
-    #     self.terminal_text.config(state=tk.NORMAL)
-    #     self.terminal_text.delete(1.0, tk.END)
-    #     self.terminal_text.config(state=tk.DISABLED)
-    #     self.tokens = []  # Reset tokens list
-    #     all_tokens = []  # Store tokens (type and value) for additional analysis
-        
-    #     try:
-    #         token_lines = lexer.get_tokens() or []
-            
-    #         # Check for lexical errors first
-    #         if lexer.errors:
-    #             self.show_terminal_message("❌ Lexical errors detected:")
-    #             for error in lexer.errors:
-    #                 self.show_terminal_message(f"  - {error}")
-    #             return
-            
-    #         # Display tokens in output_listbox and token_listbox
-    #         for line_tokens in token_lines:
-    #             for token in line_tokens:
-    #                 if hasattr(token, 'token_type'):
-    #                     self.output_listbox.insert(tk.END, token.value)
-    #                     self.token_listbox.insert(tk.END, token.token_type)
-
-    #         # Prepare tokens for ast
-    #         for line_tokens in token_lines:
-    #             tokens = []
-    #             for token in line_tokens:
-    #                 if isinstance(token, Token) and hasattr(token, 'token_type'):
-    #                     tokens.append((token.token_type, token.value))
-    #             all_tokens.append(tokens)
-           
-    #         flat_tokens = []
-    #         for line_tokens in token_lines:
-    #             for token in line_tokens:
-    #                 if hasattr(token, 'token_type'):
-    #                     flat_tokens.append(token)
-    #         try:
-    #             parser = RoyalScriptParser('<program>')
-    #             parser.parse(flat_tokens) 
-    #             self.show_terminal_message("✅ Syntax analysis completed successfully!")
-    #             self.show_terminal_message("No syntax errors found.")
-    #         except SyntaxError as e:
-    #             self.show_terminal_message("❌ Syntax errors detected. Check your code structure.")
-    #             self.show_terminal_message(str(e))
-    #         except Exception as e:
-    #             import traceback
-    #             self.show_terminal_message(f"❌ Error during syntax analysis: {str(e)}")
-    #             self.show_terminal_message(traceback.format_exc())
-
-    #     except Exception as e:
-    #         import traceback
-    #         self.show_terminal_message(f"❌ Error during syntax analysis: {str(e)}")
-    #         self.show_terminal_message(traceback.format_exc())
-
     def analyze_syntax(self, event=None):
         """Analyze the code and display syntax analysis results"""
+        # take the input and store it in code variable para gawing input sa lexical analysis 
         code = self.input_text.get("1.0", tk.END)
+        # initialize lexical analyzer (imported lexer)
         lexer = RoyalScriptLexer(code)
         
         # Clear previous output
@@ -948,64 +981,90 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.terminal_text.config(state=tk.NORMAL)
         self.terminal_text.delete(1.0, tk.END)
         self.terminal_text.config(state=tk.DISABLED)
-        self.tokens = []  # Reset tokens list
-        all_tokens = []  # Store tokens (type and value) for additional analysis
-        
-        code = self.input_text.get("1.0", tk.END)
-        lexer = RoyalScriptLexer(code)
-        
-        # Clear previous output
-        self.output_listbox.delete(0, tk.END)
-        self.token_listbox.delete(0, tk.END)
-        self.terminal_text.config(state=tk.NORMAL)
-        self.terminal_text.delete(1.0, tk.END)
-        self.terminal_text.config(state=tk.DISABLED)
-        self.tokens = []  # Reset tokens list
+        all_tokens = []  # Store tokens (type and value) for additional analysis used for ast
         
         try:
+            # for each tokens per line, store in token_line var, if wala empty
             token_lines = lexer.get_tokens() or []
-            self.tokens = token_lines  # Save tokens for later use
             
+            # check if may naencounte ne errors
             if lexer.errors:
+                # if meron idisplay sa terminal
                 self.show_terminal_message("❌ Lexical errors detected:")
                 for error in lexer.errors:
                     self.show_terminal_message(f"  - {error}")
+
+                for line_idx, line_tokens in enumerate(token_lines):
+                    # processes each individual token within a line.
+                    for token in line_tokens:
+                        # check if the token is an instance of Token class (from lexical analyzer) & check if the token have an attribute called token_type
+                        if isinstance(token, Token) and hasattr(token, 'token_type'):
+                            # if meron then display the token value (lexeme) and token type
+                            self.output_listbox.insert(tk.END, token.value)
+                            self.token_listbox.insert(tk.END, token.token_type)
+
                 return
             else:
+                # if wala display yung success message
                 self.show_terminal_message("✅ Lexical analysis completed successfully!")
                 self.show_terminal_message("No lexical errors found.")
             
-            # Display tokens in output_listbox and token_listbox
-            for line_tokens in token_lines:
+            # Display tokens in output_listbox and token_listbox (lexeme and token)
+            """The outer loop (for line_idx, line_tokens in enumerate(token_lines)) 
+            is going through each line in token_lines, getting both the index and the line's tokens."""
+            for line_idx, line_tokens in enumerate(token_lines):
+                # processes each individual token within a line.
                 for token in line_tokens:
-                    if hasattr(token, 'token_type'):
+                    # check if the token is an instance of Token class (from lexical analyzer) & check if the token have an attribute called token_type
+                    if isinstance(token, Token) and hasattr(token, 'token_type'):
+                        # if meron then display the token value (lexeme) and token type
                         self.output_listbox.insert(tk.END, token.value)
                         self.token_listbox.insert(tk.END, token.token_type)
 
-            # Prepare tokens for ast
+            # Prepare tokens for ast (ast input)
+            """It iterates through each line of tokens in token_lines 
+            (each line_tokens is a collection of tokens from a single line of text/code)"""
             for line_tokens in token_lines:
+                # For each line, creates an empty list called tokens to store processed token information
                 tokens = []
+                # loops through each individual token within the current line
                 for token in line_tokens:
+                    # check if the token is an instance of Token class (from lexical analyzer) & check if the token have an attribute called token_type
                     if isinstance(token, Token) and hasattr(token, 'token_type'):
+                        """If both conditions are met, creates a tuple containing the token's type and value 
+                        (token.token_type, token.value) and add its tuple to the tokens list"""
                         tokens.append((token.token_type, token.value))
+                # After processing all tokens in the current line, adds the collected tokens list to the all_tokens list
                 all_tokens.append(tokens)
            
             
             # Flatten tokens and collect line/column info
             flat_tokens = []
 
-
+            """It iterates through each line of tokens in token_lines 
+            (each line_tokens is a collection of tokens from a single line of text/code)"""
             for line_tokens in token_lines:
+                # loops through each individual token within the current line
                 for token in line_tokens:
                     if hasattr(token, 'token_type'):
-                        flat_tokens.append(token)  # token should have .line and .position
+                        """If token have attribute token_type add its tuple to the tokens list"""
+                        flat_tokens.append(token) 
 
-            parser = RoyalScriptParser('<program>')
+            # initialize parser with argument <'program'> to specify the start of the reading of cfg
+            parser = RoyalScriptParser('<program>') 
+            # store the result and the error_message from the parser
             tree, error_message = parser.parse(flat_tokens)
+
+            # if tree is true meaning successful yung pag parser
             if tree:
+                # display the success message
                 self.show_terminal_message("✅ Syntax analysis completed successfully!")
                 self.show_terminal_message("No syntax errors found.")
+
+                # then since walang syntax error try to build ast 
                 try:
+
+                    # initialize ast builder pass the all_tokens as input
                     ast_builder = RoyalScriptASTBuilder(all_tokens)
                     ast = ast_builder.build_ast()
                     self.show_terminal_message("\nAbstract Syntax Tree:")
@@ -1013,6 +1072,8 @@ class RoyalScriptLexerGUI(tk.Tk):
                     self.show_terminal_message(ast_string)
                 except Exception as e:
                     self.show_terminal_message(f"AST building not performed - {str(e)}")
+            
+            # if may syntax error during parsing then display the errors
             else:
                 self.show_terminal_message("❌ Syntax errors detected. Check your code structure.")
                 if error_message:
@@ -1026,7 +1087,9 @@ class RoyalScriptLexerGUI(tk.Tk):
 
     def analyze_lexical(self, event=None):
         """Analyze the code and display lexical analysis results"""
+        # take the input and store it in code variable para gawing input sa lexical analysis 
         code = self.input_text.get("1.0", tk.END)
+        # initialize lexical analyzer (imported lexer)
         lexer = RoyalScriptLexer(code)
         
         # Clear previous output
@@ -1035,32 +1098,48 @@ class RoyalScriptLexerGUI(tk.Tk):
         self.terminal_text.config(state=tk.NORMAL)
         self.terminal_text.delete(1.0, tk.END)
         self.terminal_text.config(state=tk.DISABLED)
-        self.tokens = []  # Reset tokens list
         
         try:
+            # for each tokens per line, store in token_line var, if wala empty
             token_lines = lexer.get_tokens() or []
-            self.tokens = token_lines  # Save tokens for later use
             
+            # check if may naencounter na errors
             if lexer.errors:
+                # if meron idisplay sa terminal
                 self.show_terminal_message("❌ Lexical errors detected:")
                 for error in lexer.errors:
                     self.show_terminal_message(f"  - {error}")
+                 # Display tokens in output_listbox and token_listbox (lexeme and token)
+                """The outer loop (for line_idx, line_tokens in enumerate(token_lines)) 
+                is going through each line in token_lines, getting both the index and the line's tokens."""
+                for line_idx, line_tokens in enumerate(token_lines):
+                    # processes each individual token within a line.
+                    for token in line_tokens:
+                        # check if the token is an instance of Token class (from lexical analyzer) & check if the token have an attribute called token_type
+                        if isinstance(token, Token) and hasattr(token, 'token_type'):
+                            # if meron then display the token value (lexeme) and token type
+                            self.output_listbox.insert(tk.END, token.value)
+                            self.token_listbox.insert(tk.END, token.token_type)
+                return
             else:
+                # if wala display yung success message
                 self.show_terminal_message("✅ Lexical analysis completed successfully!")
                 self.show_terminal_message("No lexical errors found.")
                 
-            # Display tokens in output_listbox and token_listbox
+            # Display tokens in output_listbox and token_listbox (lexeme and token)
+            """The outer loop (for line_idx, line_tokens in enumerate(token_lines)) 
+            is going through each line in token_lines, getting both the index and the line's tokens."""
             for line_idx, line_tokens in enumerate(token_lines):
+                # processes each individual token within a line.
                 for token in line_tokens:
+                    # check if the token is an instance of Token class (from lexical analyzer) & check if the token have an attribute called token_type
                     if isinstance(token, Token) and hasattr(token, 'token_type'):
+                        # if meron then display the token value (lexeme) and token type
                         self.output_listbox.insert(tk.END, token.value)
                         self.token_listbox.insert(tk.END, token.token_type)
             
-            # Update line numbers for lexer token section
-            self.update_lexer_token_line_numbers()
-            
+        # catch any errors if meron man
         except Exception as e:
-            import traceback
             self.show_terminal_message(f"❌ Error during lexical analysis: {str(e)}")
             self.show_terminal_message(traceback.format_exc())
 

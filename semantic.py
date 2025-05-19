@@ -5,7 +5,7 @@ This module provides comprehensive semantic analysis for the RoyalScript languag
 """
 
 from enum import Enum, auto
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Optional, Tuple
 
 
 
@@ -1608,7 +1608,7 @@ class SemanticAnalyzer:
         """
         # Extract the identifier name
         identifier_name = value[0][1]
-        node_type = type(node).__name__
+        
         # Look up the symbol in the symbol table
         symbol_entry = self.symbol_table.lookup(identifier_name)
         

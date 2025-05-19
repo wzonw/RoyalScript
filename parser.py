@@ -1465,14 +1465,7 @@ class RoyalScriptParser:
         self.start_symbol = start_symbol
 
     def parse(self, tokens):
-        class RoyalScriptToken:
-            token_type = 'EOF'
-            value = 'EOF'
-            line = -1
-            position = 1
-
         tokens = list(tokens)
-        tokens.append(RoyalScriptToken())
         pos = 0
         stack = ['EOF', self.start_symbol]
         error_message = None
@@ -1485,6 +1478,9 @@ class RoyalScriptParser:
         entered_productions = []
 
         while stack:
+            # Add debug printout
+            print(f"Stack: {stack}, pos: {pos}, token: {tokens[pos].token_type if pos < len(tokens) else 'OUT_OF_BOUNDS'}")
+            
             top = stack.pop()
             # Skip comments
             while pos < len(tokens) and tokens[pos].token_type in ('single_comment', 'multi_comment'):
@@ -1495,6 +1491,11 @@ class RoyalScriptParser:
                         position_in_line = 1
                     else:
                         position_in_line += 1
+
+            # Check if we're past the end of tokens
+            if pos >= len(tokens):
+                error_message = f"Parser error: Position {pos} exceeded token list length {len(tokens)}"
+                return False, error_message
 
             current_token = tokens[pos]
             current_token_type = current_token.token_type
@@ -1507,6 +1508,9 @@ class RoyalScriptParser:
             if top in ('ε', 'λ'):
                 continue
             elif top == current_token_type:
+                # We matched a token - add debug printout
+                print(f"Matched token: {top} at position {pos}")
+                
                 pos += 1
                 if pos < len(tokens):
                     if tokens[pos].line != last_line:
@@ -1552,21 +1556,29 @@ class RoyalScriptParser:
                     print(f"{prod[0]} -> {prod[2]} (lookahead: {prod[1]})")
                 return False, error_message
 
-        if pos == len(tokens) - 1:
+        # After the loop ends, check the position
+        print(f"Loop ended. pos: {pos}, len(tokens): {len(tokens)}")
+        
+        # Fix: Modify the success condition
+        if pos == len(tokens):
             print("All productions entered during parse:")
             for prod in entered_productions:
                 print(f"{prod[0]} -> {prod[2]} (lookahead: {prod[1]})")
             return True, None
         else:
             # Unconsumed input
-            current_token = tokens[pos]
-            current_token_value = getattr(current_token, 'value', '')
-            current_token_line = getattr(current_token, 'line', '?')
-            current_token_pos = position_in_line
-            error_message = (
-                f"Syntax Error: Unexpected input '{current_token_value}' at line {current_token_line}, position {current_token_pos}. "
-                f"Expected end of input."
-            )
+            if pos < len(tokens):
+                current_token = tokens[pos]
+                current_token_value = getattr(current_token, 'value', '')
+                current_token_line = getattr(current_token, 'line', '?')
+                current_token_pos = position_in_line
+                error_message = (
+                    f"Syntax Error: Unexpected input '{current_token_value}' at line {current_token_line}, position {current_token_pos}. "
+                    f"Expected end of input."
+                )
+            else:
+                error_message = f"Parser error: Position {pos} exceeded token list length {len(tokens)}"
+            
             print("Productions entered before error:")
             for prod in entered_productions:
                 print(f"{prod[0]} -> {prod[2]} (lookahead: {prod[1]})")

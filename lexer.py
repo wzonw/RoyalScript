@@ -108,8 +108,6 @@ class TokenType:
     GREATER_EQUAL = ">="
     LESS_EQUAL = "<="
 
-    
-
     # Other Symbols
     OPEN_PAREN = "("
     CLOSE_PAREN = ")"
@@ -128,35 +126,34 @@ class TokenType:
 
     EOF = "EOF"
 
-
 allowed_symbols = ['b', 'c', 'd', 'f', 'g', 'l', 'm', 'o', 'p', 'r', 's', 't', 'w', '=', 'M', '+', '-', '*', '/', '%', '!', '&', '|', '<', '>', '(', ')', '{', '}', '[', ']', '~', ',', '\\', '"', "'", '?', '.']
 
 class RoyalScriptLexer:
     
     def __init__(self, code):
-        self.code = code
-        self.position = 0
-        self.line = 1
+        self.code = code # input from gui
+        self.position = 0 # starting position
+        self.line = 1 # starting line
         self.tokens = [[]]  # Initialize with first line's empty token list
-        self.deci = 1
+        self.deci = 1 # count decimal precision
 
     def advance(self):
         """Advance to the next character in the input"""
-        if self.position < len(self.code):
-            if self.code[self.position] == '\n':
+        if self.position < len(self.code): # if the self.position ay less than the length of the self.code yung inputted code
+            if self.code[self.position] == '\n': # if may naencounter ne new line then increment the self.line
                 self.line += 1
                 self.tokens.append([])  # Start a new line's token list
-            self.position += 1
+            self.position += 1 # increment the self.position para magproceed sa next character
 
     def current_char(self):
         """Return the current character at the position"""
         if self.position < len(self.code):
-            return self.code[self.position]
+            return self.code[self.position] # return yung character sa current position sa self.code
         return None
 
     def match(self, regex):
         """Try to match a regex pattern at the current position"""
-        match = re.match(regex, self.code[self.position:])
+        match = re.match(regex, self.code[self.position:]) # check if magmatch yung expected char sa current char
         if match:
             return match.group(0)
         return None
@@ -164,15 +161,17 @@ class RoyalScriptLexer:
     def get_tokens(self):
         """Tokenize the entire input code"""
 
-        self.errors =[]
+        self.errors =[] # for storing error messages
 
-        while self.position < len(self.code):
-            char = self.current_char()
+        while self.position < len(self.code): # while yung self.position is less than the length of self.code meaning hindi pa tayo lagpas sa last char
+            char = self.current_char() # set the char with the current character sa current position
 
             if char in ['\n', ' ', '\t']:
-                self.advance()  # Move to the next character
+                self.advance()  # Move to the next character meaning skip lang yung white space wala tayong gagawin
                 continue
 
+            # --------------------------------------------  TOKENIZATION -------------------------------------------- #
+            #RESERVED WORDS
             if char == 'b':
                 pos_start = self.position
                 valid, input_str, tokenType= self.state1()
@@ -181,9 +180,8 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    return self.tokens # if may error stop yung tokenization then return the tokens na tama # same sa lahat
 
-            #RESERVED WORDS
             if char == 'c':
                 pos_start = self.position
                 valid, input_str, tokenType= self.state14()
@@ -549,8 +547,6 @@ class RoyalScriptLexer:
                 else:
                     return self.tokens
                 
-
-
             #ROSE LITERALS    
             if char == "'":
                 pos_start = self.position
@@ -600,7 +596,7 @@ class RoyalScriptLexer:
 
                 return self.tokens
         
-              # Assume lexer.errors stores the encountered errors
+        # Assume lexer.errors stores the encountered errors
         if not self.errors:  # Proceed only if no errors occurred during lexing
             # Add EOF token to the last line        
             if self.tokens[-1]:  # If last line has tokens
@@ -614,8 +610,6 @@ class RoyalScriptLexer:
                     self.tokens.append([Token("EOF", TokenType.EOF, self.position, self.line)])
 
 
-
-            
         return self.tokens
 
     #==================================================#

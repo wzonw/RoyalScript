@@ -1,5 +1,3 @@
-# Define your AST Nodes clearly first
-
 GLOBAL_SCOPE = 0
 LOCAL_SCOPE = 1
 

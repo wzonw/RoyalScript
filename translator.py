@@ -1,8 +1,6 @@
 import textwrap
 import ast
 import black  # For code formatting
-import re
-from io import StringIO
 
 class RoyalScriptToPythonTranslator:
     def __init__(self, global_variable_types=None):
@@ -174,8 +172,6 @@ class RoyalScriptToPythonTranslator:
 
         expr = self.translate_expression(node.expression, var_type)
         return self.indent(f"{var_name} {operator} {expr}")
-
-
 
     def translate_FunctionNode(self, node):
         """Translates function definitions."""
@@ -566,7 +562,7 @@ class RoyalScriptToPythonTranslator:
                     parts.append(token_val)
                 elif token_type == 'rose_lit':
                     # Character literal, ensuring it's properly quoted
-                    parts.append("'" + token_val.strip("'") + "'")
+                    parts.append(token_val)
                 elif token_type == 'mirror_lit':
                     # Boolean literal
                     parts.append("True" if token_val.lower() == "true" else "False")
@@ -599,10 +595,10 @@ class RoyalScriptToPythonTranslator:
                     # Translate curly brace to square bracket for array initialization
                     parts.append(']')
                 elif token_type == 'lengthof':
-                    parts.append("len" + token_val[8:] if len(token_val) > 1 else "not")
+                    parts.append("len" + token_val[8:])
                 elif token_type == '!':
                     # NOT operator - replace ! with not but preserve the rest of the value
-                    parts.append("not" + token_val[1:] if len(token_val) > 1 else "not")
+                    parts.append("not" + token_val[1:])
                 else:
                     # Default case: use the token value
                     parts.append(str(token_val))
@@ -643,15 +639,7 @@ class RoyalScriptToPythonTranslator:
     def translate_wish_function(self, tokens, datatype):
         """Special handler for wish() function (input in RoyalScript)."""
         
-        # Extract the prompt inside wish()
-        prompt = ""
-        i = 1  # Skip 'wish' token
-        
-        # Skip opening parenthesis
-        while i < len(tokens) and tokens[i][0] != '(':
-            i += 1
-        if i < len(tokens):
-            i += 1  # Move past '('
+        i = 2  # Skip 'wish(' token
         
         # Collect tokens until closing parenthesis
         prompt_tokens = []
@@ -669,7 +657,6 @@ class RoyalScriptToPythonTranslator:
             if not prompt_text.endswith('\n'):
                 prompt_text += '\\n'
             prompt_text = f'"{prompt_text}"'
-            prompt = f'"{prompt_text}"'  # Format as a quoted string
 
         # Handle appropriate type casting based on datatype
         if datatype == "treasures":     # int

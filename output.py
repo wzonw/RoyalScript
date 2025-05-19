@@ -2,7 +2,9 @@ import sys
 
 
 def Main():
-    print(str("Hello").replace("None", "phantom"), end="")
+    Letter = input("Enter: \n")
+    L = len(Letter)
+    print(str(L).replace("None", "phantom"), end="")
     return 0
 
 

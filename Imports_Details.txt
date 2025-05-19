@@ -1,0 +1,121 @@
+--------------------------------------------------------------  GUI IMPORTS --------------------------------------------------------------  
+1. tkinter imports:
+
+    > import tkinter as tk: The main Tkinter library for creating GUI applications in Python. 
+    The alias "tk" lets you use shorter code like tk.Button() instead of tkinter.Button().
+    > from tkinter import PhotoImage, scrolledtext: Imports specific classes from tkinter:
+
+    > PhotoImage: For handling image files to display in your GUI
+    > scrolledtext: A text widget with built-in scrollbars for displaying large amounts of text
+
+2. PIL (Python Imaging Library) imports:
+
+    > from PIL import Image, ImageTk, ImageSequence:
+
+        - Image: Core functionality for opening, manipulating, and saving images
+        - ImageTk: Creates Tkinter-compatible photo images from PIL images
+        - ImageSequence: Helps with handling animated GIF files frame by frame
+
+3. pygame import:
+
+    > from pygame import mixer: Audio module from pygame for playing sounds and music in your application
+
+4. Custom module imports:
+
+    > from lexer import RoyalScriptLexer: Imports your lexical analyzer class for RoyalScript
+    > from lexer import Token: Imports the Token class used to represent tokens in RoyalScript
+    > from parser import RoyalScriptParser: Imports your parser class for RoyalScript
+    > from ast_builder import RoyalScriptASTBuilder: Imports the abstract syntax tree builder for RoyalScript
+    > from semantic import SemanticAnalyzer: Imports the semantic analyzer for checking the meaning/correctness of code
+    > from translator import RoyalScriptToPythonTranslator: Imports the translator that converts RoyalScript to Python
+    > from ast_display import print_ast: Imports a function to display abstract syntax trees
+
+5. Standard library imports:
+
+    > import subprocess: Allows you to spawn new processes, connect to their input/output/error pipes, and get their return codes
+    > import sys: Provides access to Python interpreter variables and functions
+    > import threading: Enables multi-threading capabilities to run operations concurrently
+    > import time: Provides time-related functions like delays and timing operations
+    > import traceback: Provides tools for working with stack traces, useful for error handling
+
+----------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------  LEXICAL ANALYZER  ----------------------------------------------------------  
+1. import re:
+
+    > This imports Python's regular expression module, which provides tools for pattern matching and manipulation 
+      of strings using regular expressions.
+    > Use for matching chracters
+
+2. from RS_RegDef import Delims:
+
+    > Imports the Delims class that contains valid delimeter for each tokens
+
+4. from RS_RegDef import RegDef:
+
+    > Imports the RegDef class that contains regular definition 
+
+5. from decimal import Decimal, ROUND_HALF_UP:
+
+    > Imports the Decimal class and ROUND_HALF_UP constant from Python's decimal module.
+        - Decimal: Provides precise decimal arithmetic, which is important for financial or scientific 
+          applications where floating-point precision errors are unacceptable.
+        - ROUND_HALF_UP: A rounding mode that rounds to the nearest number, with ties (exactly halfway) rounding away from zero.
+        - Used in handling decimal values more accurately.
+
+----------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------  SYNTAX ANALYZER  -----------------------------------------------------------
+ > NO IMPORTS
+----------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------  AST BUILDER  -------------------------------------------------------------
+ > NO IMPORTS
+----------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------  SEMANTIC ANALYZER  ----------------------------------------------------------
+1. from enum import Enum, auto
+
+    > Enum: A base class for creating enumerated types in Python. Enumerations are a set of symbolic names bound to unique values.
+    > auto(): A helper function that automatically assigns incrementing integer values to enum members, saving you from having to 
+      manually assign values.
+
+    EXAMPLE:
+
+        class Color(Enum):
+        RED = auto()     # Will be 1
+        GREEN = auto()   # Will be 2
+        BLUE = auto()    # Will be 3
+
+2. from typing import List, Dict, Optional, Tuple
+
+    > List: Represents a list of elements of a specific type, e.g., List[int] for a list of integers.
+    > Dict: Represents a dictionary with keys and values of specific types, e.g., Dict[str, int] for a dictionary with string keys 
+      and integer values.
+    > Optional: Indicates that a value can be of a specified type or None, e.g., Optional[str] means either a string or None.
+    > Tuple: Represents a tuple with elements of specific types, e.g., Tuple[int, str] for a tuple with an integer followed by a string.
+----------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------  TRANSLATOR  ------------------------------------------------------------- 
+
+1. textwrap 
+    > is a standard library module for text wrapping and formatting. Its primary functions include:
+
+    > Wrapping text: Breaking long text into lines of specified width
+    > Indenting text: Adding consistent indentation to text blocks
+    > Dedenting text: Removing common leading whitespace from multi-line text
+
+2. ast (Abstract Syntax Tree) 
+
+    > is a standard library module for working with Python's syntax trees. It allows you to:
+
+    > Parse Python code: Convert code strings into abstract syntax trees
+    > Analyze code structure: Inspect how Python code is structured without executing it
+    > Transform code: Modify Python code programmatically by changing its syntax tree
+    > Generate code: Create Python code by building syntax trees
+
+3. black 
+
+    > is a popular third-party code formatter that automatically formats Python code to follow a consistent style. Its main features include:
+
+    > Deterministic formatting: Produces the same output regardless of the input format
+    > PEP 8 compliant: Follows Python's official style guide with some opinionated choices
+    > Zero configuration: Works with minimal setup (though some options are available)
+    > Preserves semantics: Ensures formatted code behaves exactly the same as the input
+
+----------------------------------------------------------------------------------------------------------------------------------------
