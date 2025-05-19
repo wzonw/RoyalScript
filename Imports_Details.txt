@@ -119,3 +119,32 @@
     > Preserves semantics: Ensures formatted code behaves exactly the same as the input
 
 ----------------------------------------------------------------------------------------------------------------------------------------
+
+
+GUI -> LEXICAL ANALYZER = TOKENS -> SYNTAX ANALYZER (PARSER) -> AST -> SEMANTIC ANALYZER -> TRANSLATOR -> GUI RUN  
+
+
+------------------------------------------------------------- SELF --------------------------------------------------------------------
+
+Key Differences
+
+Scope:
+
+self.variable: Available throughout the instance's lifetime
+Variable without self: Limited to its defined scope (method or class level)
+
+
+Persistence:
+
+self.variable: Persists as long as the object exists
+Local variable: Dies when function execution ends
+
+
+Accessibility:
+
+self.variable: Accessible from all instance methods and outside the class
+Local variable: Only accessible within its defined scope
+
+
+
+Understanding when to use each type is fundamental to proper Python class design and object-oriented programming.

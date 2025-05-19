@@ -5,14 +5,14 @@ class RoyalScriptParser:
     ],
     '<global_dec>': [
         ['<var_dec>', '<global_dec>'],
-        ['λ'],
+        ['ε'],
     ],
     '<var_dec>': [
         ['<dynasty>', '<data_type>', 'identifier', '<vardec_def>'],
     ],
     '<dynasty>': [
         ['dynasty'],
-        ['λ'],
+        ['ε'],
     ],
     '<vardec_def>': [
         ['<initialization>', '<vardec_more>', '~'],
@@ -20,19 +20,19 @@ class RoyalScriptParser:
     ],
     '<initialization>': [
         ['=', '<val>'],
-        ['λ'],
+        ['ε'],
     ],
     '<vardec_more>': [
         [',', 'identifier', '<initialization>', '<vardec_more>'],
-        ['λ'],
+        ['ε'],
     ],
     '<column>': [
         ['[', '<array_size>', ']'],
-        ['λ'],
+        ['ε'],
     ],
     '<array_initialization>': [
         ['=', '<array_list>'],
-        ['λ'],
+        ['ε'],
     ],
     '<array_list>': [
         ['{', '<array_content>', '}'],
@@ -46,7 +46,7 @@ class RoyalScriptParser:
     ],
     '<row_more>': [
         [',', '<row_more_ext>'],
-        ['λ'],
+        ['ε'],
     ],
     '<row_more_ext>': [
         ['{', '<array_row>', '}', '<row_more>'],
@@ -54,7 +54,7 @@ class RoyalScriptParser:
     ],
     '<lit_more>': [
         [',', '<lit_more_ext>'],
-        ['λ'],
+        ['ε'],
     ],
     '<lit_more_ext>': [
         ['<array_lit>', '<lit_more>'],
@@ -62,7 +62,7 @@ class RoyalScriptParser:
     ],
     '<array_more>': [
         [',', 'identifier', '[', '<array_size>', ']', '<column>', '<array_initialization>', '<array_more>'],
-        ['λ'],
+        ['ε'],
     ],
     '<array_lit>': [
         ['<lit4>'],
@@ -112,7 +112,7 @@ class RoyalScriptParser:
     ],
     '<logical_operand_ext>': [
         ['<more_arith>', '<relational_operator>', '<relational_operand>', '<relational_more>'],
-        ['λ'],
+        ['ε'],
     ],
     '<logical_operator>': [
         ['&&'],
@@ -120,11 +120,11 @@ class RoyalScriptParser:
     ],
     '<logical_operator1>': [
         ['!'],
-        ['λ'],
+        ['ε'],
     ],
     '<more_log>': [
         ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
-        ['λ'],
+        ['ε'],
     ],
     '<treasures_mirror>': [
         ['1'],
@@ -153,7 +153,7 @@ class RoyalScriptParser:
     ],
     '<more_arith>': [
         ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>'],
-        ['λ'],
+        ['ε'],
     ],
     '<relational_exp>': [
         ['<relational_operand>', '<relational_operator>', '<relational_operand>', '<relational_more>'],
@@ -190,7 +190,7 @@ class RoyalScriptParser:
     ],
     '<relational_more>': [
         ['<relational_operator>', '<relational_operand>', '<relational_more>'],
-        ['λ'],
+        ['ε'],
     ],
     '<unary>': [
         ['identifier', '<unary_operator>'],
@@ -206,11 +206,11 @@ class RoyalScriptParser:
     ],
     '<string_more>': [
         ['+', '<string_operand>', '<string_more>'],
-        ['λ'],
+        ['ε'],
     ],
     '<user-defined_func>': [
         ['spell', '<return_type>', 'identifier', '(', '<param>', ')', '{', '<body>', '<ret_statement>', '}', '<user-defined_func>'],
-        ['λ'],
+        ['ε'],
     ],
     '<return_type>': [
         ['<data_type>'],
@@ -218,11 +218,11 @@ class RoyalScriptParser:
     ],
     '<param>': [
         ['<data_type>', 'identifier', '<param_more>'],
-        ['λ'],
+        ['ε'],
     ],
     '<param_more>': [
         [',', '<data_type>', 'identifier', '<param_more>'],
-        ['λ'],
+        ['ε'],
     ],
     '<body>': [
         ['<dynasty>', '<data_type>', 'identifier', '<vardec_def>', '<body>'],
@@ -233,7 +233,7 @@ class RoyalScriptParser:
         ['cast', '(', '<condition>', ')', '{', '<body>', '}', '<elif>', '<else>', '<body>'],
         ['forever', '(', '<condition>', ')', '{', '<loop_body>', '}', '<body>'],
         ['believe', '{', '<loop_body>', '}', 'forever', '(', '<condition>', ')', '~', '<body>'],
-        ['λ'],
+        ['ε'],
     ],
     '<body_1_ext>': [
         ['(', '<args>', ')', '~'],
@@ -246,7 +246,7 @@ class RoyalScriptParser:
     ],
     '<ret_statement>': [
         ['return', '<val1>', '~'],
-        ['λ'],
+        ['ε'],
     ],
     '<loop_var>': [
         ['treasures', 'identifier', '=', '<loop_val>'],
@@ -254,7 +254,7 @@ class RoyalScriptParser:
     ],
     '<loop_init>': [
         ['=', '<loop_val>'],
-        ['λ'],
+        ['ε'],
     ],
     '<loop_val>': [
         ['identifier'],
@@ -271,20 +271,20 @@ class RoyalScriptParser:
         ['cast', '(', '<condition>', ')', '{', '<loop_body>', '<flow_control>', '}', '<elif_break>', '<else_break>', '<loop_body>'],
         ['forever', '(', '<condition>', ')', '{', '<loop_body>', '}', '<loop_body>'],
         ['believe', '{', '<loop_body>', '}', 'forever', '(', '<condition>', ')', '~', '<loop_body>'],
-        ['λ'],
+        ['ε'],
     ],
     '<elif_break>': [
         ['twist', '(', '<condition>', ')', '{', '<body>', '<flow_control>', '}', '<elif_break>'],
-        ['λ'],
+        ['ε'],
     ],
     '<else_break>': [
         ['curse', '{', '<body>', '<flow_control>', '}'],
-        ['λ'],
+        ['ε'],
     ],
     '<flow_control>': [
         ['break', '~'],
         ['continue', '~'],
-        ['λ'],
+        ['ε'],
     ],
     '<condition>': [
         ['<treasures_mirror>', '<more_log>'],
@@ -303,15 +303,15 @@ class RoyalScriptParser:
     ],
     '<other_id_ext>': [
         ['<more_arith>', '<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
-        ['λ'],
+        ['ε'],
     ],
     '<elif>': [
         ['twist', '(', '<condition>', ')', '{', '<body>', '}', '<elif>'],
-        ['λ'],
+        ['ε'],
     ],
     '<else>': [
         ['curse', '{', '<body>', '}'],
-        ['λ'],
+        ['ε'],
     ],
     '<granted_content_1>': [
         ['set_precision'],
@@ -351,20 +351,20 @@ class RoyalScriptParser:
     '<open_paren_other_ext>': [
         ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
         ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
-        ['λ'],
+        ['ε'],
     ],
     '<close_paren_ext>': [
         ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
         ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
         ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>', '<open_paren_other_ext>'],
-        ['λ'],
+        ['ε'],
     ],
     '<granted_id_ext>': [
         ['<unary_operator>'],
         ['<func_call>', '<granted_other_id_ext>'],
         ['[', '<array_size>', ']', '<column1>', '<granted_other_id_ext>'],
         ['<granted_other_id_ext>'],
-        ['λ'],
+        ['ε'],
     ],
     '<granted_other_id_ext>': [
         ['+', '<plus_ext>'],
@@ -374,11 +374,11 @@ class RoyalScriptParser:
         ['%', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
         ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
         ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
-        ['λ'],
+        ['ε'],
     ],
     '<granted_other_id_ext2>': [
         ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
-        ['λ'],
+        ['ε'],
     ],
     '<plus_ext>': [
         ['identifier', '<id_ext>', '<plus_ext_1>'],
@@ -397,30 +397,30 @@ class RoyalScriptParser:
         ['*', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
         ['/', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
         ['%', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
-        ['λ'],
+        ['ε'],
     ],
     '<granted_scroll_ext>': [
         ['+', '<string_operand>', '<string_more>'],
         ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
-        ['λ'],
+        ['ε'],
     ],
     '<granted_rose_ext>': [
         ['+', '<string_operand>', '<string_more>'],
         ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
-        ['λ'],
+        ['ε'],
     ],
     '<granted_lit3_ext>': [
         ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>', '<granted_lit3_ext1>'],
         ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
-        ['λ'],
+        ['ε'],
     ],
     '<granted_lit3_ext1>': [
         ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
-        ['λ'],
+        ['ε'],
     ],
     '<more_granted>': [
         [',', '<granted_content>', '<more_granted>'],
-        ['λ'],
+        ['ε'],
     ],
     '<data_type>': [
         ['scroll'],
@@ -453,7 +453,7 @@ class RoyalScriptParser:
     ],
     '<val1_id_ext>': [
         ['<assignment_operator>', '<assignment_operand>'],
-        ['λ'],
+        ['ε'],
     ],
     '<conversion_func>': [
         ['torose'],
@@ -467,11 +467,11 @@ class RoyalScriptParser:
     ],
     '<index>': [
         ['[', '<array_size>', ']', '<column1>'],
-        ['λ'],
+        ['ε'],
     ],
     '<column1>': [
         ['[', '<array_size>', ']'],
-        ['λ'],
+        ['ε'],
     ],
     '<input>': [
         ['wish', '(', 'scroll_lit', ')'],
@@ -499,7 +499,7 @@ class RoyalScriptParser:
     ],
     '<args>': [
         ['<args_val>', '<args_more>'],
-        ['λ'],
+        ['ε'],
     ],
     '<args_val>': [
         ['identifier', '<id_ext>'],
@@ -507,12 +507,12 @@ class RoyalScriptParser:
     ],
     '<args_more>': [
         [',', '<args_val>', '<args_more>'],
-        ['λ'],
+        ['ε'],
     ],
     '<id_ext>': [
         ['<func_call>'],
         ['[', '<array_size>', ']', '<column1>'],
-        ['λ'],
+        ['ε'],
     ],
     '<array_size>': [
         ['identifier'],
@@ -531,8 +531,8 @@ class RoyalScriptParser:
     ('<global_dec>', 'rose'): ['<var_dec>', '<global_dec>'],
     ('<global_dec>', 'dynasty'): ['<var_dec>', '<global_dec>'],
     ('<global_dec>', 'mirror'): ['<var_dec>', '<global_dec>'],
-    ('<global_dec>', 'spell'): ['λ'],
-    ('<global_dec>', 'castle'): ['λ'],
+    ('<global_dec>', 'spell'): ['ε'],
+    ('<global_dec>', 'castle'): ['ε'],
     # <var_dec>
     ('<var_dec>', 'ocean'): ['<dynasty>', '<data_type>', 'identifier', '<vardec_def>'],
     ('<var_dec>', 'treasures'): ['<dynasty>', '<data_type>', 'identifier', '<vardec_def>'],
@@ -542,31 +542,31 @@ class RoyalScriptParser:
     ('<var_dec>', 'mirror'): ['<dynasty>', '<data_type>', 'identifier', '<vardec_def>'],
     # <dynasty>
     ('<dynasty>', 'dynasty'): ['dynasty'],
-    ('<dynasty>', 'ocean'): ['λ'],
-    ('<dynasty>', 'treasures'): ['λ'],
-    ('<dynasty>', 'scroll'): ['λ'],
-    ('<dynasty>', 'rose'): ['λ'],
-    ('<dynasty>', 'mirror'): ['λ'],
+    ('<dynasty>', 'ocean'): ['ε'],
+    ('<dynasty>', 'treasures'): ['ε'],
+    ('<dynasty>', 'scroll'): ['ε'],
+    ('<dynasty>', 'rose'): ['ε'],
+    ('<dynasty>', 'mirror'): ['ε'],
     # <vardec_def>
     ('<vardec_def>', '='): ['<initialization>', '<vardec_more>', '~'],
     ('<vardec_def>', '~'): ['<initialization>', '<vardec_more>', '~'],
     ('<vardec_def>', '['): ['[', '<array_size>', ']', '<column>', '<array_initialization>', '<array_more>', '~'],
     # <initialization>
     ('<initialization>', '='): ['=', '<val>'],
-    ('<initialization>', '~'): ['λ'],
-    ('<initialization>', ','): ['λ'],
+    ('<initialization>', '~'): ['ε'],
+    ('<initialization>', ','): ['ε'],
     # <vardec_more>
     ('<vardec_more>', ','): [',', 'identifier', '<initialization>', '<vardec_more>'],
-    ('<vardec_more>', '~'): ['λ'],
+    ('<vardec_more>', '~'): ['ε'],
     # <column>
     ('<column>', '['): ['[', '<array_size>', ']'],
-    ('<column>', '='): ['λ'],
-    ('<column>', '~'): ['λ'],
-    ('<column>', ','): ['λ'],
+    ('<column>', '='): ['ε'],
+    ('<column>', '~'): ['ε'],
+    ('<column>', ','): ['ε'],
     # <array_initialization>
     ('<array_initialization>', '='): ['=', '<array_list>'],
-    ('<array_initialization>', '~'): ['λ'],
-    ('<array_initialization>', ','): ['λ'],
+    ('<array_initialization>', '~'): ['ε'],
+    ('<array_initialization>', ','): ['ε'],
     # <array_list>
     ('<array_list>', '{'): ['{', '<array_content>', '}'],
     # <array_content>
@@ -590,13 +590,13 @@ class RoyalScriptParser:
     ('<array_row>', 'ocean_lit'): ['<array_lit>', '<lit_more>'],
     # <row_more>
     ('<row_more>', ','): [',', '<row_more_ext>'],
-    ('<row_more>', '}'): ['λ'],
+    ('<row_more>', '}'): ['ε'],
     # <row_more_ext>
     ('<row_more_ext>', '{'): ['{', '<array_row>', '}', '<row_more>'],
     ('<row_more_ext>', 'identifier'): ['identifier', '<row_more>'],
     # <lit_more>
     ('<lit_more>', ','): [',', '<lit_more_ext>'],
-    ('<lit_more>', '}'): ['λ'],
+    ('<lit_more>', '}'): ['ε'],
     # <lit_more_ext>
     ('<lit_more_ext>', 'mirror_lit'): ['<array_lit>', '<lit_more>'],
     ('<lit_more_ext>', 'rose_lit'): ['<array_lit>', '<lit_more>'],
@@ -609,7 +609,7 @@ class RoyalScriptParser:
     ('<lit_more_ext>', '{'): ['{', '<array_row>', '}', '<row_more>'],
     # <array_more>
     ('<array_more>', ','): [',', 'identifier', '[', '<array_size>', ']', '<column>', '<array_initialization>', '<array_more>'],
-    ('<array_more>', '~'): ['λ'],
+    ('<array_more>', '~'): ['ε'],
     # <array_lit>
     ('<array_lit>', 'mirror_lit'): ['<lit4>'],
     ('<array_lit>', 'rose_lit'): ['<lit4>'],
@@ -698,31 +698,31 @@ class RoyalScriptParser:
     ('<logical_operand_ext>', '%'): ['<more_arith>', '<relational_operator>', '<relational_operand>', '<relational_more>'],
     ('<logical_operand_ext>', '<='): ['<more_arith>', '<relational_operator>', '<relational_operand>', '<relational_more>'],
     ('<logical_operand_ext>', '<'): ['<more_arith>', '<relational_operator>', '<relational_operand>', '<relational_more>'],
-    ('<logical_operand_ext>', '&&'): ['λ'],
-    ('<logical_operand_ext>', '||'): ['λ'],
-    ('<logical_operand_ext>', '~'): ['λ'],
-    ('<logical_operand_ext>', ')'): ['λ'],
-    ('<logical_operand_ext>', ','): ['λ'],
+    ('<logical_operand_ext>', '&&'): ['ε'],
+    ('<logical_operand_ext>', '||'): ['ε'],
+    ('<logical_operand_ext>', '~'): ['ε'],
+    ('<logical_operand_ext>', ')'): ['ε'],
+    ('<logical_operand_ext>', ','): ['ε'],
     # <logical_operator>
     ('<logical_operator>', '&&'): ['&&'],
     ('<logical_operator>', '||'): ['||'],
     # <logical_operator1>
     ('<logical_operator1>', '!'): ['!'],
-    ('<logical_operator1>', 'mirror_lit'): ['λ'],
-    ('<logical_operator1>', '0'): ['λ'],
-    ('<logical_operator1>', 'rose_lit'): ['λ'],
-    ('<logical_operator1>', 'scroll_lit'): ['λ'],
-    ('<logical_operator1>', '('): ['λ'],
-    ('<logical_operator1>', 'treasures_lit'): ['λ'],
-    ('<logical_operator1>', 'identifier'): ['λ'],
-    ('<logical_operator1>', '1'): ['λ'],
-    ('<logical_operator1>', 'ocean_lit'): ['λ'],
+    ('<logical_operator1>', 'mirror_lit'): ['ε'],
+    ('<logical_operator1>', '0'): ['ε'],
+    ('<logical_operator1>', 'rose_lit'): ['ε'],
+    ('<logical_operator1>', 'scroll_lit'): ['ε'],
+    ('<logical_operator1>', '('): ['ε'],
+    ('<logical_operator1>', 'treasures_lit'): ['ε'],
+    ('<logical_operator1>', 'identifier'): ['ε'],
+    ('<logical_operator1>', '1'): ['ε'],
+    ('<logical_operator1>', 'ocean_lit'): ['ε'],
     # <more_log>
     ('<more_log>', '||'): ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
     ('<more_log>', '&&'): ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
-    ('<more_log>', ')'): ['λ'],
-    ('<more_log>', ','): ['λ'],
-    ('<more_log>', '~'): ['λ'],
+    ('<more_log>', ')'): ['ε'],
+    ('<more_log>', ','): ['ε'],
+    ('<more_log>', '~'): ['ε'],
     # <treasures_mirror>
     ('<treasures_mirror>', '1'): ['1'],
     ('<treasures_mirror>', '0'): ['0'],
@@ -760,17 +760,17 @@ class RoyalScriptParser:
     ('<more_arith>', '-'): ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>'],
     ('<more_arith>', '%'): ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>'],
     ('<more_arith>', '+'): ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>'],
-    ('<more_arith>', '>'): ['λ'],
-    ('<more_arith>', '&&'): ['λ'],
-    ('<more_arith>', '!='): ['λ'],
-    ('<more_arith>', '||'): ['λ'],
-    ('<more_arith>', '=='): ['λ'],
-    ('<more_arith>', '>='): ['λ'],
-    ('<more_arith>', '<='): ['λ'],
-    ('<more_arith>', '~'): ['λ'],
-    ('<more_arith>', '<'): ['λ'],
-    ('<more_arith>', ')'): ['λ'],
-    ('<more_arith>', ','): ['λ'],
+    ('<more_arith>', '>'): ['ε'],
+    ('<more_arith>', '&&'): ['ε'],
+    ('<more_arith>', '!='): ['ε'],
+    ('<more_arith>', '||'): ['ε'],
+    ('<more_arith>', '=='): ['ε'],
+    ('<more_arith>', '>='): ['ε'],
+    ('<more_arith>', '<='): ['ε'],
+    ('<more_arith>', '~'): ['ε'],
+    ('<more_arith>', '<'): ['ε'],
+    ('<more_arith>', ')'): ['ε'],
+    ('<more_arith>', ','): ['ε'],
     # <relational_exp>
     ('<relational_exp>', 'mirror_lit'): ['<relational_operand>', '<relational_operator>', '<relational_operand>', '<relational_more>'],
     ('<relational_exp>', 'rose_lit'): ['<relational_operand>', '<relational_operator>', '<relational_operand>', '<relational_more>'],
@@ -830,11 +830,11 @@ class RoyalScriptParser:
     ('<relational_more>', '>='): ['<relational_operator>', '<relational_operand>', '<relational_more>'],
     ('<relational_more>', '<='): ['<relational_operator>', '<relational_operand>', '<relational_more>'],
     ('<relational_more>', '<'): ['<relational_operator>', '<relational_operand>', '<relational_more>'],
-    ('<relational_more>', '&&'): ['λ'],
-    ('<relational_more>', '||'): ['λ'],
-    ('<relational_more>', '~'): ['λ'],
-    ('<relational_more>', ')'): ['λ'],
-    ('<relational_more>', ','): ['λ'],
+    ('<relational_more>', '&&'): ['ε'],
+    ('<relational_more>', '||'): ['ε'],
+    ('<relational_more>', '~'): ['ε'],
+    ('<relational_more>', ')'): ['ε'],
+    ('<relational_more>', ','): ['ε'],
     # <unary>
     ('<unary>', 'identifier'): ['identifier', '<unary_operator>'],
     # <unary_operator>
@@ -847,12 +847,12 @@ class RoyalScriptParser:
     ('<string_operand>', 'toscroll'): ['toscroll', '(', '<conversion_value>', ')'],
     # <string_more>
     ('<string_more>', '+'): ['+', '<string_operand>', '<string_more>'],
-    ('<string_more>', ')'): ['λ'],
-    ('<string_more>', '~'): ['λ'],
-    ('<string_more>', ','): ['λ'],
+    ('<string_more>', ')'): ['ε'],
+    ('<string_more>', '~'): ['ε'],
+    ('<string_more>', ','): ['ε'],
     # <user-defined_func>
     ('<user-defined_func>', 'spell'): ['spell', '<return_type>', 'identifier', '(', '<param>', ')', '{', '<body>', '<ret_statement>', '}', '<user-defined_func>'],        
-    ('<user-defined_func>', 'castle'): ['λ'],
+    ('<user-defined_func>', 'castle'): ['ε'],
     # <return_type>
     ('<return_type>', 'ocean'): ['<data_type>'],
     ('<return_type>', 'treasures'): ['<data_type>'],
@@ -866,10 +866,10 @@ class RoyalScriptParser:
     ('<param>', 'scroll'): ['<data_type>', 'identifier', '<param_more>'],
     ('<param>', 'rose'): ['<data_type>', 'identifier', '<param_more>'],
     ('<param>', 'mirror'): ['<data_type>', 'identifier', '<param_more>'],
-    ('<param>', ')'): ['λ'],
+    ('<param>', ')'): ['ε'],
     # <param_more>
     ('<param_more>', ','): [',', '<data_type>', 'identifier', '<param_more>'],
-    ('<param_more>', ')'): ['λ'],
+    ('<param_more>', ')'): ['ε'],
     # <body>
     ('<body>', 'ocean'): ['<dynasty>', '<data_type>', 'identifier', '<vardec_def>', '<body>'],
     ('<body>', 'treasures'): ['<dynasty>', '<data_type>', 'identifier', '<vardec_def>', '<body>'],
@@ -884,10 +884,10 @@ class RoyalScriptParser:
     ('<body>', 'cast'): ['cast', '(', '<condition>', ')', '{', '<body>', '}', '<elif>', '<else>', '<body>'],
     ('<body>', 'forever'): ['forever', '(', '<condition>', ')', '{', '<loop_body>', '}', '<body>'],
     ('<body>', 'believe'): ['believe', '{', '<loop_body>', '}', 'forever', '(', '<condition>', ')', '~', '<body>'],
-    ('<body>', 'break'): ['λ'],
-    ('<body>', 'continue'): ['λ'],
-    ('<body>', 'return'): ['λ'],
-    ('<body>', '}'): ['λ'],
+    ('<body>', 'break'): ['ε'],
+    ('<body>', 'continue'): ['ε'],
+    ('<body>', 'return'): ['ε'],
+    ('<body>', '}'): ['ε'],
     # <body_1_ext>
     ('<body_1_ext>', '('): ['(', '<args>', ')', '~'],
     ('<body_1_ext>', '-='): ['<index>', '<body_1_other_ext>'],
@@ -908,13 +908,13 @@ class RoyalScriptParser:
     ('<body_1_other_ext>', '+='): ['<assignment_operator>', '<assignment_operand>', '~'],
     # <ret_statement>
     ('<ret_statement>', 'return'): ['return', '<val1>', '~'],
-    ('<ret_statement>', '}'): ['λ'],
+    ('<ret_statement>', '}'): ['ε'],
     # <loop_var>
     ('<loop_var>', 'treasures'): ['treasures', 'identifier', '=', '<loop_val>'],
     ('<loop_var>', 'identifier'): ['identifier', '<loop_init>'],
     # <loop_init>
     ('<loop_init>', '='): ['=', '<loop_val>'],
-    ('<loop_init>', '~'): ['λ'],
+    ('<loop_init>', '~'): ['ε'],
     # <loop_val>
     ('<loop_val>', 'identifier'): ['identifier'],
     ('<loop_val>', 'treasures_lit'): ['treasures_lit'],
@@ -934,50 +934,50 @@ class RoyalScriptParser:
     ('<loop_body>', 'cast'): ['cast', '(', '<condition>', ')', '{', '<loop_body>', '<flow_control>', '}', '<elif_break>', '<else_break>', '<loop_body>'],
     ('<loop_body>', 'forever'): ['forever', '(', '<condition>', ')', '{', '<loop_body>', '}', '<loop_body>'],
     ('<loop_body>', 'believe'): ['believe', '{', '<loop_body>', '}', 'forever', '(', '<condition>', ')', '~', '<loop_body>'],
-    ('<loop_body>', 'break'): ['λ'],
-    ('<loop_body>', 'continue'): ['λ'],
-    ('<loop_body>', '}'): ['λ'],
+    ('<loop_body>', 'break'): ['ε'],
+    ('<loop_body>', 'continue'): ['ε'],
+    ('<loop_body>', '}'): ['ε'],
     # <elif_break>
     ('<elif_break>', 'twist'): ['twist', '(', '<condition>', ')', '{', '<body>', '<flow_control>', '}', '<elif_break>'],
-    ('<elif_break>', 'tale'): ['λ'],
-    ('<elif_break>', 'treasures'): ['λ'],
-    ('<elif_break>', 'granted'): ['λ'],
-    ('<elif_break>', 'rose'): ['λ'],
-    ('<elif_break>', 'forever'): ['λ'],
-    ('<elif_break>', 'believe'): ['λ'],
-    ('<elif_break>', 'spell'): ['λ'],
-    ('<elif_break>', 'ocean'): ['λ'],
-    ('<elif_break>', '}'): ['λ'],
-    ('<elif_break>', 'scroll'): ['λ'],
-    ('<elif_break>', 'cast'): ['λ'],
-    ('<elif_break>', 'dynasty'): ['λ'],
-    ('<elif_break>', 'continue'): ['λ'],
-    ('<elif_break>', 'identifier'): ['λ'],
-    ('<elif_break>', 'curse'): ['λ'],
-    ('<elif_break>', 'break'): ['λ'],
-    ('<elif_break>', 'mirror'): ['λ'],
+    ('<elif_break>', 'tale'): ['ε'],
+    ('<elif_break>', 'treasures'): ['ε'],
+    ('<elif_break>', 'granted'): ['ε'],
+    ('<elif_break>', 'rose'): ['ε'],
+    ('<elif_break>', 'forever'): ['ε'],
+    ('<elif_break>', 'believe'): ['ε'],
+    ('<elif_break>', 'spell'): ['ε'],
+    ('<elif_break>', 'ocean'): ['ε'],
+    ('<elif_break>', '}'): ['ε'],
+    ('<elif_break>', 'scroll'): ['ε'],
+    ('<elif_break>', 'cast'): ['ε'],
+    ('<elif_break>', 'dynasty'): ['ε'],
+    ('<elif_break>', 'continue'): ['ε'],
+    ('<elif_break>', 'identifier'): ['ε'],
+    ('<elif_break>', 'curse'): ['ε'],
+    ('<elif_break>', 'break'): ['ε'],
+    ('<elif_break>', 'mirror'): ['ε'],
     # <else_break>
     ('<else_break>', 'curse'): ['curse', '{', '<body>', '<flow_control>', '}'],
-    ('<else_break>', 'tale'): ['λ'],
-    ('<else_break>', 'treasures'): ['λ'],
-    ('<else_break>', 'granted'): ['λ'],
-    ('<else_break>', 'rose'): ['λ'],
-    ('<else_break>', 'forever'): ['λ'],
-    ('<else_break>', 'believe'): ['λ'],
-    ('<else_break>', 'spell'): ['λ'],
-    ('<else_break>', 'ocean'): ['λ'],
-    ('<else_break>', '}'): ['λ'],
-    ('<else_break>', 'cast'): ['λ'],
-    ('<else_break>', 'scroll'): ['λ'],
-    ('<else_break>', 'dynasty'): ['λ'],
-    ('<else_break>', 'continue'): ['λ'],
-    ('<else_break>', 'identifier'): ['λ'],
-    ('<else_break>', 'break'): ['λ'],
-    ('<else_break>', 'mirror'): ['λ'],
+    ('<else_break>', 'tale'): ['ε'],
+    ('<else_break>', 'treasures'): ['ε'],
+    ('<else_break>', 'granted'): ['ε'],
+    ('<else_break>', 'rose'): ['ε'],
+    ('<else_break>', 'forever'): ['ε'],
+    ('<else_break>', 'believe'): ['ε'],
+    ('<else_break>', 'spell'): ['ε'],
+    ('<else_break>', 'ocean'): ['ε'],
+    ('<else_break>', '}'): ['ε'],
+    ('<else_break>', 'cast'): ['ε'],
+    ('<else_break>', 'scroll'): ['ε'],
+    ('<else_break>', 'dynasty'): ['ε'],
+    ('<else_break>', 'continue'): ['ε'],
+    ('<else_break>', 'identifier'): ['ε'],
+    ('<else_break>', 'break'): ['ε'],
+    ('<else_break>', 'mirror'): ['ε'],
     # <flow_control>
     ('<flow_control>', 'break'): ['break', '~'],
     ('<flow_control>', 'continue'): ['continue', '~'],
-    ('<flow_control>', '}'): ['λ'],
+    ('<flow_control>', '}'): ['ε'],
     # <condition>
     ('<condition>', '1'): ['<treasures_mirror>', '<more_log>'],
     ('<condition>', '0'): ['<treasures_mirror>', '<more_log>'],
@@ -1018,46 +1018,46 @@ class RoyalScriptParser:
     ('<other_id_ext>', '%'): ['<more_arith>', '<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<other_id_ext>', '<='): ['<more_arith>', '<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<other_id_ext>', '<'): ['<more_arith>', '<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
-    ('<other_id_ext>', ')'): ['λ'],
+    ('<other_id_ext>', ')'): ['ε'],
     # <elif>
     ('<elif>', 'twist'): ['twist', '(', '<condition>', ')', '{', '<body>', '}', '<elif>'],
-    ('<elif>', 'tale'): ['λ'],
-    ('<elif>', 'treasures'): ['λ'],
-    ('<elif>', 'granted'): ['λ'],
-    ('<elif>', 'rose'): ['λ'],
-    ('<elif>', 'forever'): ['λ'],
-    ('<elif>', 'believe'): ['λ'],
-    ('<elif>', 'spell'): ['λ'],
-    ('<elif>', 'ocean'): ['λ'],
-    ('<elif>', '}'): ['λ'],
-    ('<elif>', 'scroll'): ['λ'],
-    ('<elif>', 'cast'): ['λ'],
-    ('<elif>', 'dynasty'): ['λ'],
-    ('<elif>', 'continue'): ['λ'],
-    ('<elif>', 'identifier'): ['λ'],
-    ('<elif>', 'curse'): ['λ'],
-    ('<elif>', 'return'): ['λ'],
-    ('<elif>', 'break'): ['λ'],
-    ('<elif>', 'mirror'): ['λ'],
+    ('<elif>', 'tale'): ['ε'],
+    ('<elif>', 'treasures'): ['ε'],
+    ('<elif>', 'granted'): ['ε'],
+    ('<elif>', 'rose'): ['ε'],
+    ('<elif>', 'forever'): ['ε'],
+    ('<elif>', 'believe'): ['ε'],
+    ('<elif>', 'spell'): ['ε'],
+    ('<elif>', 'ocean'): ['ε'],
+    ('<elif>', '}'): ['ε'],
+    ('<elif>', 'scroll'): ['ε'],
+    ('<elif>', 'cast'): ['ε'],
+    ('<elif>', 'dynasty'): ['ε'],
+    ('<elif>', 'continue'): ['ε'],
+    ('<elif>', 'identifier'): ['ε'],
+    ('<elif>', 'curse'): ['ε'],
+    ('<elif>', 'return'): ['ε'],
+    ('<elif>', 'break'): ['ε'],
+    ('<elif>', 'mirror'): ['ε'],
     # <else>
     ('<else>', 'curse'): ['curse', '{', '<body>', '}'],
-    ('<else>', 'tale'): ['λ'],
-    ('<else>', 'treasures'): ['λ'],
-    ('<else>', 'granted'): ['λ'],
-    ('<else>', 'rose'): ['λ'],
-    ('<else>', 'forever'): ['λ'],
-    ('<else>', 'believe'): ['λ'],
-    ('<else>', 'spell'): ['λ'],
-    ('<else>', 'ocean'): ['λ'],
-    ('<else>', '}'): ['λ'],
-    ('<else>', 'cast'): ['λ'],
-    ('<else>', 'scroll'): ['λ'],
-    ('<else>', 'dynasty'): ['λ'],
-    ('<else>', 'continue'): ['λ'],
-    ('<else>', 'identifier'): ['λ'],
-    ('<else>', 'return'): ['λ'],
-    ('<else>', 'break'): ['λ'],
-    ('<else>', 'mirror'): ['λ'],
+    ('<else>', 'tale'): ['ε'],
+    ('<else>', 'treasures'): ['ε'],
+    ('<else>', 'granted'): ['ε'],
+    ('<else>', 'rose'): ['ε'],
+    ('<else>', 'forever'): ['ε'],
+    ('<else>', 'believe'): ['ε'],
+    ('<else>', 'spell'): ['ε'],
+    ('<else>', 'ocean'): ['ε'],
+    ('<else>', '}'): ['ε'],
+    ('<else>', 'cast'): ['ε'],
+    ('<else>', 'scroll'): ['ε'],
+    ('<else>', 'dynasty'): ['ε'],
+    ('<else>', 'continue'): ['ε'],
+    ('<else>', 'identifier'): ['ε'],
+    ('<else>', 'return'): ['ε'],
+    ('<else>', 'break'): ['ε'],
+    ('<else>', 'mirror'): ['ε'],
     # <granted_content_1>
     ('<granted_content_1>', 'set_precision'): ['set_precision'],
     ('<granted_content_1>', 'identifier'): ['identifier', '<granted_id_ext>'],
@@ -1130,9 +1130,9 @@ class RoyalScriptParser:
     ('<open_paren_other_ext>', '<'): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<open_paren_other_ext>', '||'): ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
     ('<open_paren_other_ext>', '&&'): ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
-    ('<open_paren_other_ext>', ')'): ['λ'],
-    ('<open_paren_other_ext>', '~'): ['λ'],
-    ('<open_paren_other_ext>', ','): ['λ'],
+    ('<open_paren_other_ext>', ')'): ['ε'],
+    ('<open_paren_other_ext>', '~'): ['ε'],
+    ('<open_paren_other_ext>', ','): ['ε'],
     # <close_paren_ext>
     ('<close_paren_ext>', '>'): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<close_paren_ext>', '!='): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
@@ -1147,9 +1147,9 @@ class RoyalScriptParser:
     ('<close_paren_ext>', '-'): ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>', '<open_paren_other_ext>'],
     ('<close_paren_ext>', '%'): ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>', '<open_paren_other_ext>'],
     ('<close_paren_ext>', '+'): ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>', '<open_paren_other_ext>'],
-    ('<close_paren_ext>', ')'): ['λ'],
-    ('<close_paren_ext>', '~'): ['λ'],
-    ('<close_paren_ext>', ','): ['λ'],
+    ('<close_paren_ext>', ')'): ['ε'],
+    ('<close_paren_ext>', '~'): ['ε'],
+    ('<close_paren_ext>', ','): ['ε'],
     # <granted_id_ext>
     ('<granted_id_ext>', '--'): ['<unary_operator>'],
     ('<granted_id_ext>', '++'): ['<unary_operator>'],
@@ -1170,7 +1170,7 @@ class RoyalScriptParser:
     ('<granted_id_ext>', '~'): ['<granted_other_id_ext>'],
     ('<granted_id_ext>', '!='): ['<granted_other_id_ext>'],
     ('<granted_id_ext>', ')'): ['<granted_other_id_ext>'],
-    ('<granted_id_ext>', ','): ['λ'],
+    ('<granted_id_ext>', ','): ['ε'],
     # <granted_other_id_ext>
     ('<granted_other_id_ext>', '+'): ['+', '<plus_ext>'],
     ('<granted_other_id_ext>', '-'): ['-', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
@@ -1185,9 +1185,9 @@ class RoyalScriptParser:
     ('<granted_other_id_ext>', '<'): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<granted_other_id_ext>', '||'): ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
     ('<granted_other_id_ext>', '&&'): ['<logical_operator>', '<logical_operator1>', '<logical_operand>', '<more_log>'],
-    ('<granted_other_id_ext>', ')'): ['λ'],
-    ('<granted_other_id_ext>', '~'): ['λ'],
-    ('<granted_other_id_ext>', ','): ['λ'],
+    ('<granted_other_id_ext>', ')'): ['ε'],
+    ('<granted_other_id_ext>', '~'): ['ε'],
+    ('<granted_other_id_ext>', ','): ['ε'],
     # <granted_other_id_ext2>
     ('<granted_other_id_ext2>', '>'): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<granted_other_id_ext2>', '!='): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
@@ -1195,9 +1195,9 @@ class RoyalScriptParser:
     ('<granted_other_id_ext2>', '>='): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<granted_other_id_ext2>', '<='): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<granted_other_id_ext2>', '<'): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
-    ('<granted_other_id_ext2>', ')'): ['λ'],
-    ('<granted_other_id_ext2>', '~'): ['λ'],
-    ('<granted_other_id_ext2>', ','): ['λ'],
+    ('<granted_other_id_ext2>', ')'): ['ε'],
+    ('<granted_other_id_ext2>', '~'): ['ε'],
+    ('<granted_other_id_ext2>', ','): ['ε'],
     # <plus_ext>
     ('<plus_ext>', 'identifier'): ['identifier', '<id_ext>', '<plus_ext_1>'],
     ('<plus_ext>', 'toscroll'): ['toscroll', '(', '<conversion_value>', ')','<string_more>'],
@@ -1214,9 +1214,9 @@ class RoyalScriptParser:
     ('<plus_ext_1>', '*'): ['*', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
     ('<plus_ext_1>', '/'): ['/', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
     ('<plus_ext_1>', '%'): ['%', '<arithmetic_operand>', '<more_arith>', '<granted_other_id_ext2>'],
-    ('<plus_ext_1>', ')'): ['λ'],
-    ('<plus_ext_1>', '~'): ['λ'],
-    ('<plus_ext_1>', ','): ['λ'],
+    ('<plus_ext_1>', ')'): ['ε'],
+    ('<plus_ext_1>', '~'): ['ε'],
+    ('<plus_ext_1>', ','): ['ε'],
     # <granted_scroll_ext>
     ('<granted_scroll_ext>', '+'): ['+', '<string_operand>', '<string_more>'],
     ('<granted_scroll_ext>', '>'): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
@@ -1225,10 +1225,10 @@ class RoyalScriptParser:
     ('<granted_scroll_ext>', '>='): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<granted_scroll_ext>', '<='): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<granted_scroll_ext>', '<'): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
-    ('<granted_scroll_ext>', ','): ['λ'],
-    ('<granted_scroll_ext>', ')'): ['λ'],
-    ('<granted_scroll_ext>', '~'): ['λ'],
-    ('<granted_scroll_ext>', ','): ['λ'],
+    ('<granted_scroll_ext>', ','): ['ε'],
+    ('<granted_scroll_ext>', ')'): ['ε'],
+    ('<granted_scroll_ext>', '~'): ['ε'],
+    ('<granted_scroll_ext>', ','): ['ε'],
     # <granted_rose_ext>
     ('<granted_rose_ext>', '+'): ['+', '<string_operand>', '<string_more>'],
     ('<granted_rose_ext>', '>'): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
@@ -1237,9 +1237,9 @@ class RoyalScriptParser:
     ('<granted_rose_ext>', '>='): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<granted_rose_ext>', '<='): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<granted_rose_ext>', '<'): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
-    ('<granted_rose_ext>', ')'): ['λ'],
-    ('<granted_rose_ext>', '~'): ['λ'],
-    ('<granted_rose_ext>', ','): ['λ'],
+    ('<granted_rose_ext>', ')'): ['ε'],
+    ('<granted_rose_ext>', '~'): ['ε'],
+    ('<granted_rose_ext>', ','): ['ε'],
     # <granted_lit3_ext>
     ('<granted_lit3_ext>', '/'): ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>', '<granted_lit3_ext1>'],
     ('<granted_lit3_ext>', '*'): ['<arithmetic_operator>', '<arithmetic_operand>', '<more_arith>', '<granted_lit3_ext1>'],
@@ -1252,9 +1252,9 @@ class RoyalScriptParser:
     ('<granted_lit3_ext>', '>='): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<granted_lit3_ext>', '<='): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<granted_lit3_ext>', '<'): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
-    ('<granted_lit3_ext>', ')'): ['λ'],
-    ('<granted_lit3_ext>', '~'): ['λ'],
-    ('<granted_lit3_ext>', ','): ['λ'],
+    ('<granted_lit3_ext>', ')'): ['ε'],
+    ('<granted_lit3_ext>', '~'): ['ε'],
+    ('<granted_lit3_ext>', ','): ['ε'],
     # <granted_lit3_ext1>
     ('<granted_lit3_ext1>', '>'): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<granted_lit3_ext1>', '!='): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
@@ -1262,12 +1262,12 @@ class RoyalScriptParser:
     ('<granted_lit3_ext1>', '>='): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<granted_lit3_ext1>', '<='): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
     ('<granted_lit3_ext1>', '<'): ['<relational_operator>', '<relational_operand>', '<relational_more>', '<more_log>'],
-    ('<granted_lit3_ext1>', ')'): ['λ'],
-    ('<granted_lit3_ext1>', '~'): ['λ'],
-    ('<granted_lit3_ext1>', ','): ['λ'],
+    ('<granted_lit3_ext1>', ')'): ['ε'],
+    ('<granted_lit3_ext1>', '~'): ['ε'],
+    ('<granted_lit3_ext1>', ','): ['ε'],
     # <more_granted>
     ('<more_granted>', ','): [',', '<granted_content>', '<more_granted>'],
-    ('<more_granted>', ')'): ['λ'],
+    ('<more_granted>', ')'): ['ε'],
     # <data_type>
     ('<data_type>', 'scroll'): ['scroll'],
     ('<data_type>', 'treasures'): ['treasures'],
@@ -1341,7 +1341,7 @@ class RoyalScriptParser:
     ('<val1_id_ext>', '*='): ['<assignment_operator>', '<assignment_operand>'],
     ('<val1_id_ext>', '/='): ['<assignment_operator>', '<assignment_operand>'],
     ('<val1_id_ext>', '+='): ['<assignment_operator>', '<assignment_operand>'],
-    ('<val1_id_ext>', '~'): ['λ'],
+    ('<val1_id_ext>', '~'): ['ε'],
     # <conversion_func>
     ('<conversion_func>', 'torose'): ['torose'],
     ('<conversion_func>', 'totreasures'): ['totreasures'],
@@ -1358,37 +1358,37 @@ class RoyalScriptParser:
     ('<conversion_value>', 'identifier'): ['identifier', '<id_ext>'],
     # <index>
     ('<index>', '['): ['[', '<array_size>', ']', '<column1>'],
-    ('<index>', '%='): ['λ'],
-    ('<index>', '-='): ['λ'],
-    ('<index>', '='): ['λ'],
-    ('<index>', '*='): ['λ'],
-    ('<index>', ')'): ['λ'],
-    ('<index>', '/='): ['λ'],
-    ('<index>', '+='): ['λ'],
+    ('<index>', '%='): ['ε'],
+    ('<index>', '-='): ['ε'],
+    ('<index>', '='): ['ε'],
+    ('<index>', '*='): ['ε'],
+    ('<index>', ')'): ['ε'],
+    ('<index>', '/='): ['ε'],
+    ('<index>', '+='): ['ε'],
     # <column1>
     ('<column1>', '['): ['[', '<array_size>', ']'],
-    ('<column1>', '>'): ['λ'],
-    ('<column1>', '-='): ['λ'],
-    ('<column1>', '='): ['λ'],
-    ('<column1>', '&&'): ['λ'],
-    ('<column1>', '/'): ['λ'],
-    ('<column1>', '*'): ['λ'],
-    ('<column1>', '!='): ['λ'],
-    ('<column1>', '*='): ['λ'],
-    ('<column1>', '-'): ['λ'],
-    ('<column1>', '+'): ['λ'],
-    ('<column1>', '<='): ['λ'],
-    ('<column1>', '/='): ['λ'],
-    ('<column1>', '||'): ['λ'],
-    ('<column1>', '=='): ['λ'],
-    ('<column1>', '>='): ['λ'],
-    ('<column1>', '%='): ['λ'],
-    ('<column1>', '%'): ['λ'],
-    ('<column1>', ')'): ['λ'],
-    ('<column1>', '~'): ['λ'],
-    ('<column1>', '<'): ['λ'],
-    ('<column1>', '+='): ['λ'],
-    ('<column1>', ','): ['λ'],
+    ('<column1>', '>'): ['ε'],
+    ('<column1>', '-='): ['ε'],
+    ('<column1>', '='): ['ε'],
+    ('<column1>', '&&'): ['ε'],
+    ('<column1>', '/'): ['ε'],
+    ('<column1>', '*'): ['ε'],
+    ('<column1>', '!='): ['ε'],
+    ('<column1>', '*='): ['ε'],
+    ('<column1>', '-'): ['ε'],
+    ('<column1>', '+'): ['ε'],
+    ('<column1>', '<='): ['ε'],
+    ('<column1>', '/='): ['ε'],
+    ('<column1>', '||'): ['ε'],
+    ('<column1>', '=='): ['ε'],
+    ('<column1>', '>='): ['ε'],
+    ('<column1>', '%='): ['ε'],
+    ('<column1>', '%'): ['ε'],
+    ('<column1>', ')'): ['ε'],
+    ('<column1>', '~'): ['ε'],
+    ('<column1>', '<'): ['ε'],
+    ('<column1>', '+='): ['ε'],
+    ('<column1>', ','): ['ε'],
     # <input>
     ('<input>', 'wish'): ['wish', '(', 'scroll_lit', ')'],
     # <lit1>
@@ -1420,7 +1420,7 @@ class RoyalScriptParser:
     ('<args>', '0'): ['<args_val>', '<args_more>'],
     ('<args>', 'identifier'): ['<args_val>', '<args_more>'],
     ('<args>', 'ocean_lit'): ['<args_val>', '<args_more>'],
-    ('<args>', ')'): ['λ'],
+    ('<args>', ')'): ['ε'],
     # <args_val>
     ('<args_val>', 'identifier'): ['identifier', '<id_ext>'],
     ('<args_val>', 'mirror_lit'): ['<lit4>'],
@@ -1432,26 +1432,26 @@ class RoyalScriptParser:
     ('<args_val>', 'ocean_lit'): ['<lit4>'],
     # <args_more>
     ('<args_more>', ','): [',', '<args_val>', '<args_more>'],
-    ('<args_more>', ')'): ['λ'],
+    ('<args_more>', ')'): ['ε'],
     # <id_ext>
     ('<id_ext>', '('): ['<func_call>'],
     ('<id_ext>', '['): ['[', '<array_size>', ']', '<column1>'],
-    ('<id_ext>', '>'): ['λ'],
-    ('<id_ext>', '&&'): ['λ'],
-    ('<id_ext>', '/'): ['λ'],
-    ('<id_ext>', '*'): ['λ'],
-    ('<id_ext>', '!='): ['λ'],
-    ('<id_ext>', '+'): ['λ'],
-    ('<id_ext>', '-'): ['λ'],
-    ('<id_ext>', '<='): ['λ'],
-    ('<id_ext>', '||'): ['λ'],
-    ('<id_ext>', '=='): ['λ'],
-    ('<id_ext>', '>='): ['λ'],
-    ('<id_ext>', '%'): ['λ'],
-    ('<id_ext>', ')'): ['λ'],
-    ('<id_ext>', '~'): ['λ'],
-    ('<id_ext>', '<'): ['λ'],
-    ('<id_ext>', ','): ['λ'],
+    ('<id_ext>', '>'): ['ε'],
+    ('<id_ext>', '&&'): ['ε'],
+    ('<id_ext>', '/'): ['ε'],
+    ('<id_ext>', '*'): ['ε'],
+    ('<id_ext>', '!='): ['ε'],
+    ('<id_ext>', '+'): ['ε'],
+    ('<id_ext>', '-'): ['ε'],
+    ('<id_ext>', '<='): ['ε'],
+    ('<id_ext>', '||'): ['ε'],
+    ('<id_ext>', '=='): ['ε'],
+    ('<id_ext>', '>='): ['ε'],
+    ('<id_ext>', '%'): ['ε'],
+    ('<id_ext>', ')'): ['ε'],
+    ('<id_ext>', '~'): ['ε'],
+    ('<id_ext>', '<'): ['ε'],
+    ('<id_ext>', ','): ['ε'],
     # <array_size>
     ('<array_size>', 'identifier'): ['identifier'],
     ('<array_size>', 'treasures_lit'): ['treasures_lit'],
@@ -1465,92 +1465,119 @@ class RoyalScriptParser:
         self.start_symbol = start_symbol
 
     def parse(self, tokens):
+        # Convert tokens iterator to a list for random access
         tokens = list(tokens)
+        # Initialize position pointer to start of token list
         pos = 0
+        # Initialize parsing stack with end marker and start symbol
+        # The stack is processed from right to left (top is rightmost/last element)
         stack = ['EOF', self.start_symbol]
+        # Initialize error message as None (will be set if an error occurs)
         error_message = None
 
-        # Track line and position in line
+        # Initialize line tracking for error reporting
+        # Default to line 1 even if tokens list is empty
         last_line = 1 if tokens else 1
+        # Position counter within current line
         position_in_line = 1
 
-        # Track all productions entered
-        entered_productions = []
+        # List to track all productions used during parsing (for debugging)
+        entered_productions = [] 
 
+        # Main parsing loop - continues until stack is empty
         while stack:
-            # Add debug printout
+            # Debug output showing current state of parser
             print(f"Stack: {stack}, pos: {pos}, token: {tokens[pos].token_type if pos < len(tokens) else 'OUT_OF_BOUNDS'}")
             
+            # Pop the top symbol from the stack to process it
             top = stack.pop()
-            # Skip comments
-            while pos < len(tokens) and tokens[pos].token_type in ('single_comment', 'multi_comment'):
-                pos += 1
-                if pos < len(tokens):
-                    if tokens[pos].line != last_line:
-                        last_line = tokens[pos].line
-                        position_in_line = 1
-                    else:
-                        position_in_line += 1
 
-            # Check if we're past the end of tokens
+            # Skip any comment tokens before processing current symbol
+            while pos < len(tokens) and tokens[pos].token_type in ('single_comment', 'multi_comment'):
+                # Move to next token
+                pos += 1
+                # Update line position tracking if we still have tokens
+                if pos < len(tokens):
+                    if tokens[pos].line != last_line:  # Check if we've moved to a new line
+                        last_line = tokens[pos].line   # Update line number
+                        position_in_line = 1           # Reset position to beginning of line
+                    else:
+                        position_in_line += 1          # Increment position within current line
+
+            # Safety check - if we've gone beyond the token list
             if pos >= len(tokens):
                 error_message = f"Parser error: Position {pos} exceeded token list length {len(tokens)}"
                 return False, error_message
 
-            current_token = tokens[pos]
-            current_token_type = current_token.token_type
-            current_token_value = getattr(current_token, 'value', '')
-            current_token_line = getattr(current_token, 'line', '?')
+            # Extract information from the current token for processing and error reporting
+            current_token = tokens[pos]                        # Get the current token object
+            current_token_type = current_token.token_type      # Extract token type for matching
+            current_token_value = getattr(current_token, 'value', '')  # Get token value if available
+            current_token_line = getattr(current_token, 'line', '?')   # Get line number if available
 
-            # Use our tracked position
+            # Use tracked position for error reporting
             current_token_pos = position_in_line
 
-            if top in ('ε', 'λ'):
+            # Case 1: If top of stack is epsilon (empty production), 
+            # just continue without consuming input
+            if top == 'ε':
                 continue
+
+            # Case 2: If top of stack matches current token type,
+            # we've found a terminal match
             elif top == current_token_type:
-                # We matched a token - add debug printout
-                print(f"Matched token: {top} at position {pos}")
+                # Debug output to show matched token
+                print(f"Matched token: {top} at position {pos}") # debugging
                 
+                # Advance to next token
                 pos += 1
+                # Update line position tracking if we still have tokens
                 if pos < len(tokens):
-                    if tokens[pos].line != last_line:
-                        last_line = tokens[pos].line
-                        position_in_line = 1
+                    if tokens[pos].line != last_line:  # Check if we've moved to a new line
+                        last_line = tokens[pos].line   # Update line number
+                        position_in_line = 1           # Reset position to beginning of line
                     else:
-                        position_in_line += 1
-                # Skip comments after matching
-                while pos < len(tokens) and tokens[pos].token_type in ('single_comment', 'multi_comment'):
-                    pos += 1
-                    if pos < len(tokens):
-                        if tokens[pos].line != last_line:
-                            last_line = tokens[pos].line
-                            position_in_line = 1
-                        else:
-                            position_in_line += 1
+                        position_in_line += 1          # Increment position within current line
+                            
+            # Case 3: If top of stack is a non-terminal (defined in the CFG)
             elif top in self.cfg:
+                # Get a list of expected tokens for this non-terminal (for error reporting)
                 expected = [lookahead for (nt, lookahead) in self.predict if nt == top]
+                
+                # Create a key from current non-terminal and token type to look up in predict table
                 key = (top, current_token_type)
+                
+                # If the key exists in predict table, we have a valid production
                 if key in self.predict:
+                    # Get the production to apply
                     production = self.predict[key]
-                    # Track the production entered
+                    # Record this production for debugging
                     entered_productions.append((top, current_token_type, production.copy()))
+                    
+                    # Push production symbols onto stack in reverse order
+                    # (since stack processes from right to left)
+                    # balikan
                     for symbol in reversed(production):
-                        if symbol not in ('ε', 'λ'):
+                        if symbol != 'ε':  # Skip epsilon symbols
                             stack.append(symbol)
                 else:
+                    # If no production found, generate syntax error
                     error_message = (
                         f"Syntax Error: Unexpected input '{current_token_value}' at line {current_token_line}, position {current_token_pos}. "
                         f"Expected one of {expected}"
                     )
+                    # Print debugging information showing productions applied before error
                     print("Productions entered before error:")
                     for prod in entered_productions:
                         print(f"{prod[0]} -> {prod[2]} (lookahead: {prod[1]})")
                     return False, error_message
             else:
+                # Case 4: Top of stack is a terminal that doesn't match current token
                 error_message = (
                     f"Syntax Error: Unexpected input '{current_token_value}' at line {current_token_line}, position {current_token_pos}. "
                     f"Expected one of ['{top}']"
                 )
+                # Print debugging information showing productions applied before error
                 print("Productions entered before error:")
                 for prod in entered_productions:
                     print(f"{prod[0]} -> {prod[2]} (lookahead: {prod[1]})")

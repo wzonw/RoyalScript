@@ -135,6 +135,7 @@ class RoyalScriptLexer:
         self.position = 0 # starting position
         self.line = 1 # starting line
         self.tokens = [[]]  # Initialize with first line's empty token list
+        # (value, token_type, position, line) [[('crown', "crown", 0, 1), ('~', '~', 6, 1)], [(), (), (), ()]]
         self.deci = 1 # count decimal precision
 
     def advance(self):
@@ -149,13 +150,6 @@ class RoyalScriptLexer:
         """Return the current character at the position"""
         if self.position < len(self.code):
             return self.code[self.position] # return yung character sa current position sa self.code
-        return None
-
-    def match(self, regex):
-        """Try to match a regex pattern at the current position"""
-        match = re.match(regex, self.code[self.position:]) # check if magmatch yung expected char sa current char
-        if match:
-            return match.group(0)
         return None
 
     def get_tokens(self):
@@ -174,7 +168,7 @@ class RoyalScriptLexer:
             #RESERVED WORDS
             if char == 'b':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state1()
+                valid, input_str, tokenType = self.state1()
 
                 if valid:
                     # Append the recognized token
@@ -184,7 +178,7 @@ class RoyalScriptLexer:
 
             if char == 'c':
                 pos_start = self.position
-                valid, input_str, tokenType= self.state14()
+                valid, input_str, tokenType = self.state14()
 
                 if valid:
                     # Append the recognized token

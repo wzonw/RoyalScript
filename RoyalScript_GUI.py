@@ -511,12 +511,6 @@ class RoyalScriptLexerGUI(tk.Tk):
             self.terminal_text.delete(1.0, tk.END)
             self.terminal_text.config(state=tk.DISABLED)
             
-            # # Show a message indicating the terminal was cleared
-            # self.terminal_text.config(state=tk.NORMAL)
-            # self.terminal_text.insert(tk.END, "[Terminal cleared]\n", "system")
-            # self.terminal_text.see(tk.END)
-            # self.terminal_text.config(state=tk.DISABLED)
-
     def run_code(self, event=None):
         """Run the generated Python code with input capabilities"""
         # take the input and store it in code variable para gawing input sa lexical analysis 

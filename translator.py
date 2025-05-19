@@ -18,9 +18,9 @@ class RoyalScriptToPythonTranslator:
 
     def translate(self, node):
         """Dispatches to the appropriate translation method based on node type."""
-        method_name = f"translate_{type(node).__name__}"
-        method = getattr(self, method_name, self.unsupported_node)
-        return method(node)
+        method_name = f"translate_{type(node).__name__}" # translate_VariableDeclarationNode
+        method = getattr(self, method_name, self.unsupported_node) # self.translate_VariableDeclarationNode
+        return method(node) # self.translate_VariableDeclarationNode(node)
 
     def unsupported_node(self, node):
         """Handles unsupported node types."""
@@ -88,7 +88,7 @@ class RoyalScriptToPythonTranslator:
                     identifiers.append(ident[1])
                     # Update symbol table with variable type
                     if hasattr(node, 'datatype'):
-                        self.symbol_table[ident[1]] = node.datatype[1]
+                        self.symbol_table[ident[1]] = node.datatype[1] # N = tresaures
                 else:
                     identifiers.append(str(ident))
             

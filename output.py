@@ -2,9 +2,20 @@ import sys
 
 
 def Main():
-    Letter = input("Enter: \n")
-    L = len(Letter)
-    print(str(L).replace("None", "phantom"), end="")
+    N = int(input("Enter number of Fibonacci Sequence to be displayed: \n\n"))
+    A = 0
+    B = 1
+    I = 1
+    while I <= N:
+        print(
+            str(A).replace("None", "phantom"),
+            str(" ").replace("None", "phantom"),
+            end="",
+        )
+        Temp = A
+        A = B
+        B = Temp + B
+        I += 1
     return 0
 
 

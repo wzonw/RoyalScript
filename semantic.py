@@ -202,6 +202,7 @@ class SemanticAnalyzer:
         datatype = node.datatype[1] # store data type
         print('data_type', datatype)
         
+        # check if array
         if node.array_dimensions:
             dimension = len(node.array_dimensions)
             if node.value is not None:
@@ -2190,7 +2191,7 @@ class SemanticAnalyzer:
         """
         for statement in body:
             # Dispatch to appropriate validation method based on node type
-            validator_method = getattr(self, f'validate_{type(statement).__name__}', None)
+            validator_method = getattr(self, f'validate_{type(statement).__name__}', None)  # self.validate_VariableDeclarationNode
             if validator_method:
                 validator_method(statement)
 
@@ -2853,7 +2854,7 @@ class SemanticAnalyzer:
         # Define operator types
         relational_ops = ['>', '<', '>=', '<=', '==', '!=']
         arithmetic_ops = ['+', '-', '*', '/', '%']
-        logical_ops = ['&&', '||', 'and', 'or']
+        logical_ops = ['&&', '||']
         assign_ops = ['+=',  '-=', '/=', '*=', '%=']
         
         # Check for the presence of each operator type
