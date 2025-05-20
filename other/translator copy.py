@@ -470,15 +470,13 @@ class RoyalScriptToPythonTranslator:
             if not prompt_text.endswith('\n'):  # If prompt does not end with newline
                 prompt_text += '\\n'  # Add newline
             prompt_text = f'"{prompt_text}"'  # Format prompt text
-        # Handle appropriate type casting based on datatype
-        if datatype == "treasures":     # int
-            return f"(lambda v: int(v) if v.isdigit() else (print('Semantic Error: Invalid input value for treasures datatype.') or __import__('sys').exit()))(input({prompt_text}).strip())"
-        elif datatype == "ocean":       # float
-            return f"(lambda v: float(v) if (v.count('.') == 1 and v.replace('.', '', 1).replace('-', '', 1).isdigit() and v != '.' and v != '-.' and v[0] != '.' and v != '-0.' and v[0] in '-0123456789' and not v.replace('.', '', 1).replace('-', '', 1).isdigit() == v.lstrip('-')) else (print('Semantic Error: Invalid input value for ocean datatype.') or __import__('sys').exit()))(input({prompt_text}).strip())"
-        elif datatype == "rose":  # char
-            return f"(lambda v: v if len(v)==1 else (print('Semantic Error: Invalid input value for rose datatype.') or __import__('sys').exit()))(input({prompt_text}).strip())"
-        elif datatype == "mirror":      # bool
-            return f"(lambda v: v if v in ['true', '1', 'false', '0'] else (print('Semantic Error: Invalid input value for mirror datatype.') or __import__('sys').exit()))(input({prompt_text}).strip().lower())"
+        if datatype == "treasures":     # If datatype is treasures (int)
+            return f"int(input({prompt_text}))"  # Return int input
+        elif datatype == "ocean":       # If datatype is ocean (float)
+            return f"float(input({prompt_text}))"  # Return float input
+        elif datatype == "rose":  # If datatype is rose (char)
+            return f"(lambda v: v if len(v)==1 else (print('Semantic Error: Invalid input value for rose datatype.') or __import__('sys').exit()))(input({prompt_text}).strip())"  # Return char input with validation
+        elif datatype == "mirror":      # If datatype is mirror (bool)
+            return f"(lambda v: v if v in ['true', '1', 'false', '0'] else (print('Semantic Error: Invalid input value for mirror datatype.') or __import__('sys').exit()))(input({prompt_text}).strip().lower())"  # Return bool input with validation
         else:
-            # Default to string if we can't determine type
-            return f"input({prompt_text})"
+            return f"input({prompt_text})"  # Return string input

@@ -4,42 +4,46 @@ Semantic Analyzer for RoyalScript Language
 This module provides comprehensive semantic analysis for the RoyalScript language.
 """
 
+# Import Enum class and auto function from enum module to create enumerated types
 from enum import Enum, auto
+# Import typing hints for collections and optional values
 from typing import List, Dict, Optional, Tuple
 
 
-
+# Define an enumeration for different types of semantic errors
 class SemanticErrorType(Enum):
-    Redeclaration = auto()
-    Undeclared = auto()
-    Type_Mismatch = auto()
-    Scope_Violation = auto()
-    Invalid_Assignment = auto()
-    Function_Signature_Mismatch = auto()
-    Array_Dimension_Mismatch = auto()
+    Redeclaration = auto()           # Error when a variable is declared more than once
+    Undeclared = auto()              # Error when using a variable that hasn't been declared
+    Type_Mismatch = auto()           # Error when types don't match in an operation
+    Scope_Violation = auto()         # Error when accessing a variable outside its scope
+    Invalid_Assignment = auto()      # Error when assigning an incompatible value
+    Function_Signature_Mismatch = auto()  # Error when function call doesn't match declaration
+    Array_Dimension_Mismatch = auto()     # Error when array dimensions don't match
 
+# Custom exception class for semantic errors
 class SemanticError(Exception):
     def __init__(self, error_type: SemanticErrorType, message: str, line: int = 0, position: int = 0):
-        self.error_type = error_type
-        self.message = message
-        self.line = line
-        self.position = position
+        self.error_type = error_type    # Type of semantic error
+        self.message = message          # Error message
+        self.line = line                # Line number where error occurred
+        self.position = position        # Position in line where error occurred
 
     def __str__(self):
-        return f"Semantic Error: {self.message}" #at Line {self.line}, Index {self.position}."
+        return f"Semantic Error: {self.message}" # Format error message (line/position info commented out)
 
+# Class representing an entry in the symbol table
 class SymbolEntry:
     def __init__(
         self, 
-        name: str, 
-        datatype: str,
-        value: str, 
-        scope_level: int, 
-        is_dynasty: bool = False, 
-        is_initialized: bool = False, 
-        is_function: bool = False,
-        array_dimensions: List[int] = None,
-        parameters: List[Tuple[str, str]] = None  # (type, name)
+        name: str,                      # Name of the symbol
+        datatype: str,                  # Data type of the symbol
+        value: str,                     # Value of the symbol 
+        scope_level: int,               # Scope level where symbol is declared
+        is_dynasty: bool = False,       # Flag for dynasty (likely constant/immutable values)
+        is_initialized: bool = False,   # Flag indicating if symbol has been initialized
+        is_function: bool = False,      # Flag indicating if symbol is a function
+        array_dimensions: List[int] = None,  # Dimensions if symbol is an array
+        parameters: List[Tuple[str, str]] = None  # Parameters if symbol is a function
     ):
         self.name = name
         self.datatype = datatype
@@ -48,31 +52,32 @@ class SymbolEntry:
         self.is_dynasty = is_dynasty
         self.is_initialized = is_initialized
         self.is_function = is_function
-        self.array_dimensions = array_dimensions or []
-        self.parameters = parameters or []
+        self.array_dimensions = array_dimensions or []  # Default to empty list if None
+        self.parameters = parameters or []             # Default to empty list if None
 
+# Class implementing a symbol table with scope management
 class SymbolTable:
     def __init__(self):
-        self.scopes: List[Dict[str, SymbolEntry]] = [{}]  # Start with global scope
-        self.current_scope_level = 0
+        self.scopes: List[Dict[str, SymbolEntry]] = [{}]  # Initialize with global scope
+        self.current_scope_level = 0                      # Start at global scope level
 
     def enter_scope(self):
         """Enter a new scope level."""
-        self.current_scope_level += 1
-        self.scopes.append({})
+        self.current_scope_level += 1           # Increment scope level
+        self.scopes.append({})                  # Add new empty scope dictionary
 
     def exit_scope(self):
         """Exit the current scope level."""
-        if self.current_scope_level > 0:
-            self.scopes.pop()
-            self.current_scope_level -= 1
+        if self.current_scope_level > 0:        # Check we're not already at global scope
+            self.scopes.pop()                   # Remove current scope
+            self.current_scope_level -= 1       # Decrement scope level
 
     def declare(self, symbol: SymbolEntry) -> Optional[SemanticError]:
         """
         Declare a new symbol in the current scope.
         Check for Redeclaration in the same scope.
         """
-        current_scope = self.scopes[self.current_scope_level]
+        current_scope = self.scopes[self.current_scope_level]  # Get current scope dictionary
         
         # Check for Redeclaration in the same scope
         if symbol.name in current_scope:
@@ -81,36 +86,20 @@ class SymbolTable:
                 f"Symbol '{symbol.name}' already declared in this scope"
             )
         
-        current_scope[symbol.name] = symbol
+        current_scope[symbol.name] = symbol  # Add symbol to current scope
 
-        print(f"Declaring {symbol.name} at scope level {self.current_scope_level}")
+        print(f"Declaring {symbol.name} at scope level {self.current_scope_level}")  # Debugging output
 
-        return None
+        return None  # Return None if no error
 
     def lookup(self, name: str) -> Optional[SymbolEntry]:
         """
         Look up a symbol, searching from current scope to global scope.
         """
-        for scope in reversed(self.scopes):
+        for scope in reversed(self.scopes):  # Search from current scope back to global
             if name in scope:
-                return scope[name]
-        return None
-    
-    def insert(self, param_name, entry_data):
-        """
-        Insert a symbol into the current scope of the symbol table
-        
-        Args:
-            param_name: The name of the symbol
-            entry_data: A dictionary containing symbol information:
-                - type: The data type of the symbol
-                - value: The value of the symbol (optional)
-                - is_function: Whether the symbol is a function (optional)
-                - line: Source code line number (optional)
-        """
-        current_scope = self.scopes[self.current_scope_level]
-        current_scope[param_name] = entry_data
-            
+                return scope[name]          # Return symbol if found
+        return None                         # Return None if symbol not found
 
 class SemanticAnalyzer:
     def __init__(self):

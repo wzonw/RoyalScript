@@ -246,17 +246,6 @@ class RoyalScriptASTBuilder:
         
         raise SyntaxError(f"Expected {expected}, got {token} at line {self.current_position[0]+1}, position {self.current_position[1]+1}")
 
-    def try_match(self, expected):
-        """
-        Try to match the expected token type, return True and advance if matched,
-        return False without advancing if not matched.
-        """
-        token = self.current_token()
-        if token and token[0] == expected:
-            self.advance()
-            return True
-        return False
-
     def current_token_position(self):
         """Returns a string representation of the current token position for error messages."""
         return f"line {self.current_position[0]+1}, position {self.current_position[1]+1}"

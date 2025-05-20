@@ -581,7 +581,7 @@ class RoyalScriptLexerGUI(tk.Tk):
                     (token.token_type, token.value) and add its tuple to the tokens list"""
                     tokens.append((token.token_type, token.value))
             # After processing all tokens in the current line, adds the collected tokens list to the all_tokens list
-            all_tokens.append(tokens) 
+            all_tokens.append(tokens) # per lines pero ang laman lang is tyken_type and token value
         
         # Flatten tokens and collect line/column info
         flat_tokens = [] # [(token.token_type, token.value, token.line, token.position), (token.token_type, token.value, token.line, token.position), (token.token_type, token.value, token.line, token.position)]

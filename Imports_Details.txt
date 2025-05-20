@@ -148,3 +148,72 @@ Local variable: Only accessible within its defined scope
 
 
 Understanding when to use each type is fundamental to proper Python class design and object-oriented programming.
+
+
+
+# sample of symbol table
+
+self.scopes = [
+    # Scope level 0 (Global scope)
+    {
+        "age": SymbolEntry(
+            name="age", 
+            datatype="number", 
+            value="30", 
+            scope_level=0, 
+            is_initialized=True
+        ),
+        "APP_NAME": SymbolEntry(
+            name="APP_NAME", 
+            datatype="string", 
+            value="RoyalApp", 
+            scope_level=0, 
+            is_dynasty=True, 
+            is_initialized=True
+        ),
+        "calculateBonus": SymbolEntry(
+            name="calculateBonus", 
+            datatype="number", 
+            value="", 
+            scope_level=0, 
+            is_function=True, 
+            parameters=[("number", "salary"), ("number", "years")]
+        )
+    },
+    
+    # Scope level 1 (Function scope)
+    {
+        "rate": SymbolEntry(
+            name="rate", 
+            datatype="number", 
+            value="0.1", 
+            scope_level=1, 
+            is_initialized=True
+        ),
+        "salary": SymbolEntry(  # Function parameters are in function scope
+            name="salary", 
+            datatype="number", 
+            value="", 
+            scope_level=1, 
+            is_initialized=True
+        ),
+        "years": SymbolEntry(
+            name="years", 
+            datatype="number", 
+            value="", 
+            scope_level=1, 
+            is_initialized=True
+        )
+    },
+    
+    # Scope level 2 (If-block scope)
+    {
+        "bonusMultiplier": SymbolEntry(
+            name="bonusMultiplier", 
+            datatype="number", 
+            value="1.5", 
+            scope_level=2, 
+            is_initialized=True
+        )
+    }
+]

@@ -522,9 +522,9 @@ class RoyalScriptParser:
     ],
 }
     PREDICT = {
-    # <program>
+    # <program> 
     ('<program>', 'crown'): ['crown', '~', '<global_dec>', '<user-defined_func>', 'castle', 'treasures', 'identifier', '(', ')', '{', '<body>', 'return', '0', '~', '}', 'reign', '~'],
-    # <global_dec>
+    # <global_dec> 
     ('<global_dec>', 'ocean'): ['<var_dec>', '<global_dec>'],
     ('<global_dec>', 'treasures'): ['<var_dec>', '<global_dec>'],
     ('<global_dec>', 'scroll'): ['<var_dec>', '<global_dec>'],
@@ -1471,7 +1471,7 @@ class RoyalScriptParser:
         pos = 0
         # Initialize parsing stack with end marker and start symbol
         # The stack is processed from right to left (top is rightmost/last element)
-        stack = ['EOF', self.start_symbol]
+        stack = ['EOF', self.start_symbol] # ['EOF', '<program>']
         # Initialize error message as None (will be set if an error occurs)
         error_message = None
 
@@ -1490,7 +1490,7 @@ class RoyalScriptParser:
             print(f"Stack: {stack}, pos: {pos}, token: {tokens[pos].token_type if pos < len(tokens) else 'OUT_OF_BOUNDS'}")
             
             # Pop the top symbol from the stack to process it
-            top = stack.pop()
+            top = stack.pop() # '<global_dec>'
 
             # Skip any comment tokens before processing current symbol
             while pos < len(tokens) and tokens[pos].token_type in ('single_comment', 'multi_comment'):
@@ -1520,12 +1520,12 @@ class RoyalScriptParser:
 
             # Case 1: If top of stack is epsilon (empty production), 
             # just continue without consuming input
-            if top == 'ε':
+            if top == 'ε': # '<gloabl_dec>' == 'ε'
                 continue
 
             # Case 2: If top of stack matches current token type,
             # we've found a terminal match
-            elif top == current_token_type:
+            elif top == current_token_type: # '<gloabl_dec>' == 'castle'
                 # Debug output to show matched token
                 print(f"Matched token: {top} at position {pos}") # debugging
                 
@@ -1540,26 +1540,27 @@ class RoyalScriptParser:
                         position_in_line += 1          # Increment position within current line
                             
             # Case 3: If top of stack is a non-terminal (defined in the CFG)
-            elif top in self.cfg:
+            elif top in self.cfg: # '<gloabl_dec>'
                 # Get a list of expected tokens for this non-terminal (for error reporting)
-                expected = [lookahead for (nt, lookahead) in self.predict if nt == top]
+                expected = [lookahead for (nt, lookahead) in self.predict if nt == top] # ('<gloabl_dec>', lookahead ) # 'crown'
                 
                 # Create a key from current non-terminal and token type to look up in predict table
-                key = (top, current_token_type)
+                key = (top, current_token_type) # ('<gloabl_dec>', 'castle') 
                 
                 # If the key exists in predict table, we have a valid production
                 if key in self.predict:
                     # Get the production to apply
-                    production = self.predict[key]
+                    production = self.predict[key] # self.predict[('<gloabl_dec>', 'castle') ] = 'ε'
+                    # ['crown', '~', '<global_dec>', '<user-defined_func>', 'castle', 'treasures', 'identifier', '(', ')', '{', '<body>', 'return', '0', '~', '}', 'reign', '~'],
+                    
                     # Record this production for debugging
                     entered_productions.append((top, current_token_type, production.copy()))
                     
                     # Push production symbols onto stack in reverse order
                     # (since stack processes from right to left)
-                    # balikan
                     for symbol in reversed(production):
                         if symbol != 'ε':  # Skip epsilon symbols
-                            stack.append(symbol)
+                            stack.append(symbol) # ['EOF', '~', .... , 'castle']
                 else:
                     # If no production found, generate syntax error
                     error_message = (
@@ -1586,11 +1587,10 @@ class RoyalScriptParser:
         # After the loop ends, check the position
         print(f"Loop ended. pos: {pos}, len(tokens): {len(tokens)}")
         
-        # Fix: Modify the success condition
         if pos == len(tokens):
-            print("All productions entered during parse:")
-            for prod in entered_productions:
-                print(f"{prod[0]} -> {prod[2]} (lookahead: {prod[1]})")
+            print("All productions entered during parse:") # for debug
+            for prod in entered_productions:  # for debug
+                print(f"{prod[0]} -> {prod[2]} (lookahead: {prod[1]})")  # for debug
             return True, None
         else:
             # Unconsumed input
