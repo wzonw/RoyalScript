@@ -54,12 +54,22 @@ class SymbolEntry:
         self.is_function = is_function
         self.array_dimensions = array_dimensions or []  # Default to empty list if None
         self.parameters = parameters or []             # Default to empty list if None
+        
+class StructTypeEntry:
+    """Represents a struct type definition in the symbol table."""
+    def __init__(self, name: str, members: Dict[str, str], scope_level: int, line: int = None, position: int = None):
+        self.name = name                # Name of the struct type
+        self.members = members          # Dictionary of member_name: data_type
+        self.scope_level = scope_level  # Scope level where struct is declared
+        self.line = line                # Line where struct is declared (for error reporting)
+        self.position = position        # Position where struct is declared (for error reporting)
 
 # Class implementing a symbol table with scope management
 class SymbolTable:
     def __init__(self):
         self.scopes: List[Dict[str, SymbolEntry]] = [{}]  # Initialize with global scope
         self.current_scope_level = 0                      # Start at global scope level
+        self.struct_types = {}
 
     def enter_scope(self):
         """Enter a new scope level."""
@@ -100,10 +110,273 @@ class SymbolTable:
             if name in scope:
                 return scope[name]          # Return symbol if found
         return None                         # Return None if symbol not found
+class StructSymbolTable(SymbolTable):
+    """Extended SymbolTable with struct handling capabilities."""
+    global_struct_types = {}
+    def __init__(self):
+        super().__init__()
+        # Dictionary to map scope levels to struct type definitions
+        # Format: {scope_level: {struct_name: StructTypeEntry}}
+        self.struct_types = {0: {}}  # Initialize with global scope
+        
+    def enter_scope(self):
+        """Enter a new scope level, extending the parent method."""
+        super().enter_scope()
+        # Create a new empty dict for struct types in this scope
+        if self.current_scope_level not in self.struct_types:
+            self.struct_types[self.current_scope_level] = {}
+    
+    def exit_scope(self):
+        """Exit the current scope level, extending the parent method."""
+        # Remove struct types in the current scope if we're exiting
+        if self.current_scope_level in self.struct_types:
+            self.struct_types.pop(self.current_scope_level, None)
+        super().exit_scope()
+        
+    def register_struct_type(self, node) -> Optional[SemanticError]:
+        struct_name = node.identifier[1]
+        
+        # Process members
+        members = {}
+        for member in node.members:
+            member_type = member[0]
+            member_name = member[1]
+            
+            if member_name in members:
+                return f"Duplicate member '{member_name}' in struct '{struct_name}' at line {node.line}"
+            
+            members[member_name] = member_type
+        
+        # Store in both regular struct_types AND global storage
+        if self.current_scope_level not in self.struct_types:
+            self.struct_types[self.current_scope_level] = {}
+            
+        struct_entry = StructTypeEntry(
+            struct_name,
+            members,
+            self.current_scope_level,
+            node.line,
+            node.position
+        )
+        
+        self.struct_types[self.current_scope_level][struct_name] = struct_entry
+        # Also store globally as backup
+        StructSymbolTable.global_struct_types[struct_name] = struct_entry
+        
+        print(f"Registered struct type '{struct_name}' at scope level {self.current_scope_level} with members: {members}")
+        return None
+    
+    def lookup_struct_type(self, name: str) -> Optional[StructTypeEntry]:
+        # First try normal scope-based lookup
+        for level in range(self.current_scope_level, -1, -1):
+            if level in self.struct_types and name in self.struct_types[level]:
+                return self.struct_types[level][name]
+        
+        # Fallback to global storage
+        if name in StructSymbolTable.global_struct_types:
+            print(f"Found '{name}' in global struct storage (fallback)")
+            return StructSymbolTable.global_struct_types[name]
+        
+        return None
+    
+    def lookup_struct_member(self, struct_type_name: str, member_name: str):
+        """
+        Look up a member in a struct type.
+        Returns the member type if found, None otherwise.
+        """
+        struct_type = self.lookup_struct_type(struct_type_name)
+        if struct_type and member_name in struct_type.members:
+            return struct_type.members[member_name]
+        return None
+            
+    def validate_struct_instantiation(self, node) -> Optional[SemanticError]:
+        """
+        Validate a struct instantiation.
+        
+        Args:
+            node: StructInstantiationNode with struct_type, identifier, and member_initializations
+            
+        Returns:
+            SemanticError if validation fails, None otherwise
+        """
+        # Extract struct type and instance name
+        struct_type_name = node.struct_type[1]
+        instance_name = node.identifier[1]
+        
+        # Look up struct type in scope hierarchy
+        struct_type = self.lookup_struct_type(struct_type_name)
+        if not struct_type:
+            return f"Undefined struct type '{struct_type_name}' at line {node.line}"
+        
+        # Debug version with print statements to see what's happening
+        print(f"DEBUG: Checking struct instantiation for '{instance_name}' of type '{struct_type_name}'")
+        print(f"DEBUG: Struct members: {struct_type.members}")  # This is a dict: {member_name: member_type}
+        print(f"DEBUG: Member initializations: {node.member_initializations}")
+
+        # Check all required members are initialized
+        # struct_type.members is a dictionary {member_name: member_type}
+        for member_name in struct_type.members.keys():
+            print(f"DEBUG: Checking required member '{member_name}'")
+            if member_name not in node.member_initializations:
+                print(f"DEBUG: MISSING MEMBER ERROR - '{member_name}' not found in initializations")
+                return f"Missing initialization for member '{member_name}' in struct '{instance_name}' at line {node.line}"
+
+        print(f"DEBUG: Required members: {list(struct_type.members.keys())}")
+
+        # Check for extra members
+        valid_member_names = set(struct_type.members.keys())
+        print(f"DEBUG: Valid member names: {valid_member_names}")
+
+        for member_name in node.member_initializations:
+            print(f"DEBUG: Checking initialization key '{member_name}'")
+            if member_name not in valid_member_names:
+                print(f"DEBUG: INVALID MEMBER ERROR - '{member_name}' not in valid members")
+                return f"Unknown member '{member_name}' in struct '{struct_type_name}' at line {node.line}"
+
+        # Check member types
+        print(f"DEBUG: Member types mapping: {struct_type.members}")
+
+        for member_name, member_value in node.member_initializations.items():
+            expected_type = struct_type.members[member_name]  # Direct access since it's a dict
+            actual_type = self._get_expression_type(member_value)
+            print(f"DEBUG: Type check for '{member_name}': expected '{expected_type}', got '{actual_type}'")
+            
+            # Type checking logic
+            if not self._are_types_compatible(expected_type, actual_type):
+                print(f"DEBUG: TYPE MISMATCH ERROR")
+                return f"Type mismatch for member '{member_name}': expected '{expected_type}', got '{actual_type}' at line {node.line}"
+
+        print("DEBUG: No errors found in struct instantiation")
+        
+        # Create and declare the struct instance as a variable
+        struct_symbol = SymbolEntry(
+            name=instance_name,
+            datatype=struct_type_name,  # The datatype is the struct type name
+            value=None,  # Structured value handled separately
+            scope_level=self.current_scope_level,
+            is_initialized=True
+        )
+        
+        # Declare the struct instance in the symbol table
+        result = self.declare(struct_symbol)
+        if result:
+            return result
+            
+        print(f"Registered struct instance '{instance_name}' of type '{struct_type_name}' at scope level {self.current_scope_level}")
+        return None
+        
+    def _get_expression_type(self, expr) -> str:
+        """
+        Determine the type of an expression.
+        
+        Args:
+            expr: List of tokens or a single token representing an expression
+            
+        Returns:
+            String representing the type
+        """
+        # Handle empty expressions
+        if not expr:
+            return "unknown"
+            
+        # For simple literal, get the type directly
+        if isinstance(expr, list) and len(expr) == 1:
+            token = expr[0]
+            return self._get_token_type(token)
+            
+        # For complex expressions with operators
+        if isinstance(expr, list) and len(expr) > 1:
+            # Basic expression type inference
+            first_token = expr[0]
+            token_type = self._get_token_type(first_token)
+            
+            # If all tokens are of the same type (for arithmetic expressions)
+            for token in expr:
+                if token[0] not in ['+', '-', '*', '/', '%', '(', ')']:  # Skip operators
+                    curr_type = self._get_token_type(token)
+                    if curr_type != token_type and curr_type != "unknown":
+                        # Type conflict in expression
+                        return "mixed"  # Could be refined for type coercion rules
+            
+            return token_type
+        
+        # Default case
+        return "unknown"
+    
+    def _get_token_type(self, token) -> str:
+        """Extract type from a token."""
+        token_type = token[0]
+        
+        # Handle literal types
+        if token_type == 'treasures_lit':
+            return 'treasures'
+        elif token_type == 'scroll_lit':
+            return 'scroll'
+        elif token_type == 'mirror_lit':
+            return 'mirror'
+        elif token_type == 'ocean_lit':
+            return 'ocean'
+        elif token_type == 'rose_lit':
+            return 'rose'
+        elif token_type == 'identifier':
+            # For identifiers, look up their type in the symbol table
+            symbol = self.lookup(token[1])
+            if symbol:
+                return symbol.datatype
+        
+        return "unknown"
+    
+    def _are_types_compatible(self, expected_type: str, actual_type: str) -> bool:
+        """
+        Check if actual_type is compatible with expected_type.
+        
+        Args:
+            expected_type: Expected type name
+            actual_type: Actual type name
+            
+        Returns:
+            Boolean indicating compatibility
+        """
+        # Direct match
+        if expected_type == actual_type:
+            return True
+            
+        # Unknown type (couldn't determine) - assume compatible but might log warning
+        if actual_type == "unknown":
+            return True
+            
+        # Handle mixed type expressions (could refine based on language rules)
+        if actual_type == "mixed" and expected_type in ['treasures', 'ocean']:
+            # Allow mixed numeric expressions to be assigned to numeric types
+            return True
+            
+        # Add your language's type compatibility rules here
+        # For example, numeric type compatibility
+        numeric_types = ['treasures', 'ocean']
+        if expected_type in numeric_types and actual_type in numeric_types:
+            return True
+            
+        return False
+    
+    def get_struct_member_type(self, var_name, member_name):
+        # 1. Look up the variable in the symbol table
+        var_entry = self.lookup(var_name)
+        if not var_entry:
+            return None  # or raise an error
+
+        # 2. Get the struct type from the variable's datatype
+        struct_type = var_entry.datatype
+        struct_type_entry = self.lookup_struct_type(struct_type)
+        if not struct_type_entry:
+            return None  # or raise an error
+
+        # 3. Get the member's type
+        return struct_type_entry.members.get(member_name)
 
 class SemanticAnalyzer:
     def __init__(self):
         self.symbol_table = SymbolTable()
+        self.symbol_structable = StructSymbolTable()
         self.errors: List[SemanticError] = []
         self.primitive_types = {'treasures', 'scroll', 'mirror', 'ocean', 'rose'}
         self.global_variable_types = {}  # flat symbol table of all variable types
@@ -125,13 +398,30 @@ class SemanticAnalyzer:
             # Process global declarations
             if hasattr(ast_root, 'global_declarations'):
                 for decl in ast_root.global_declarations:
-                    self.validate_VariableDeclarationNode(decl)
+                    if decl.__class__.__name__ == 'StructDeclarationNode':
+                        error = self.symbol_structable.register_struct_type(decl)
+                        if error:
+                            raise ValueError(error)
+                    else:
+                        self.validate_VariableDeclarationNode(decl)
             
             # Process global functions
             if hasattr(ast_root, 'functions'):
                 for func in ast_root.functions:
-                    self.validate_FunctionNode(func)
+                    self.symbol_structable.enter_scope()
+                    if func.__class__.__name__ == 'StructDeclarationNode':
+                        error = self.symbol_structable.register_struct_type(func)
+                        if error:
+                            raise ValueError(error)
+                    elif func.__class__.__name__ == 'StructInstantiationNode':
+                        error = self.symbol_structable.validate_struct_instantiation(func)
+                        if error:
+                            raise ValueError(error)
+                    else:
+                        self.validate_FunctionNode(func)
             
+                self.symbol_structable.exit_scope()
+
             # Process main function
             if hasattr(ast_root, 'main_function'):
                 self.validate_MainFunctionNode(ast_root.main_function)
@@ -169,7 +459,7 @@ class SemanticAnalyzer:
             scope_level=node.scope_level,
             is_dynasty=node.is_dynasty,
             is_initialized=node.value is not None,
-            array_dimensions=node.array_dimensions
+            array_dimensions=node.array_dimensions # []
         )
         
         # Check for Redeclaration
@@ -412,9 +702,9 @@ class SemanticAnalyzer:
 
         # determine if the value is an expression and what type of expression
         for val in value:   
-            content.append(val[1]) 
+            content.append(val[1])  # ["wish", "(", "string", ")"] 5 * 2
         value_string = ' '.join(content)
-        expr_type = self.type_expr(content)
+        expr_type = self.type_expr(content) # 'Not Valid'
         # ===================================================================
 
         print('expression', expr_type, content, value, value_string,)
@@ -445,6 +735,15 @@ class SemanticAnalyzer:
             elif value_type == 'phantom':
                 return True
             
+            elif value_type == 'struct_id':
+                struct_val = value[0][1]
+                parts = struct_val.split(".")
+                var_name = parts[0]
+                member_name = parts[1]
+                dtype = self.symbol_structable.get_struct_member_type(var_name, member_name)
+
+                if dtype != 'treasures':
+                    raise ValueError(f"Invalid treasures initialization '{struct_val}' at line {node.line+1}.")
             else:
                 raise ValueError(f"Invalid treasures initialization '{value_string}' at line {node.line+1}.")
         
@@ -490,6 +789,16 @@ class SemanticAnalyzer:
             elif value_type == 'phantom':
                 return True
             
+            elif value_type == 'struct_id':
+                struct_val = value[0][1]
+                parts = struct_val.split(".")
+                var_name = parts[0]
+                member_name = parts[1]
+                dtype = self.symbol_structable.get_struct_member_type(var_name, member_name)
+
+                if dtype != 'ocean':
+                    raise ValueError(f"Invalid ocean initialization '{struct_val}' at line {node.line+1}.")
+            
             else:
                 raise ValueError(f"Invalid ocean initialization '{value_string}' at line {node.line+1}.")
         
@@ -533,6 +842,16 @@ class SemanticAnalyzer:
             elif value_type == 'phantom':
                 return True
             
+            elif value_type == 'struct_id':
+                struct_val = value[0][1]
+                parts = struct_val.split(".")
+                var_name = parts[0]
+                member_name = parts[1]
+                dtype = self.symbol_structable.get_struct_member_type(var_name, member_name)
+
+                if dtype != 'scroll':
+                    raise ValueError(f"Invalid scroll initialization '{struct_val}' at line {node.line+1}.")
+            
             else:
                 raise ValueError(f"Invalid scroll initialization '{value_string}' at line {node.line+1}.")
         
@@ -571,6 +890,16 @@ class SemanticAnalyzer:
         
             elif value_type == 'phantom':
                 return True
+            
+            elif value_type == 'struct_id':
+                struct_val = value[0][1]
+                parts = struct_val.split(".")
+                var_name = parts[0]
+                member_name = parts[1]
+                dtype = self.symbol_structable.get_struct_member_type(var_name, member_name)
+
+                if dtype != 'rose':
+                    raise ValueError(f"Invalid rose initialization '{struct_val}' at line {node.line+1}.")
             
             else:
                 raise ValueError(f"Invalid rose initialization '{value_string}' at line {node.line+1}.")
@@ -617,6 +946,16 @@ class SemanticAnalyzer:
             elif value_type == 'wish':
                 return True
             
+            elif value_type == 'struct_id':
+                struct_val = value[0][1]
+                parts = struct_val.split(".")
+                var_name = parts[0]
+                member_name = parts[1]
+                dtype = self.symbol_structable.get_struct_member_type(var_name, member_name)
+
+                if dtype != 'mirror':
+                    raise ValueError(f"Invalid mirror initialization '{struct_val}' at line {node.line+1}.")
+                
             else:
                 raise ValueError(f"Invalid mirror initialization '{value_string}' at line {node.line+1}.")
         
@@ -1328,7 +1667,7 @@ class SemanticAnalyzer:
 
     def validate_relOp(self, value, datatype, node):
         print("entered validate relational", value)
-        i = 0
+        i = 0 
         n = len(value)
         
         op1 = None
@@ -1583,6 +1922,19 @@ class SemanticAnalyzer:
 
         print(len_val)
         return True
+    
+    def validate_StructDeclarationNode(self, node):
+        error = self.symbol_structable.register_struct_type(node)
+        if error:
+            raise ValueError(error)
+        
+            
+    def validate_StructInstantiationNode(self, node) -> Optional[SemanticError]:
+        error = self.symbol_structable.validate_struct_instantiation(node)
+        if error:
+            raise ValueError(error)
+        return True
+
     
     def validate_id(self, value, datatype, node, expr_type):
         """
@@ -2182,7 +2534,7 @@ class SemanticAnalyzer:
             # Dispatch to appropriate validation method based on node type
             validator_method = getattr(self, f'validate_{type(statement).__name__}', None)  # self.validate_VariableDeclarationNode
             if validator_method:
-                validator_method(statement)
+                validator_method(statement) # self.validate_VariableDeclarationNode(statement)
 
     def validate_return_value(self, node):
         """
@@ -2802,6 +3154,9 @@ class SemanticAnalyzer:
                 elif expressions[i][0][0] == 'totreasures':
                     self.validate_conversion_func(expressions[i], 'treasures', node)
 
+                elif expressions[i][0][0] == 'struct_id':
+                    self.validate_struct_id(expressions[i], node)
+
                 elif expressions[i][0][0] == 'toocean':
                     self.validate_conversion_func(expressions[i], 'ocean', node)
 
@@ -2824,6 +3179,35 @@ class SemanticAnalyzer:
             i += 1
 
         print(expressions)
+
+        return True
+
+    def validate_struct_id(self, expressions, node):
+        print('entered validate_struct_id')
+        struct_id = expressions[0][1]
+        if '.' not in struct_id:
+            return f"Invalid struct id format '{struct_id}' at line {node.line}"
+        parts = struct_id.split(".")
+        if len(parts) != 2:
+            return f"Invalid struct id format '{struct_id}' at line {node.line}"
+        var_name, member_name = parts
+        print(f'{var_name}, {member_name}')
+        
+        # Look up the variable in the symbol table
+        var_entry = self.symbol_structable.lookup(var_name)
+        if not var_entry:
+            return f"Undefined variable '{var_name}' at line {node.line}"
+        
+        struct_type = var_entry.datatype
+        # Check if struct type exists
+        is_struct_type = self.symbol_structable.lookup_struct_type(struct_type)
+        if not is_struct_type:
+            return f"Undefined struct type '{struct_type}' at line {node.line}"
+        
+        # Check if struct member exists
+        is_struct_member = self.symbol_structable.lookup_struct_member(struct_type, member_name)
+        if not is_struct_member:
+            return f"Undefined member '{member_name}' in struct '{struct_type}' at line {node.line}"
 
         return True
 

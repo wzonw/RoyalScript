@@ -7,16 +7,17 @@ class RoyalScriptToPythonTranslator:
         self.indent_level = 0  # Set initial indentation level to 0
         self.symbol_table = {}  # Initialize symbol table for variable types
         self.global_variable_types = global_variable_types or {}  # Set global variable types or empty dict
+        self.struct_definitions = {}
 
     def indent(self, text):
         """Indent the given text according to the current indent_level."""
         prefix = "    " * self.indent_level  # Create indentation prefix based on indent_level
         return textwrap.indent(text, prefix)  # Indent the text using textwrap
 
-    def translate(self, node):
+    def translate(self, node): # node = ast
         """Dispatches to the appropriate translation method based on node type."""
         method_name = f"translate_{type(node).__name__}"  # Build method name string
-        method = getattr(self, method_name, self.unsupported_node)  # Get translation method or fallback
+        method = getattr(self, method_name, self.unsupported_node)  # Get translation method or fallback 
         return method(node)  # Call the translation method
 
     def unsupported_node(self, node):
@@ -60,8 +61,102 @@ class RoyalScriptToPythonTranslator:
             code.append(self.translate(func))  # Add translated function code
         code.append("")  # Add empty line before main function
         code.append(self.translate(node.main_function))  # Add translated main function
-        raw_code = "\n".join(code)  # Join code list into a single string
+        raw_code = "\n".join(code)  # Join code list into a single string ["import sys", "def Main():", "N = 12 * 7", "return 0", "if_name_ == "_main_: Main()""]
         return self.format_code(raw_code)  # Format and return the code
+    
+    def translate_StructDeclarationNode(self, node):
+        """Translates struct declarations to Python classes."""
+        struct_name = node.identifier[1] if isinstance(node.identifier, tuple) else node.identifier
+        
+        # Store struct definition for later reference
+        self.struct_definitions[struct_name] = node.members
+        
+        code = [f"class {struct_name}:"]
+        self.indent_level += 1
+        
+        # Add __init__ method
+        init_params = ["self"]
+        init_body = []
+        self.indent_level += 1
+        for member in node.members:
+            if isinstance(member, list) and len(member) >= 2:
+                member_type = member[0]
+                member_name = member[1]
+                
+                # Add parameter with default value based on type
+                default_value = self.get_default_value_for_type(member_type)
+                init_params.append(f"{member_name}={default_value}")
+                init_body.append(self.indent(f"self.{member_name} = {member_name}"))
+        
+        # Create __init__ method signature
+        self.indent_level -= 1
+        init_signature = f"def __init__({', '.join(init_params)}):"
+        code.append(self.indent(init_signature))
+        self.indent_level += 1
+        if init_body:
+            code.extend(init_body)
+        else:
+            code.append(self.indent("pass"))
+        self.indent_level -= 1
+        
+        # Add __str__ method for better representation
+        code.append("")
+        code.append(self.indent("def __str__(self):"))
+        self.indent_level += 1
+        
+        member_strs = []
+        for member in node.members:
+            if isinstance(member, list) and len(member) >= 2:
+                member_name = member[1]
+                member_strs.append(f"{member_name}={{self.{member_name}}}")
+        
+        str_format = f"{struct_name}({', '.join(member_strs)})"
+        code.append(self.indent(f'return f"{str_format}"'))
+        self.indent_level -= 1
+        
+        # Add __repr__ method
+        code.append("")
+        code.append(self.indent("def __repr__(self):"))
+        self.indent_level += 1
+        code.append(self.indent("return self.__str__()"))
+        self.indent_level -= 1
+        
+        self.indent_level -= 1
+        return "\n".join(code)
+
+
+    def translate_StructInstantiationNode(self, node):
+        """Translates struct instantiation to Python class instantiation."""
+        struct_type = node.struct_type[1] if isinstance(node.struct_type, tuple) else node.struct_type
+        instance_name = node.identifier[1] if isinstance(node.identifier, tuple) else node.identifier
+        
+        # Build constructor arguments
+        args = []
+        if hasattr(node, 'member_initializations') and node.member_initializations:
+            for member_name, value_tokens in node.member_initializations.items():
+                # Translate the value expression
+                translated_value = self.translate_expression(value_tokens, None)
+                args.append(f"{member_name}={translated_value}")
+        
+        # Create instantiation statement
+        if args:
+            constructor_call = f"{struct_type}({', '.join(args)})"
+        else:
+            constructor_call = f"{struct_type}()"
+        
+        return self.indent(f"{instance_name} = {constructor_call}")
+
+
+    def get_default_value_for_type(self, type_name):
+        """Returns appropriate default value for RoyalScript data types."""
+        type_defaults = {
+            'treasures': '0',      # int
+            'ocean': '0.0',        # float
+            'rose': "''",          # char (empty string)
+            'scroll': '""',        # string
+            'mirror': 'False'      # bool
+        }
+        return type_defaults.get(type_name, 'None')
 
     def translate_VariableDeclarationNode(self, node):
         """Translates variable declarations to Python assignments."""
@@ -84,15 +179,18 @@ class RoyalScriptToPythonTranslator:
             if isinstance(node.identifier, tuple) and len(node.identifier) >= 2:  # If identifier is a tuple
                 var_name = node.identifier[1]  # Get variable name
                 if hasattr(node, 'datatype') and isinstance(node.datatype, tuple):  # If node has datatype
-                    self.symbol_table[var_name] = node.datatype[1]  # Update symbol table
+                    self.symbol_table[var_name] = node.datatype[1]  # Update symbol table 'N' : {'treasures'}
             if hasattr(node, 'array_dimensions') and node.array_dimensions:  # If array dimensions exist
                 return self.translate_array_declaration(node)  # Translate array declaration
-            value = self.translate_expression(
+           
+            value = self.translate_expression( # "12 * 7"
                 node.value,
                 node.datatype[1] if hasattr(node, 'datatype') and isinstance(node.datatype, tuple) else None
             ) if node.value else "None"  # Translate value or set to None
+            
             if isinstance(node.identifier, tuple):  # If identifier is a tuple
                 return self.indent(f"{node.identifier[1]} = {value}")  # Return assignment
+               # "N = 12 * 7"
             else:
                 return self.indent(f"{node.identifier} = {value}")  # Return assignment
 
@@ -113,6 +211,7 @@ class RoyalScriptToPythonTranslator:
         else:  # If array has no initial value
             if len(dimensions) == 1:  # If 1D array
                 return self.indent(f"{var_name} = [None] * {dimensions[0]}")  # Return 1D array initialization
+            
             elif len(dimensions) == 2:  # If 2D array
                 return self.indent(f"{var_name} = [[None] * {dimensions[1]} for _ in range({dimensions[0]})]")  # Return 2D array initialization
             else:
@@ -163,10 +262,10 @@ class RoyalScriptToPythonTranslator:
         code = [f"def {main_name}():"]  # Start main function definition
         self.indent_level += 1  # Increase indentation
         for stmt in node.body:  # Loop through main function body
-            translated = self.translate(stmt)  # Translate statement
+            translated = self.translate(stmt)  # Translate statement N = 12 * 7 
             if translated.strip():  # If translation is not empty
                 code.append(translated)  # Add to code list
-        return_val = node.return_val[1] if isinstance(node.return_val, tuple) else node.return_val  # Get return value
+        return_val = node.return_val[1] if isinstance(node.return_val, tuple) else node.return_val  # Get return value 0
         code.append(self.indent(f"return {return_val}"))  # Add return statement
         self.indent_level -= 1  # Decrease indentation
         code.append("")  # Add empty line
@@ -434,7 +533,7 @@ class RoyalScriptToPythonTranslator:
             else:
                 parts.append(str(token))  # Add token as string
             i += 1  # Increment index
-        return " ".join(parts)  # Join parts into string
+        return " ".join(parts)  # Join parts into string ['12', '*', '7'] = > 12 * 7
 
     def translate_array_initializer(self, tokens):
         """Translates array initializer expressions with curly braces to Python list syntax."""

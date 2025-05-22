@@ -5,10 +5,21 @@ class RoyalScriptParser:
     ],
     '<global_dec>': [
         ['<var_dec>', '<global_dec>'],
+        ['<struct>', '<global_dec>'],
         ['ε'],
     ],
     '<var_dec>': [
         ['<dynasty>', '<data_type>', 'identifier', '<vardec_def>'],
+    ],
+    '<struct>': [
+        ['dream', 'identifier', '{', '<struct_vardec>', '}'],
+    ],
+    '<struct_vardec>': [
+        ['<data_type>', 'identifier', '~', '<struct_vardec_more>'],
+    ],
+    '<struct_vardec_more>': [
+        ['<data_type>', 'identifier', '~', '<struct_vardec_more>'],
+        ['ε'],
     ],
     '<dynasty>': [
         ['dynasty'],
@@ -226,6 +237,7 @@ class RoyalScriptParser:
     ],
     '<body>': [
         ['<dynasty>', '<data_type>', 'identifier', '<vardec_def>', '<body>'],
+        ['<struct>', '<body>'],
         ['granted', '(', '<granted_content>', '<more_granted>', ')', '~', '<body>'],
         ['identifier', '<body_1_ext>', '<body>'],
         ['spell', '<return_type>', 'identifier', '(', '<param>', ')', '{', '<body>', '<ret_statement>', '}', '<body>'],
@@ -239,10 +251,21 @@ class RoyalScriptParser:
         ['(', '<args>', ')', '~'],
         ['<index>', '<body_1_other_ext>'],
         ['<unary_operator>', '~'],
+        ['<struct_use>'],
     ],
     '<body_1_other_ext>': [
         ['=', '<val>', '~'],
         ['<assignment_operator>', '<assignment_operand>', '~'],
+    ],
+    '<struct_use>': [
+        ['identifier', 'identifier', '=', '{', '<struct_init>', '}'],
+    ],
+    '<struct_init>': [
+        ['identifier', '=', '<val>', '~', '<more_init>'],
+    ],
+    '<more_init>': [
+        ['identifier', '=', '<val>', '~', '<more_init>'],
+        ['ε'],
     ],
     '<ret_statement>': [
         ['return', '<val1>', '~'],
@@ -319,6 +342,7 @@ class RoyalScriptParser:
     ],
     '<granted_content_2>': [
         ['phantom'],
+        ['struct_id'],
         ['lengthof', '(', 'identifier', '<index>', ')'],
         ['<conversion_func>', '(', '<conversion_value>', ')'],
         ['toscroll', '(', '<conversion_value>', ')', '<string_more>'],
@@ -531,6 +555,7 @@ class RoyalScriptParser:
     ('<global_dec>', 'rose'): ['<var_dec>', '<global_dec>'],
     ('<global_dec>', 'dynasty'): ['<var_dec>', '<global_dec>'],
     ('<global_dec>', 'mirror'): ['<var_dec>', '<global_dec>'],
+    ('<global_dec>', 'dream'): ['<struct>', '<global_dec>'],
     ('<global_dec>', 'spell'): ['ε'],
     ('<global_dec>', 'castle'): ['ε'],
     # <var_dec>
@@ -540,6 +565,21 @@ class RoyalScriptParser:
     ('<var_dec>', 'rose'): ['<dynasty>', '<data_type>', 'identifier', '<vardec_def>'],
     ('<var_dec>', 'dynasty'): ['<dynasty>', '<data_type>', 'identifier', '<vardec_def>'],
     ('<var_dec>', 'mirror'): ['<dynasty>', '<data_type>', 'identifier', '<vardec_def>'],
+    # <struct>
+    ('<struct>', 'dream'): ['dream', 'identifier', '{', '<struct_vardec>', '}'],
+    # <struct_vardec>
+    ('<struct_vardec>', 'ocean'): ['<data_type>', 'identifier', '~', '<struct_vardec_more>'],
+    ('<struct_vardec>', 'treasures'): ['<data_type>', 'identifier', '~', '<struct_vardec_more>'],
+    ('<struct_vardec>', 'scroll'): ['<data_type>', 'identifier', '~', '<struct_vardec_more>'],
+    ('<struct_vardec>', 'rose'): ['<data_type>', 'identifier', '~', '<struct_vardec_more>'],
+    ('<struct_vardec>', 'mirror'): ['<data_type>', 'identifier', '~', '<struct_vardec_more>'],
+    # <struct_vardec_more>
+    ('<struct_vardec_more>', 'ocean'): ['<data_type>', 'identifier', '~', '<struct_vardec_more>'],
+    ('<struct_vardec_more>', 'treasures'): ['<data_type>', 'identifier', '~', '<struct_vardec_more>'],
+    ('<struct_vardec_more>', 'scroll'): ['<data_type>', 'identifier', '~', '<struct_vardec_more>'],
+    ('<struct_vardec_more>', 'rose'): ['<data_type>', 'identifier', '~', '<struct_vardec_more>'],
+    ('<struct_vardec_more>', 'mirror'): ['<data_type>', 'identifier', '~', '<struct_vardec_more>'],
+    ('<struct_vardec_more>', '}'):  ['ε'],
     # <dynasty>
     ('<dynasty>', 'dynasty'): ['dynasty'],
     ('<dynasty>', 'ocean'): ['ε'],
@@ -884,6 +924,7 @@ class RoyalScriptParser:
     ('<body>', 'cast'): ['cast', '(', '<condition>', ')', '{', '<body>', '}', '<elif>', '<else>', '<body>'],
     ('<body>', 'forever'): ['forever', '(', '<condition>', ')', '{', '<loop_body>', '}', '<body>'],
     ('<body>', 'believe'): ['believe', '{', '<loop_body>', '}', 'forever', '(', '<condition>', ')', '~', '<body>'],
+    ('<body>', 'dream'): ['<struct>', '<body>'],
     ('<body>', 'break'): ['ε'],
     ('<body>', 'continue'): ['ε'],
     ('<body>', 'return'): ['ε'],
@@ -899,6 +940,7 @@ class RoyalScriptParser:
     ('<body_1_ext>', '+='): ['<index>', '<body_1_other_ext>'],
     ('<body_1_ext>', '--'): ['<unary_operator>', '~'],
     ('<body_1_ext>', '++'): ['<unary_operator>', '~'],
+    ('<body_1_ext>', 'identifier'): ['<struct_use>'],
     # <body_1_other_ext>
     ('<body_1_other_ext>', '='): ['=', '<val>', '~'],
     ('<body_1_other_ext>', '-='): ['<assignment_operator>', '<assignment_operand>', '~'],
@@ -906,6 +948,13 @@ class RoyalScriptParser:
     ('<body_1_other_ext>', '*='): ['<assignment_operator>', '<assignment_operand>', '~'],
     ('<body_1_other_ext>', '/='): ['<assignment_operator>', '<assignment_operand>', '~'],
     ('<body_1_other_ext>', '+='): ['<assignment_operator>', '<assignment_operand>', '~'],
+    # <struct_use>
+    ('<struct_use>', 'identifier'): ['identifier', '=', '{', '<struct_init>', '}'],
+    # <struct_init>
+    ('<struct_init>', 'identifier'): ['identifier', '=', '<val>', '~', '<more_init>'],
+    # <more_init>
+    ('<more_init>', 'identifier'): ['identifier', '=', '<val>', '~', '<more_init>'],
+    ('<more_init>', '}'): ['ε'],
     # <ret_statement>
     ('<ret_statement>', 'return'): ['return', '<val1>', '~'],
     ('<ret_statement>', '}'): ['ε'],
@@ -1063,6 +1112,7 @@ class RoyalScriptParser:
     ('<granted_content_1>', 'identifier'): ['identifier', '<granted_id_ext>'],
     # <granted_content_2>
     ('<granted_content_2>', 'phantom'): ['phantom'],
+    ('<granted_content_2>', 'struct_id'): ['struct_id'],
     ('<granted_content_2>', 'lengthof'): ['lengthof', '(', 'identifier', '<index>', ')'],
     ('<granted_content_2>', 'torose'): ['<conversion_func>', '(', '<conversion_value>', ')'],
     ('<granted_content_2>', 'totreasures'): ['<conversion_func>', '(', '<conversion_value>', ')'],
@@ -1096,6 +1146,7 @@ class RoyalScriptParser:
     ('<granted_content>', 'treasures_lit'): ['<granted_content_2>'],
     ('<granted_content>', '1'): ['<granted_content_2>'],
     ('<granted_content>', 'phantom'): ['<granted_content_2>'],
+    ('<granted_content>', 'struct_id'): ['<granted_content_2>'],
     ('<granted_content>', 'ocean_lit'): ['<granted_content_2>'],
     # <granted_open_paren_ext>
     ('<granted_open_paren_ext>', 'identifier'): ['identifier', '<id_ext>', '<idlit3_granted_ext>'],
@@ -1290,6 +1341,7 @@ class RoyalScriptParser:
     ('<val>', 'treasures_lit'): ['<granted_content_2>'],
     ('<val>', '1'): ['<granted_content_2>'],
     ('<val>', 'phantom'): ['<granted_content_2>'],
+    ('<val>', 'struct_id'): ['<granted_content_2>'],
     ('<val>', 'ocean_lit'): ['<granted_content_2>'],
     ('<val>', 'identifier'): ['identifier', '<granted_id_ext>'],
     ('<val>', 'wish'): ['<input>'],
@@ -1309,6 +1361,7 @@ class RoyalScriptParser:
     ('<val1>', 'treasures_lit'): ['<granted_content_2>'],
     ('<val1>', '1'): ['<granted_content_2>'],
     ('<val1>', 'phantom'): ['<granted_content_2>'],
+    ('<val1>', 'struct_id'): ['<granted_content_2>'],
     ('<val1>', 'ocean_lit'): ['<granted_content_2>'],
     ('<val1>', 'identifier'): ['identifier', '<val1_ext>'],
     # <val1_ext>

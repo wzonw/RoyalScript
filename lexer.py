@@ -28,6 +28,7 @@ class TokenType:
     
     #start and end
     CROWN = "crown"
+    DREAM = "dream"
     REIGN = "reign"
     #input and outpt
     WISH = "wish" 
@@ -121,6 +122,7 @@ class TokenType:
 
     # Other token types
     IDENTIFIER = "identifier"
+    STRUCT = "struct_id"
     SINGLE_COMMENT = "single_comment"
     MULTI_COMMENT = "multi_comment"
 
@@ -174,7 +176,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens # if may error stop yung tokenization then return the tokens na tama # same sa lahat
+                    continue # if may error stop yung tokenization then return the tokens na tama # same sa lahat
 
             if char == 'c':
                 pos_start = self.position
@@ -184,7 +186,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
             if char == 'd':
                 pos_start = self.position
@@ -194,7 +196,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
             if char == 'f':
                 pos_start = self.position
@@ -204,7 +206,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
                 
             if char == 'g':
@@ -215,7 +217,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
             if char == 'l':
                 pos_start = self.position
@@ -225,7 +227,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
 
             if char == 'm':
                 pos_start = self.position
@@ -235,7 +237,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
 
             if char == 'o':
@@ -246,7 +248,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
                 
             if char == 'p':
@@ -257,7 +259,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
             if char == 'r':
                 pos_start = self.position
@@ -267,7 +269,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
 
             if char == 's':
@@ -278,7 +280,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                   
 
             if char == 't':
@@ -289,7 +291,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
 
             if char == 'w':
@@ -300,7 +302,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
 
 
             #RESERVED SYMBOL
@@ -312,7 +314,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
             
             if char == '+':
                 pos_start = self.position
@@ -322,7 +324,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
     
 
             if char == '-':
@@ -333,7 +335,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
                 
             if char == '*':
@@ -344,7 +346,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
             if char == '/':
                 pos_start = self.position
@@ -354,7 +356,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
                 
             if char == '%':
@@ -365,7 +367,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
 
             if char == '!':
@@ -376,7 +378,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
                 
             if char == '&':
@@ -387,7 +389,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
                 
             if char == '|':
@@ -398,7 +400,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
 
             if char == '>':
@@ -409,7 +411,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
             
             if char == '<':
@@ -420,7 +422,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
 
             if char == '(':
                 pos_start = self.position
@@ -430,7 +432,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
             if char == ')':
                 pos_start = self.position
@@ -440,7 +442,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
             
             
             if char == '{':
@@ -451,7 +453,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
                 
             if char == '}':
@@ -462,7 +464,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
             if char == '[':
                 pos_start = self.position
@@ -472,7 +474,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
             if char == ']':
                 pos_start = self.position
@@ -482,7 +484,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
             
                 
             if char == '~':
@@ -493,7 +495,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
             
             if char == ',':
@@ -504,7 +506,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
             #IDENTIFIER    
             if char in RegDef['alpha_big']:
@@ -515,7 +517,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
                 
             #COMMENTS
@@ -527,7 +529,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
 
             #SCROLL LITERALS 
@@ -539,7 +541,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
             #ROSE LITERALS    
             if char == "'":
@@ -550,7 +552,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
 
             #TREASURES & FLOAT LITERALS
@@ -562,7 +564,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
                 
             
             
@@ -575,7 +577,7 @@ class RoyalScriptLexer:
                     # Append the recognized token
                     self.tokens[self.line - 1].append(Token(input_str, tokenType, pos_start, self.line))
                 else:
-                    return self.tokens
+                    continue
 
             # After all the if-block checks for known states, handle invalid character:
             if (char not in allowed_symbols 
@@ -588,7 +590,7 @@ class RoyalScriptLexer:
                 
                 self.advance()  # Move forward
 
-                return self.tokens
+                continue
         
         # Assume lexer.errors stores the encountered errors
         if not self.errors:  # Proceed only if no errors occurred during lexing
@@ -1200,6 +1202,8 @@ class RoyalScriptLexer:
         match self.current_char():
             case "y":
                 return self.state48(input_str)
+            case "r":
+                return self.state288(input_str)
             case _:
                 error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
                 self.errors.append(error_message)
@@ -1289,6 +1293,67 @@ class RoyalScriptLexer:
         return True, input_str, TokenType.DYNASTY
     
     #################################################################
+
+
+    # additional for struct 
+    def state288(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "e":
+                return self.state289(input_str)
+            case _:
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+
+
+    def state289(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "a":
+                return self.state290(input_str)
+            case _:
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+			
+
+    def state290(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        match self.current_char():
+            case "m":
+                return self.state291(input_str)
+            case _:
+                error_message = f"Invalid character '{self.current_char()}' at line {self.line}, position {self.position}"
+                self.errors.append(error_message)
+                return False, input_str, None
+
+    def state291(self, input_str):
+        input_str += self.current_char()
+        self.advance()
+
+        if self.current_char() in [' ']:
+            return self.state292(input_str)
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+
+    #################### FINAL STATE FOR DYNASTY ####################
+
+    def state292(self, input_str):
+        return True, input_str, TokenType.DREAM
+    
+    ##################################################################
+
+
 
     def state55(self):
         input_str = ""
@@ -3695,12 +3760,14 @@ class RoyalScriptLexer:
         input_str += self.current_char()  # Append the current character
         self.advance()
 
-        if self.current_char() in RegDef['alphanum'] | {'_'} and self.current_char() not in Delims['id_delim']:
+        if self.current_char() in RegDef['alphanum'] | {'_'} and self.current_char() not in Delims['id_delim'] and self.current_char() != '.':
             return self.state259(input_str) 
-        elif self.current_char() in RegDef['special_char'] and self.current_char() not in Delims['id_delim']:
+        elif self.current_char() in RegDef['special_char'] and self.current_char() not in Delims['id_delim'] and self.current_char() != '.':
             error_message = f"Invalid character '{self.current_char()}' for Identifier at line {self.line}, position {self.position}"
             self.errors.append(error_message)
             return False, input_str, None
+        elif self.current_char() == '.':
+            return self.stateCheck(input_str)
         elif self.current_char() in Delims['id_delim']:
             return self.state260(input_str)  
         else:
@@ -3712,6 +3779,41 @@ class RoyalScriptLexer:
 
     def state260(self, input_str):
         return True, input_str, TokenType.IDENTIFIER
+
+    ####################################################################
+    def stateCheck(self, input_str):
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in RegDef['alphanum'] | {'_'} and self.current_char() not in Delims['id_delim']:
+            return self.state293(input_str)  
+        else:
+            error_message = f"Invalid character '{self.current_char()}' for Struct Identifier at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+
+    # new
+    def state293(self, input_str):
+        """Initial state for identifiers."""
+        input_str += self.current_char()  # Append the current character
+        self.advance()
+
+        if self.current_char() in RegDef['alphanum'] | {'_'} and self.current_char() not in Delims['id_delim']:
+            return self.state293(input_str) 
+        elif self.current_char() in RegDef['special_char'] and self.current_char() not in Delims['id_delim']:
+            error_message = f"Invalid character '{self.current_char()}' for Identifier at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+        elif self.current_char() in Delims['id_delim']:
+            return self.state294(input_str)  
+        else:
+            error_message = f"Invalid delimiter after '{input_str}' at line {self.line}, position {self.position}"
+            self.errors.append(error_message)
+            return False, input_str, None
+    #################### FINAL STATE FOR STRUCT_ID ####################
+
+    def state294(self, input_str):
+        return True, input_str, TokenType.STRUCT
 
     ####################################################################
 

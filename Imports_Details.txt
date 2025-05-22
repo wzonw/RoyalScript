@@ -217,3 +217,20 @@ self.scopes = [
         )
     }
 ]
+
+
+
+self.scopes = {
+{}, {"N": symbol = SymbolEntry(
+            name=node.identifier[1],  
+            datatype=node.datatype[0],
+            value=node.value,
+            scope_level=node.scope_level,
+            is_dynasty=node.is_dynasty,
+            is_initialized=node.value is not None,
+            array_dimensions=node.array_dimensions # []
+        )}
+
+
+
+}

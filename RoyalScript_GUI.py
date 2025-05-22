@@ -445,7 +445,7 @@ class RoyalScriptLexerGUI(tk.Tk):
         
         # Terminal input entry
         self.terminal_input = tk.Entry(
-            input_frame, width=177, bg="black", fg="#00ff00",
+            input_frame, width=177, bg="black", fg="#f883aa",
             insertbackground="#00ff00", relief="flat", font=("Consolas", 10)
         )
         self.terminal_input.grid(row=0, column=1, sticky="ew", padx=(0, 10))

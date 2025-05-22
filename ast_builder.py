@@ -38,6 +38,28 @@ class ProgramNode(Node):
         self.functions = functions
         self.main_function = main_function
 
+class StructDeclarationNode(Node):
+    """Node representing a struct declaration."""
+    def __init__(self, identifier, members, line=None, position=None):
+        super().__init__(line, position)
+        self.identifier = identifier  # Name of the struct
+        self.members = members 
+    
+class StructInstantiationNode(Node):
+    """Node representing a struct instantiation/initialization."""
+    def __init__(self, struct_type, identifier, member_initializations, line=None, position=None):
+        super().__init__(line, position)
+        self.struct_type = struct_type                   # Type of struct being instantiated
+        self.identifier = identifier                     # Name of the variable
+        self.member_initializations = member_initializations  # Dictionary of member name -> value expressions
+
+class MemberAccessNode(Node):
+    """Node representing access to a struct member."""
+    def __init__(self, struct_identifier, member_identifier, line=None, position=None):
+        super().__init__(line, position)
+        self.struct_identifier = struct_identifier  # Name of the struct variable
+        self.member_identifier = member_identifier  # Name of the member being accessed
+
 class VariableDeclarationNode(Node):
     def __init__(self, datatype, identifier, value=None, is_dynasty=False, scope_level=GLOBAL_SCOPE, array_dimensions=None, line=None, position=None):
         super().__init__(line, position)
@@ -418,11 +440,110 @@ class RoyalScriptASTBuilder:
             # End parsing if we encounter function or main program
             if token is None or token[0] in ['spell', 'castle']:
                 break
-                
-            declarations.extend(self.build_declaration(scope_level=GLOBAL_SCOPE))
+            
+            if token[0] == 'dream':
+                # Handle struct declaration
+                struct_decl = self.build_struct_declaration(scope_level=GLOBAL_SCOPE)
+                declarations.append(struct_decl)
+            else:
+                # Handle regular variable declarations
+                declarations.extend(self.build_declaration(scope_level=GLOBAL_SCOPE))
             
         return declarations
+    
+    def build_struct_declaration(self, scope_level):
+        """Build a struct declaration node."""
+        line, pos = self.get_token_position()
+        self.match('dream')
+        
+        # Get struct name
+        token = self.current_token()
+        if token is None or token[0] != 'identifier':
+            raise SyntaxError(f"Expected struct name identifier, got {token}")
+        identifier = token
+        self.advance()
+        
+        self.match('{')
+        
+        # Parse struct members
+        members = []  # Keep as a list to preserve order and original token objects
+        member = []
+        while True:
+            token = self.current_token()
+            if token is None:
+                raise SyntaxError("Unexpected end of input while parsing struct members")
+            
+            elif token[0] == '}':
+                # Add the last member if it's not empty
+                if member:
+                    members.append(member)
+                break
+            
+            # Parse member declaration (similar to variable declaration)
+            elif token[0] in ['dynasty', 'scroll', 'mirror', 'ocean', 'treasures', 'rose', 'identifier']:
+                member.append(token[1])
+                self.advance() 
+            elif token[0] == '~':
+                members.append(member)
+                member = []  # Reset member array for the next entry
+                self.advance()
+            else:
+                raise SyntaxError(f"Unexpected token '{token[0]}' in struct declaration")
+        
+        self.match('}')
+        
+        return StructDeclarationNode(identifier, members, line, pos)
 
+    def build_struct_instantiation(self):
+        """Build a struct instantiation node."""
+        line, pos = self.get_token_position()
+        
+        # Get struct type
+        struct_name = self.current_token()
+        self.advance()
+        
+        # Get variable name
+        token = self.current_token()
+        if token is None or token[0] != 'identifier':
+            raise SyntaxError(f"Expected identifier for struct variable, got {token}")
+        identifier = token
+        self.advance()
+        
+        self.match('=')
+        self.match('{')
+
+        token = self.current_token()
+        print(f'here is token1 {token}')
+        
+        # Parse member initializations
+        member_initializations = {}  # Use list of tuples to preserve order and token objects
+        while True:
+            token = self.current_token()
+            print(f'here is token {token}')
+            if token is None:
+                raise SyntaxError("Unexpected end of input while parsing struct initialization")
+            
+            if token[0] == '}':
+                break
+                
+            # Get member name
+            if token[0] != 'identifier':
+                raise SyntaxError(f"Expected member name, got {token[0]}")
+            member_name = token[1]  # Keep the entire token object
+            self.advance()
+            
+            # Get assignment and value
+            self.match('=')
+            member_value = self.build_val()
+
+            member_initializations[member_name] = member_value
+            
+            self.match('~')
+            
+        self.match('}')
+        
+        return StructInstantiationNode(struct_name, identifier, member_initializations, line, pos)
+    
     def build_global_functions(self):
         """Build all global functions."""
         functions = []
@@ -535,6 +656,11 @@ class RoyalScriptASTBuilder:
                 declarations = self.build_declaration(scope_level=LOCAL_SCOPE)
                 body_nodes.extend(declarations)
 
+            elif token[0] == 'dream':
+                # Handle struct declaration in function body
+                struct_decls = self.build_struct_declaration(scope_level=LOCAL_SCOPE)
+                body_nodes.append(struct_decls) 
+
             elif token[0] == 'spell':
                 function = self.build_function(is_global=False, scope_level=LOCAL_SCOPE)
                 body_nodes.append(function)
@@ -556,6 +682,10 @@ class RoyalScriptASTBuilder:
                     # Variable reassignment case: x = 5~, x += 2~, etc.
                     var_reassign = self.build_var_reassign(line, pos)
                     body_nodes.append(var_reassign)
+
+                elif next_token and next_token[0] == 'identifier':
+                    struct_init = self.build_struct_instantiation()
+                    body_nodes.append(struct_init) 
 
                 elif next_token and next_token[0] == '(':
                     # Function call case: funcName(args)~
